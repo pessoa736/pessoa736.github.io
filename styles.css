@@ -1,0 +1,118 @@
+/* Reset Básico */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  /* Body */
+  body {
+    font-family: 'Arial', sans-serif;
+    color: #333; /* Texto escuro */
+    background-color: #fff; /* Fundo branco */
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+  }
+  
+  /* Cabeçalho */
+  header {
+    text-align: center;
+    padding: 2rem 1rem;
+    background-color: #000; /* Fundo preto */
+    color: #fff; /* Texto branco */
+  }
+  
+  header h1 {
+    font-size: 2.5rem;
+    letter-spacing: 2px;
+  }
+  
+  header p {
+    font-size: 1rem;
+    margin-top: 0.5rem;
+    color: #ccc; /* Cinza claro */
+  }
+  
+  /* Container Principal */
+  .container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+  }
+  
+  /* Seções */
+  .section {
+    margin-bottom: 3rem;
+  }
+  
+  .section h2 {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #000; /* Linha de separação preta */
+    padding-bottom: 0.5rem;
+  }
+  
+  .section p {
+    margin-bottom: 1rem;
+    color: #555; /* Cinza médio */
+  }
+  
+  /* Projetos */
+  .projects {
+    display: grid;
+    gap: 1.5rem;
+  }
+  
+  .project-card {
+    background-color: #f9f9f9; /* Fundo claro */
+    border: 1px solid #ddd; /* Borda sutil */
+    border-radius: 8px;
+    padding: 1rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .project-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .project-card h3 {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .project-card a {
+    color: #000;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s ease;
+  }
+  
+  .project-card a:hover {
+    color: #555; /* Cinza médio */
+  }
+  
+  /* Footer */
+  footer {
+    text-align: center;
+    padding: 2rem 1rem;
+    margin-top: 2rem;
+    background-color: #000; /* Fundo preto */
+    color: #fff; /* Texto branco */
+  }
+  
+  footer p {
+    font-size: 0.9rem;
+  }
+  
+  footer a {
+    color: #fff;
+    text-decoration: none;
+    font-weight: bold;
+  }
+  
+  footer a:hover {
+    text-decoration: underline;
+  }
+  
