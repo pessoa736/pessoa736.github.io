@@ -3,11 +3,11 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    font-family: 'Times New Roman', Times, serif;
   }
   
   /* Body */
   body {
-    font-family: 'Arial', sans-serif;
     color: #333; /* Texto escuro */
     background-color: #fff; /* Fundo branco */
     line-height: 1.6;
@@ -66,16 +66,18 @@
   
   .project-card {
     background-color: #f9f9f9; /* Fundo claro */
-    border: 1px solid #ddd; /* Borda sutil */
+    border: 1px solid #222; /* Borda sutil */
     border-radius: 8px;
     display:flex;
     padding: 1rem;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: -5px 5px black;
   }
   
   .project-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: -7px 12px 5px black;
   }
   
   .project-card h3 {
