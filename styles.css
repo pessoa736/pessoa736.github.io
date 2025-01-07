@@ -68,6 +68,7 @@
     background-color: #f9f9f9; /* Fundo claro */
     border: 1px solid #ddd; /* Borda sutil */
     border-radius: 8px;
+    display:flex;
     padding: 1rem;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
   }
@@ -87,6 +88,13 @@
     text-decoration: none;
     font-weight: bold;
     transition: color 0.3s ease;
+  }
+  
+  .project-card img { 
+    max-width: 150px; /* Limita o tamanho da imagem */
+    border-radius: 8px;
+    margin-left: 50%; /* Espaço entre o texto e a imagem */
+    
   }
   
   .project-card a:hover {
