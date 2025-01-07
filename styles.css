@@ -24,8 +24,8 @@
   }
 
   header img{
-    width: 10%;
-    border-radius: 10%;
+    max-width: 150px;
+    border-radius: 15px;
     box-shadow: -5px 5px #fff;
   }
   
@@ -71,13 +71,14 @@
   }
   
   .project-card {
-    background-color: #f9f9f9; /* Fundo claro */
+    background-color: #fff; /* Fundo claro */
     border: 1px solid #222; /* Borda sutil */
-    border-radius: 8px;
+    border-radius: 15px;
     display:flex;
     padding: 1rem;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     box-shadow: -5px 5px black;
+    max-height: 200px;
   }
   
   .project-card:hover {
@@ -101,7 +102,7 @@
   .project-card img { 
     max-width: 150px; /* Limita o tamanho da imagem */
     border-radius: 8px;
-    margin-left: 50%; /* Espaço entre o texto e a imagem */
+    margin-left: 25%; /* Espaço entre o texto e a imagem */
     
   }
   
