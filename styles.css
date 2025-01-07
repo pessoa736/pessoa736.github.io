@@ -42,7 +42,7 @@
   
   /* Container Principal */
   .container {
-    max-width: 800px;
+    max-width: 65%;
     margin: 2rem auto;
     padding: 0 1rem;
   }
@@ -67,7 +67,6 @@
   /* Projetos */
   .projects {
     display: grid;
-    gap: 1.5rem;
   }
   
   .project-card {
@@ -78,7 +77,9 @@
     padding: 1rem;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     box-shadow: -5px 5px black;
-    max-height: 200px;
+    max-height: 95%;
+    justify-content: right;
+    
   }
   
   .project-card:hover {
@@ -100,10 +101,13 @@
   }
   
   .project-card img { 
-    max-width: 150px; /* Limita o tamanho da imagem */
+    width: 150px; /* Limita o tamanho da imagem */
     border-radius: 8px;
-    margin-left: 25%; /* Espaço entre o texto e a imagem */
-    
+  }
+
+  .info {
+    justify-content: left;
+    width: 100%;
   }
   
   .project-card a:hover {
