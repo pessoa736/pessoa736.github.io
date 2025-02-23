@@ -121,6 +121,8 @@
     margin-top: 2rem;
     background-color: #000; /* Fundo preto */
     color: #fff; /* Texto branco */
+    bottom: 0;
+    left: 0;
   }
   
   footer p {
