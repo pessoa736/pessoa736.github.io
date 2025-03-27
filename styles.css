@@ -3,6 +3,7 @@
     /*font-family: 'Times New Roman', Times, serif;*/
     font-family: "Comic Sans MS", cursive;
     margin: 0;
+    display: flex;
 }
   
   /* Body */
