@@ -99,6 +99,7 @@ header p {
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     box-shadow: -5px 5px black;
     justify-content: flex-end;
+    text-decoration: none;
 }
 .project-card:hover {
     transform: translateY(-5px) scale(1.05) rotateX(-0.5deg);
