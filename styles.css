@@ -97,13 +97,13 @@ header p {
     border-radius: 15px;
     padding: 1rem;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    box-shadow: -5px 5px --color2;
+    box-shadow: -5px 5px var(--color2);
     text-decoration: none;
     
 }
 .project-card:hover {
     transform: translateY(-5px) scale(1.1) rotateX(-1deg);
-    box-shadow: -7px 12px  black;
+    box-shadow: -7px 12px  var(--color2);
 }
 
 .project-card h3 {
