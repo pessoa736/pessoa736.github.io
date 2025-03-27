@@ -3,11 +3,7 @@
     /*font-family: 'Times New Roman', Times, serif;*/
     font-family: "Comic Sans MS", cursive;
     margin: 0;
-    align-items: center;
-    align-content: center;
-    justify-content: center;
-    justify-items: center;  
-  }
+}
   
   /* Body */
   body {
