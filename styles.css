@@ -1,16 +1,18 @@
-/* Reset Básico */
+:root{
+    --color1: #fff;
+    --color2: #000;
+}
+
+
 * {
-    /*font-family: 'Times New Roman', Times, serif;*/
     font-family: "Comic Sans MS", cursive;
     margin: 0;
     padding: 0;
 }
 
-  
-  /* Body */
 body {
-    color: #333; /* Texto escuro */
-    background-color: #fff; /* Fundo branco */
+    color: var(--color2); /* Texto escuro */
+    background-color: var(--color1); /* Fundo branco */
     line-height: 1.6;
 }
 
@@ -18,14 +20,14 @@ body {
 header {
     text-align: center;
     padding: 2rem 1rem;
-    background-color: #000; /* Fundo preto */
-    color: #fff; /* Texto branco */
+    background-color: var(--color2); /* Fundo preto */
+    color: var(--color1); /* Texto branco */
 }
 
 header img{
     max-width: 150px;
     border-radius: 15px;
-    box-shadow: -2.5px 2.5px #fff;
+    box-shadow: -2.5px 2.5px var(--color1);
 }
 
 header h1 {
@@ -36,7 +38,7 @@ header h1 {
 header p {
     font-size: 1rem;
     margin-top: 0.5rem;
-    color: #ccc; /* Cinza claro */
+    color: var(--color1); /* Cinza claro */
 }
 
 /* Container Principal */
@@ -54,12 +56,12 @@ header p {
 
 .section h2 {
     font-size: 1.8rem;
-    border-bottom: 2px solid #000; /* Linha de separação preta */
+    border-bottom: 2px solid var(--color2); /* Linha de separação preta */
 }
 
 .section p {
     margin-bottom: 1rem;
-    color: #555; /* Cinza médio */
+    color: var(--color2); /* Cinza médio */
 }
 
 /* Projetos */
@@ -89,9 +91,9 @@ header p {
 
 
 .project-card {
-    background-color: #fff; /* Fundo claro */
-    border: 1px solid #000; /* Borda sutil */
-    color: #000;
+    background-color: var(--color1); /* Fundo claro */
+    border: 1px solid var(--color2); /* Borda sutil */
+    color: var(--color2);
     border-radius: 15px;
     padding: 1rem;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -107,7 +109,7 @@ header p {
 .project-card h3 {
     font-size: 1.2rem;
     margin-bottom: 0.5rem;
-    color: #000;
+    color: var(--color2);
 }
 
 .project-card img { 
@@ -121,7 +123,7 @@ header p {
 }
 
 .project-card a:hover {
-    color: #555; /* Cinza médio */
+    color: var(--color2); /* Cinza médio */
 }
 
 /* Footer */
@@ -129,8 +131,8 @@ footer {
     text-align: center;
     padding: 2rem 1rem;
     margin-top: 2rem;
-    background-color: #000; /* Fundo preto */
-    color: #fff; /* Texto branco */
+    background-color: var(--color2); /* Fundo preto */
+    color: var(--color1); /* Texto branco */
     bottom: 0;
     left: 0;
 }
@@ -140,7 +142,7 @@ footer p {
 }
 
 footer a {
-    color: #fff;
+    color: var(--color1);
     text-decoration: none;
     font-weight: bold;
 }
