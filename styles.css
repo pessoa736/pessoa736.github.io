@@ -48,6 +48,7 @@ header p {
 
 /* Seções */
 .section {
+    display: inline;
     margin-bottom: 3rem;
 }
 
