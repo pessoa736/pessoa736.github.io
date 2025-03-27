@@ -54,9 +54,7 @@ header p {
 
 .section h2 {
     font-size: 1.8rem;
-    margin-bottom: 1rem;
     border-bottom: 2px solid #000; /* Linha de separação preta */
-    padding-bottom: 0.5rem;
 }
 
 .section p {
@@ -95,22 +93,21 @@ header p {
     border: 1px solid #000; /* Borda sutil */
     color: #000;
     border-radius: 15px;
-    display: flex;
-    flex-direction: column;
     padding: 1rem;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     box-shadow: -5px 5px black;
-    justify-content: flex-end;
     text-decoration: none;
+    
 }
 .project-card:hover {
-    transform: translateY(-5px) scale(1.05) rotateX(-0.5deg);
+    transform: translateY(-5px) scale(1.1) rotateX(-1deg);
     box-shadow: -7px 12px  black;
 }
 
 .project-card h3 {
     font-size: 1.2rem;
     margin-bottom: 0.5rem;
+    color: #000;
 }
 
 .project-card img { 
