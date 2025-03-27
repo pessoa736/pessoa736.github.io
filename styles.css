@@ -11,17 +11,17 @@
 }
 
 body {
-    color: var(--color2); /* Texto escuro */
-    background-color: var(--color1); /* Fundo branco */
+    color: var(--color2); 
+    background-color: var(--color1); 
     line-height: 1.6;
 }
 
-/* Cabeçalho */
+
 header {
     text-align: center;
     padding: 2rem 1rem;
-    background-color: var(--color2); /* Fundo preto */
-    color: var(--color1); /* Texto branco */
+    background-color: var(--color2); 
+    color: var(--color1); 
 }
 
 header img{
@@ -38,17 +38,17 @@ header h1 {
 header p {
     font-size: 1rem;
     margin-top: 0.5rem;
-    color: var(--color1); /* Cinza claro */
+    color: var(--color1);
 }
 
-/* Container Principal */
+
 .container {
     max-width: 65%;
     margin: 2rem auto;
     padding: 0 1rem;
 }
 
-/* Seções */
+
 .section {
     display: inline;
     margin-bottom: 3rem;
@@ -56,15 +56,15 @@ header p {
 
 .section h2 {
     font-size: 1.8rem;
-    border-bottom: 2px solid var(--color2); /* Linha de separação preta */
+    border-bottom: 2px solid var(--color2); 
 }
 
 .section p {
     margin-bottom: 1rem;
-    color: var(--color2); /* Cinza médio */
+    color: var(--color2); 
 }
 
-/* Projetos */
+
 .projects {
     display: grid;
     gap: 1rem;
@@ -91,13 +91,13 @@ header p {
 
 
 .project-card {
-    background-color: var(--color1); /* Fundo claro */
-    border: 1px solid var(--color2); /* Borda sutil */
+    background-color: var(--color1);
+    border: 1px solid var(--color2);
     color: var(--color2);
     border-radius: 15px;
     padding: 1rem;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    box-shadow: -5px 5px black;
+    box-shadow: -5px 5px --color2;
     text-decoration: none;
     
 }
@@ -113,7 +113,7 @@ header p {
 }
 
 .project-card img { 
-    width: 150px; /* Limita o tamanho da imagem */
+    width: 150px; 
     border-radius: 8px;
 }
 
@@ -123,16 +123,16 @@ header p {
 }
 
 .project-card a:hover {
-    color: var(--color2); /* Cinza médio */
+    color: var(--color2);
 }
 
-/* Footer */
+
 footer {
     text-align: center;
     padding: 2rem 1rem;
     margin-top: 2rem;
-    background-color: var(--color2); /* Fundo preto */
-    color: var(--color1); /* Texto branco */
+    background-color: var(--color2); 
+    color: var(--color1); 
     bottom: 0;
     left: 0;
 }
