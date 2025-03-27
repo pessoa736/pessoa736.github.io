@@ -3,6 +3,7 @@
     /*font-family: 'Times New Roman', Times, serif;*/
     font-family: "Comic Sans MS", cursive;
     margin: 0;
+    padding: 0;
 }
   
   /* Body */
@@ -12,12 +13,6 @@
     line-height: 1.6;
     margin: 0;
     padding: 0;
-    justify-content: center;
-    justify-self: center;
-    justify-items: center;
-    aling-content: center;
-    aling-self: center;
-    aling-items: center;
   }
   
   /* Cabeçalho */
