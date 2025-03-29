@@ -3,7 +3,8 @@
     --color2: #ffffff;
     --shadow: -5px 5px;
     --border: 5px solid;
-    --border-radius: 5px ;
+    --border-section: 2px solid;
+    --border-radius: 15px;
 }
 
 .main {
@@ -67,7 +68,7 @@ header {
     margin-bottom: 3rem;
     & h2 {
         font-size: 1.8rem;
-        border-bottom: var(--border) var(--color2); 
+        border-bottom: var(--border-section) var(--color2); 
     }
     & p {
         margin-bottom: 1rem;
