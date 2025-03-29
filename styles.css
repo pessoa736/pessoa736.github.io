@@ -2,9 +2,10 @@
     --color1: #000000;
     --color2: #ffffff;
     --shadow: -5px 5px;
+    --shadow-hover: -10px 10px;
     --border: 5px solid;
     --border-section: 2px solid;
-    --border-radius: 15px;
+    --border-radius: 10%;
 }
 
 .main {
@@ -38,10 +39,14 @@ header {
     color: var(--color1); 
 
     & img{
-        max-width: 150px;
+        width: 150px;
         border-radius: var(--border-radius);
         border: var(--border)  var(--color1);
         box-shadow: var(--shadow) var(--color1);
+    }
+    & img:hover{
+        transform: translate(5px, -5px) scale(1.05) rotateX(5deg);
+        box-shadow: var(--shadow-hover) var(--color1);
     }
 
     & h1 {
