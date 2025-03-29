@@ -10,6 +10,13 @@
     --transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
+@media(prefers-color-scheme: light){
+    :root{
+        --color1: #ffffff;
+        --color2: #000000;
+    }
+}
+
 .main {
     justijy-content: center;
     max-width: 95%;
