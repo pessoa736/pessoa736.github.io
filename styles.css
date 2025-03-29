@@ -5,6 +5,8 @@
 }
 
 .main {
+    justijy-content: center;
+    max-width: 95%
     padding: 15%;
 }
 @media (max-width: 900px){
