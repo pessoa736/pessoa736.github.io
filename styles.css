@@ -7,6 +7,11 @@
 .main {
     padding: 15%;
 }
+@media (max-width: 900px){
+    .main {
+        padding: 5px;
+    }    
+}
 
 * {
     font-family: "Comic Sans MS", "Josefin Sans", sans-serif;
@@ -72,18 +77,18 @@ header {
     grid-template-columns:  repeat(4, 2fr);
 }
 
-@media (max-width: 1200){
+@media (max-width: 1200px){
     .projects {
         grid-template-columns:  repeat(3, 1fr);
     }
 }
 
-@media (max-width: 900){
+@media (max-width: 900px){
     .projects {
         grid-template-columns:  repeat(2, 1fr);
     }
 }
-@media (max-width: 400){
+@media (max-width: 400px){
     .projects {
         grid-template-columns: 1fr;
     }
