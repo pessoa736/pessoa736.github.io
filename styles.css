@@ -4,6 +4,9 @@
     --shadow: -5px 5px;
 }
 
+main {
+    padding: 15%;
+}
 
 * {
     font-family: "Comic Sans MS", "Josefin Sans", sans-serif;
