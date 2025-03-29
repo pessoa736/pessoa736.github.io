@@ -5,7 +5,9 @@
     --shadow-hover: -10px 10px;
     --border: 5px solid;
     --border-section: 2px solid;
-    --border-radius: 10%;
+    --border-radius: 7%;
+    --transform-hover: translate(5px, -5px) scale(1.05) rotateX(5deg);
+    --transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .main {
@@ -43,9 +45,10 @@ header {
         border-radius: var(--border-radius);
         border: var(--border)  var(--color1);
         box-shadow: var(--shadow) var(--color1);
+        transition: var(--transition);
     }
     & img:hover{
-        transform: translate(5px, -5px) scale(1.05) rotateX(5deg);
+        transform: var(--transform-hover) ;
         box-shadow: var(--shadow-hover) var(--color1);
     }
 
@@ -114,7 +117,7 @@ header {
     color: var(--color2);
     border-radius: var(--border-radius);
     padding: 1rem;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: var(--transition);
     box-shadow: var(--shadow) var(--color2);
     text-decoration: none;
     & h3 {
@@ -128,8 +131,8 @@ header {
     }
 }
 .project-card:hover {
-    transform: translateY(-5px) scale(1.1) rotateX(-5deg);
-    box-shadow: var(--shadow)  var(--color2);
+    transform: var(--transform-hover);
+    box-shadow: var(--shadow-hover)  var(--color2);
 }
 
 
