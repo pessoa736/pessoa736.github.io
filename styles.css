@@ -7,7 +7,7 @@
 .main {
     justijy-content: center;
     max-width: 95%;
-    padding:  5% 15%;
+    padding:  2.5% 10%;
 }
 @media (max-width: 900px){
     .main {
@@ -68,7 +68,8 @@ header {
     }
     & p {
         margin-bottom: 1rem;
-        color: var(--color2); 
+        color: var(--color2);
+        padding-left: 7px;
     }
 }
 
