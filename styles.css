@@ -174,4 +174,48 @@ footer {
     }
 }
 
+.redes-sociais {
+    margin-top: 1rem;
+}
+
+.redes-sociais a {
+    margin: 0 0.5rem;
+    color: var(--color1);
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.redes-sociais a:hover {
+    text-decoration: underline;
+}
+
+.contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.contact-form input,
+.contact-form textarea {
+    padding: 0.5rem;
+    border: var(--border) var(--color2);
+    border-radius: var(--border-radius);
+    background-color: var(--color1);
+    color: var(--color2);
+}
+
+.contact-form button {
+    padding: 0.5rem 1rem;
+    background-color: var(--color2);
+    color: var(--color1);
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition:(removido por engano var(--transition));
+}
+
+.contact-form button:hover {
+    transform: var(--transform-hover);
+    box-shadow: var(--shadow-hover) var(--color1);
+}
 
