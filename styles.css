@@ -20,11 +20,11 @@
 .main {
     justijy-content: center;
     max-width: 85%;
-    padding:  2.5% 10%;
+    padding:  2.5% 20%;
 }
 @media (max-width: 900px){
     .main {
-        padding: 5px;
+        padding: 5%;
     }    
 }
 
