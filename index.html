@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>melhor site blog</title>
+    <title>Meu Site Pessoal</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <header>
-        <h1>Bem-vindo ao Meu Site blog</h1>
+        <img src="minha-foto.jpg" alt="Minha Foto">
+        <h1>Bem-vindo ao Meu Site Pessoal</h1>
         <nav>
             <ul>
                 <li><a href="#sobre">Sobre Mim</a></li>
@@ -20,56 +21,47 @@
         </nav>
     </header>
 
-    <main>
-        <section id="sobre">
+    <main class="container">
+        <section id="sobre" class="section">
             <h2>Sobre Mim</h2>
-            <img src="minha-foto.jpg" alt="Minha Foto" class="foto-perfil">
-            <p>Olá! Eu sou [Seu Nome], um(a) [sua profissão ou área de atuação]. Sou apaixonado(a) por [seus interesses ou hobbies]. Minha jornada começou quando [breve história sobre como você começou na sua área].</p>
-            <p>Meu lema é: "[Uma citação ou lema que te represente]".</p>
+            <p>Uma breve descrição sobre mim.</p>
         </section>
 
-        <section id="habilidades">
+        <section id="habilidades" class="section">
             <h2>Habilidades</h2>
             <ul>
-                <li>Habilidade 1</li>
-                <li>Habilidade 2</li>
-                <li>Habilidade 3</li>
-                <li>Habilidade 4</li>
+                <li>HTML</li>
+                <li>CSS</li>
+                <li>JavaScript</li>
             </ul>
         </section>
 
-        <section id="experiencias">
+        <section id="experiencias" class="section">
             <h2>Experiências</h2>
-            <div class="experiencia">
-                <h3>Cargo ou Título 1</h3>
-                <p>Empresa ou Instituição 1 | Data de Início - Data de Término</p>
-                <p>Descrição breve das responsabilidades e conquistas.</p>
-            </div>
-            <div class="experiencia">
-                <h3>Cargo ou Título 2</h3>
-                <p>Empresa ou Instituição 2 | Data de Início - Data de Término</p>
-                <p>Descrição breve das responsabilidades e conquistas.</p>
-            </div>
+            <p>Minha experiência profissional.</p>
         </section>
 
-        <section id="projetos">
+        <section id="projetos" class="section">
             <h2>Projetos</h2>
-            <div class="projeto">
-                <h3>Projeto 1</h3>
-                <p>Descrição breve do projeto 1.</p>
-                <a href="link-para-o-projeto-1">Ver mais</a>
-            </div>
-            <div class="projeto">
-                <h3>Projeto 2</h3>
-                <p>Descrição breve do projeto 2.</p>
-                <a href="link-para-o-projeto-2">Ver mais</a>
+            <div class="projects">
+                <div class="project-card">
+                    <img src="projeto1.jpg" alt="Projeto 1">
+                    <h3>Projeto 1</h3>
+                    <p>Descrição breve do projeto 1.</p>
+                    <a href="link-para-o-projeto-1">Ver mais</a>
+                </div>
+                <div class="project-card">
+                    <img src="projeto2.jpg" alt="Projeto 2">
+                    <h3>Projeto 2</h3>
+                    <p>Descrição breve do projeto 2.</p>
+                    <a href="link-para-o-projeto-2">Ver mais</a>
+                </div>
             </div>
         </section>
 
-        <section id="contato">
+        <section id="contato" class="section">
             <h2>Contato</h2>
-            <p>Entre em contato comigo através do formulário abaixo ou pelas minhas redes sociais.</p>
-            <form action="enviar-formulario.php" method="post">
+            <form action="enviar-formulario.php" method="post" class="contact-form">
                 <label for="nome">Nome:</label>
                 <input type="text" id="nome" name="nome" required>
                 <label for="email">Email:</label>
@@ -78,16 +70,16 @@
                 <textarea id="mensagem" name="mensagem" required></textarea>
                 <button type="submit">Enviar</button>
             </form>
-            <div class="redes-sociais">
-                <a href="link-para-linkedin">LinkedIn</a>
-                <a href="link-para-github">GitHub</a>
-                <a href="link-para-twitter">Twitter</a>
-            </div>
         </section>
     </main>
 
     <footer>
-        <p>&copy; 2023 [Seu Nome]. Todos os direitos reservados.</p>
+        <p>&copy; 2023 Meu Site Pessoal</p>
+        <div class="redes-sociais">
+            <a href="link-para-linkedin">LinkedIn</a>
+            <a href="link-para-github">GitHub</a>
+            <a href="link-para-twitter">Twitter</a>
+        </div>
     </footer>
 </body>
 </html>
