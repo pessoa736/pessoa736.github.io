@@ -19,7 +19,7 @@
 
 .main {
     justijy-content: center;
-    max-width: 95%;
+    max-width: 85%;
     padding:  2.5% 10%;
 }
 @media (max-width: 900px){
