@@ -111,8 +111,8 @@ export default function Home() {
                 title: "Esse site :0",
                 description: "esse site conta?",
                 image: "/esse-site.png",
-                linkRun: "https://pessoa736.github.io/meu-projeto-pessoal/",
-                linkRepo: "https://github.com/pessoa736/meu-projeto-pessoal"
+                linkRun: "/",
+                linkRepo: "https://github.com/pessoa736/pessoa736.github.io"
               },
             ]} />
           </Box>
