@@ -12,7 +12,7 @@ import {motion as _motion} from "framer-motion";
             as="header" 
             position="sticky"
             width={"100%"} 
-            top={0} zIndex={10} 
+            top={0} zIndex={30} 
             bg="linear-gradient(-90deg, #fff5 10%, rgba(255, 255, 255, 0.65) 90%)" 
             _dark={{ bg: "linear-gradient(-90deg, #0005 10%, rgba(0, 0, 0, 0.56) 90%)"  }}
             backdropFilter="saturate(180%) blur(8px)" 
@@ -27,7 +27,7 @@ import {motion as _motion} from "framer-motion";
             
                 <HStack gap={4}>
                     <NextLink href="#sobre">Sobre mim</NextLink>
-                    <NextLink href="#habilidades">blogs</NextLink>
+                    {/* <NextLink href="#habilidades">a</NextLink> */}
                     <NextLink href="#projetos">Projetos</NextLink>
                     <ColorModeButton aria-label="Alternar tema" />
                 </HStack>

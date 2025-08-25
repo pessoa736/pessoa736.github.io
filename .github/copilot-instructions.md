@@ -1,148 +1,123 @@
-# Instruções do Copilot para o Projeto
+# Copilot Instructions — pessoa736.github.io
 
-## Configuração do Projeto
-**Tipo**: Next.js 15.5.0 com TypeScript
-**UI Framework**: Chakra UI v3.25.0
-**Tema**: next-themes v0.4.6 para dark/light mode
-**Ícones**: react-icons v5.5.0
-**Animações**: motion v12.23.12
+Estas instruções ajudam o GitHub Copilot (Chat e inline) a gerar código e respostas alinhadas a este projeto.
 
-### Dependências Principais
-```json
-{
-  "dependencies": {
-    "@chakra-ui/react": "^3.25.0",
-    "@emotion/react": "^11.14.0",
-    "motion": "^12.23.12",
-    "next": "15.5.0",
-    "next-themes": "^0.4.6",
-    "react": "19.1.0",
-    "react-dom": "19.1.0",
-    "react-icons": "^5.5.0"
-  }
-}
-```
+## Sobre o projeto
+- Portfólio pessoal em Next.js 15 (App Router) + TypeScript.
+- UI com Chakra UI v3 e animações com `motion`.
+- Build estático (Next.js `output: "export"`) para deploy no GitHub Pages.
+- Linguagem preferencial: pt-BR nas mensagens, componentes e conteúdos visíveis (quando fizer sentido).
 
-### Configuração TypeScript
-- Target: ES2017
-- Paths configurados: `"site/*": ["./src/*"]`
-- JSX: preserve
-- Strict mode ativado
+## Stack e versões
+- Node 20 (CI usa `actions/setup-node@v4` com Node 20)
+- Next.js: 15.5.x
+- React: 19.1.x
+- Chakra UI: 3.x
+- TypeScript: 5.x
 
-## Estrutura do Projeto
-```
-src/
-├── app/
-│   ├── layout.tsx (Provider wrapper)
-│   └── page.tsx
-└── components/
-    └── ui/
-        ├── provider.tsx (ChakraProvider + ColorModeProvider)
-        ├── color-mode.tsx
-        ├── toaster.tsx
-        └── tooltip.tsx
-```
+## Estrutura do repositório
+- `site/` (raiz do app Next.js)
+  - `src/app/` — App Router: `layout.tsx`, `page.tsx` e futuras rotas/páginas.
+  - `src/components/` — Componentes reutilizáveis (ex.: `Header`, `Footer`, `card`, `perfilfoto`, `ui`).
+  - `src/templates/` — Layouts/templates de páginas (ex.: `defaultpage`).
+  - `src/utils/` — Utilitários (detecção de viewport, etc.).
+  - `public/` — Imagens e assets estáticos.
+  - `next.config.ts` — `output: "export"` (somente recursos compatíveis com export estático).
+  - `tsconfig.json` — Alias de import principal: `"site/*" -> "./src/*"`.
 
-## Diretrizes de Desenvolvimento
+## Importações e alias
+- Sempre preferir o alias `site/*` para código interno. Exemplos:
+  - `import PerfilFoto from "site/components/perfilfoto"`
+  - `import DefaultPage from "site/templates/defaultpage"`
+  - `import { isMobileScreen } from "site/utils/chackmobilescreen"`
 
-### ANÁLISE OBRIGATÓRIA
-**SEMPRE antes de implementar qualquer funcionalidade:**
-1. Analise a estrutura atual do projeto
-2. Verifique os componentes UI existentes em `src/components/ui/`
-3. Identifique padrões de organização já estabelecidos
-4. Considere a arquitetura de providers existente
+## Padrões de Componentes (Chakra + App Router)
+- Use Chakra UI para layout/estilização (Box, Flex, Heading, Text, etc.).
+- Componentes que usam hooks, `motion` ou interatividade devem começar com `"use client"`.
+- Preferir composição via props do Chakra (ex.: `px`, `py`, `gap`) em vez de CSS manual quando possível.
+- Acessibilidade: adicionar `aria-*` e semântica quando aplicável.
+- Tipagem: manter `strict` do TS. Evitar `any`; definir tipos de props.
 
-### Criação de Componentes
-1. **Localização**: Todos os componentes UI em `src/components/ui/`
-2. **Importações**: Use o alias `site/` configurado no tsconfig
-3. **Tipo**: Sempre criar componentes funcionais com TypeScript
-4. **Props**: Defina interfaces claras para as props
-5. **Export**: Use export nomeado quando apropriado
+Sugestão de organização ao criar um novo componente reutilizável:
+- Pasta: `site/src/components/NomeDoComponente/`
+  - `index.tsx` — implementação
+  - `NomeDoComponente.types.ts` — tipos de props (opcional)
 
-### Padrão de Hooks
-1. **Localização**: Criar pasta `src/hooks/` para hooks customizados
-2. **Nomenclatura**: Prefixo `use` + nome descritivo (ex: `useTheme`, `useLocalStorage`)
-3. **Tipagem**: Sempre tipar retorno e parâmetros dos hooks
-4. **Reutilização**: Focar em hooks genéricos e reutilizáveis
+Respeite o padrão já presente quando editar componentes existentes (alguns diretórios usam caixa baixa).
 
-### Padrão de Providers
-1. **Estrutura existente**: Já existe Provider principal em `src/components/ui/provider.tsx`
-2. **Novos providers**: Integrar ao Provider existente quando possível
-3. **Context**: Criar contexts tipados com TypeScript
-4. **Hooks de consumo**: Sempre criar hook personalizado para consumir context
+## Páginas e rotas (App Router)
+- Nova rota: criar pasta em `src/app/<rota>/page.tsx`.
+- Opcionalmente exportar `metadata` tipada com `Metadata` do Next.
+- Se o componente da página usar hooks/efeitos/`motion`, inclua `"use client"` no topo.
+- Por ser export estático:
+  - Evitar APIs/SSR (`getServerSideProps`, `dynamic = "force-dynamic"`, headers e cookies do request, etc.).
+  - Preferir dados estáticos ou carregamento no cliente (quando aceitável) sem depender de execução no servidor.
 
-### Estilo e UI
-1. **Framework**: Usar exclusivamente Chakra UI
-2. **Tema**: Respeitar o sistema de dark/light mode configurado
-3. **Responsividade**: Usar breakpoints do Chakra UI
-4. **Ícones**: Usar react-icons para consistência
-5. **Animações**: Utilizar motion para transições suaves
-
-### Organização de Arquivos
-1. **Componentes simples**: Um arquivo por componente
-2. **Componentes complexos**: Pasta com index.tsx + arquivos auxiliares
-3. **Tipos**: Definir em arquivos .types.ts quando necessário
-4. **Utilitários**: Criar pasta `src/utils/` para funções auxiliares
-
-### Boas Práticas
-1. **Client Components**: Usar "use client" apenas quando necessário
-2. **Performance**: Implementar lazy loading para componentes pesados
-3. **Acessibilidade**: Sempre considerar ARIA labels e navegação por teclado
-4. **Testes**: Preparar componentes para serem testáveis
-5. **Documentação**: Comentar componentes complexos com JSDoc
-
-### Exemplo de Estrutura de Componente
+Exemplo básico de página:
 ```tsx
-"use client"
+// site/src/app/sobre/page.tsx
+"use client";
+import { Box, Heading, Text } from "@chakra-ui/react";
 
-import { Box, BoxProps } from "@chakra-ui/react"
-import { ReactNode } from "react"
+export const metadata = { title: "Sobre — Davi Pessoa" };
 
-interface CustomComponentProps extends BoxProps {
-  title: string
-  children: ReactNode
-  variant?: "primary" | "secondary"
-}
-
-export function CustomComponent({ title, children, variant = "primary", ...props }: CustomComponentProps) {
+export default function SobrePage() {
   return (
-    <Box {...props}>
-      {/* Implementação */}
+    <Box px="10%" py="6%">
+      <Heading mb={3}>Sobre</Heading>
+      <Text>Conteúdo da página Sobre.</Text>
     </Box>
-  )
+  );
 }
 ```
 
-### Exemplo de Hook Customizado
-```tsx
-import { useState, useEffect } from "react"
+## Animações (motion)
+- Importar de `motion/react` (conforme já usado).
+- Encadear animações simples com `initial`, `animate`, `transition`.
+- Garantir que componentes animados sejam client-side (`"use client"`).
 
-interface UseCustomHookReturn {
-  data: any[]
-  loading: boolean
-  error: string | null
-}
+## Estilo, acessibilidade e conteúdo
+- Texto em pt-BR. Evitar gírias e manter tom amigável.
+- Usar tokens/responsividade do Chakra quando possível (`display`, `direction`, `gap`, breakpoints).
+- Respeitar dark mode (o projeto tem Provider de modo de cor).
 
-export function useCustomHook(): UseCustomHookReturn {
-  const [data, setData] = useState<any[]>([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+## Utilitários
+- `site/src/utils/chackmobilescreen.tsx` e `.../getscreensize.tsx` são utilitários atuais de viewport.
+- Ao criar novos utils, colocá-los em `src/utils/` e tipar assinaturas.
 
-  // Implementação
+## Convenções de código
+- TypeScript estrito, sem `any` silencioso.
+- Mantém imports ordenados e usa alias `site/*`.
+- Exports padrão para componentes (`export default ...`).
+- Evitar lógica complexa em componentes; extrair para utils quando possível.
 
-  return { data, loading, error }
-}
-```
+## Build, execução e deploy
+- Scripts (executar dentro de `site/`):
+  - `npm run dev` — desenvolvimento
+  - `npm run build` — build de produção
+  - `npm start` — rodar build
+- Deploy: GitHub Pages via workflow em `.github/workflows/nextjs.yml`.
+  - Observação: o workflow ouve `push` para `main`. Se o branch padrão for `master`, alinhar o gatilho do workflow.
 
-## Lembre-se
-- SEMPRE analise o projeto antes de implementar
-- Mantenha consistência com a estrutura existente  
-- Priorize componentes reutilizáveis e simples
-- Use hooks e providers de forma eficiente
-- Evite um amontoado de vários elementos XML numa mesma página  
-- Use as dependências já instaladas antes de sugerir novas
-- Respeite os padrões de nomenclatura e organização estabelecidos
-- se uma pagina tiver muitos elementos semelhantes ou com muitos argumentos parecidos, considere criar um componente separado para eles
-- foque em criar padrões e reutilizar componentes já existentes
-- crie componentes para qualquer coisa que seja repetitiva
-- se tiver muito grande o codigo, refatore em componentes menores, hooks ou providers
+## O que Copilot deve priorizar nas respostas
+- Gerar código funcional e idiomático para Next.js App Router + Chakra.
+- Usar alias `site/*` nas importações internas.
+- Inserir `"use client"` quando houver hooks/efeitos ou `motion`.
+- Evitar padrões incompatíveis com export estático.
+- Fornecer exemplos enxutos e diretamente aplicáveis ao projeto.
+- Quando criar novas rotas/componentes, indicar o caminho do arquivo e quaisquer imports necessários.
+
+## O que evitar
+- SSR, APIs do Next (rotas de API) ou qualquer recurso que exija servidor.
+- Introduzir dependências novas sem necessidade clara.
+- Sugestões que ignorem o Provider do Chakra/tema.
+
+## Check rápido antes de sugerir código
+- [ ] O import usa `site/*` quando é interno?
+- [ ] Precisa de `"use client"`?
+- [ ] É compatível com export estático?
+- [ ] Tipos estão corretos (sem `any` desnecessário)?
+- [ ] Respeita a estrutura de pastas?
+
+---
+Se precisar, posso ajustar estas instruções à medida que o projeto evolui (novos componentes, rotas, libs, etc.).

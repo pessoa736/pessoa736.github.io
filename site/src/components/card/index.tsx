@@ -1,9 +1,15 @@
-import { Box, Heading, Image, Text } from "@chakra-ui/react";
+"use client";
+ 
+import { Box, Button, Grid, GridItem, Heading, Image, Text, Card as Cd, Link } from "@chakra-ui/react";
 import { CardProps } from "./card.d";
 import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
+import NextLink from "next/link";
+import { LuGithub, LuPlay } from "react-icons/lu";
 
-function OpenCard({ card, onClose }: { card: CardProps; onClose: any }) {
+const MotionCardRoot = motion(Cd.Root as any);
+
+function StaticOpenCard({ card, onClose }: { card: CardProps; onClose: any }) {
   const ref = useRef(null);
 
   useEffect(() => {
@@ -33,45 +39,69 @@ function OpenCard({ card, onClose }: { card: CardProps; onClose: any }) {
       justifyContent="center"
       alignItems="center"
     >
-      <Box
-        ref={ref} // <<< ref aqui dentro, não no overlay
+  <MotionCardRoot
+        initial={{ opacity: 0, y: 25 }}
+        animate={{ opacity: 1, y: 0, transition: { duration: 0.8, type: "ease"} }}
+        exit={{ opacity: 0, y: 25, transition: { duration: 0.3 } }}
+        ref={ref}
         borderWidth="1px"
+        display="flex"
+        flexDirection="column"
         borderRadius="lg"
         overflow="hidden"
         backdropFilter={"blur(15px)"}
         bg={"rgba(255, 255, 255, 0.4)"}
-        _dark={{ bg: "rgba(0,0,0, 0.7)" } }
-        width={["80%", "70%", "50%"]}
-        height={["80%", "70%", "60%"]}
+        _dark={{ bg: "rgba(0,0,0, 0.7)" }}
+        minH={"500px"}
+        minW={"300px"}
         maxW={"500px"}
-        maxH={"600px"}
         zIndex={20}
       >
-        <Image
-          w={"100%"}
-          aspectRatio={4/3}
-          borderRadius={"md"}
-          src={card.image}
-          alt={card.title}
-        />
-        <Box p={4}>
-          <Heading size="lg">{card.title}</Heading>
-          <Text mt={3} mx={2}>
-            {card.description}
-          </Text>
-        </Box>
-      </Box>
+        <Cd.Body flex="1">  
+          <Image
+            w={"100%"}
+            aspectRatio={1}
+            borderRadius={"md"}
+            src={card.image}
+            alt={card.title}
+          />
+          <Box pt={4} px={4}>
+            <Heading size="lg">{card.title}</Heading>
+            <Text mt={3} mx={2}>
+              {card.description}
+            </Text>
+          </Box>
+        </Cd.Body>
+        <Cd.Footer w={"100%"} >
+          <Grid templateColumns="repeat(3, 1fr)" gap={1} w={"100%"} bottom={0} mt={4}>
+
+            <GridItem colSpan={2} >
+              <Link as={NextLink} href={card.linkRun} target="_blank" _hover={{ textDecoration: "none" }} w="100%" display="block">
+                <Button colorScheme="blue" w={"100%"}>
+                  <LuPlay />
+                </Button>
+              </Link>
+            </GridItem>
+
+            <GridItem colSpan={1}>
+              <Link as={NextLink} href={card.linkRepo} target="_blank" _hover={{ textDecoration: "none" }} w="100%" display="block">
+                <Button colorScheme="gray" w={"100%"}>
+                  <LuGithub />
+                </Button>
+              </Link>
+            </GridItem>
+          </Grid>
+        </Cd.Footer>
+  </MotionCardRoot>
     </Box>
   );
 }
 
+const OpenCard = motion(StaticOpenCard);
 
 function StaticCard({ title, description, image, linkRun, linkRepo }: CardProps) {
     const [opened, setOpened] = useState(false);
 
-    function handleExitCardOpened() {
-        setOpened(false);
-    }
 
     return (
         <Box borderWidth="1px" borderRadius="lg" overflow="hidden" onClick={() => setOpened(true)}>
@@ -80,7 +110,12 @@ function StaticCard({ title, description, image, linkRun, linkRepo }: CardProps)
                 <Heading size="md">{title}</Heading>
                 <Text mt={2}>{description}</Text>
             </Box>
-            {opened ? <OpenCard card={{ title, description, image, linkRun, linkRepo }} onClose={handleExitCardOpened} /> : null}
+            {opened && 
+              <OpenCard 
+                card={{ title, description, image, linkRun, linkRepo }} 
+                onClose={() => setOpened(false)} 
+              /> 
+            }
         </Box>
     );
 }

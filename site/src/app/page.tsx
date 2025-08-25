@@ -1,11 +1,10 @@
 "use client"
 
-import { Box, Button, Flex, Heading, HStack, Image, Text, VStack } from "@chakra-ui/react";
+import { Box, Flex, Heading, Text } from "@chakra-ui/react";
 import PerfilFoto from "site/components/perfilfoto";
 import DefaultPage from "site/templates/defaultpage";
 import { motion } from "motion/react";
-import { use, useEffect, useState } from "react";
-import { getScreenSize } from "site/utils/getscreensize";
+import { useEffect, useState } from "react";
 import { isMobileScreen } from "site/utils/chackmobilescreen";
 import RenderCardList from "site/components/card";
 // import NextLink from "next/link";
@@ -18,7 +17,6 @@ export default function Home() {
   useEffect(() => {
     const interval = setInterval(() => {
       setBackx((backx + 1) % 720);
-      console.log(isMobile);
     }, 10);
     return () => clearInterval(interval);
   }, [backx]);
@@ -62,7 +60,7 @@ export default function Home() {
         transition={{ duration: 0.8, type: "spring", stiffness: 80 }}
       >
         <Box 
-          id="section-2"
+          id="sobre"
           mt={"50px"}mx={0}  py={"10%"} px={"10%"}  
           bg={``}
           _dark={{
@@ -84,7 +82,7 @@ export default function Home() {
         transition={{ duration: 0.8, type: "spring", stiffness: 80 }}
       >
         <Box 
-          id="section-3"
+          id="projetos"
           mt={"50px"}mx={0}  py={"5%"} px={"10%"}  
           bg={``}
           _dark={{
@@ -104,12 +102,18 @@ export default function Home() {
                 linkRepo: "https://github.com/Causa-Solidaria/causa-solidaria.github.io"
               },
               {
-                title: "jogo da vida de Conway",
+                title: "Jogo da vida de Conway",
                 description: "Um jogo simples baseado na lógica de Conway.",
                 image: "/image.png",
                 linkRun: "https://pessoa736.github.io/lifegameConway-react/",
                 linkRepo: "https://github.com/pessoa736/lifegameConway-react"
-              }
+              },{
+                title: "Esse site :0",
+                description: "esse site conta?",
+                image: "/esse-site.png",
+                linkRun: "https://pessoa736.github.io/meu-projeto-pessoal/",
+                linkRepo: "https://github.com/pessoa736/meu-projeto-pessoal"
+              },
             ]} />
           </Box>
 
