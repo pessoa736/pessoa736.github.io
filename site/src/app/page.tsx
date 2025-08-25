@@ -63,7 +63,7 @@ export default function Home() {
       >
         <Box 
           id="section-2"
-          mt={"50px"}mx={0}  py={"5%"} px={"10%"}  
+          mt={"50px"}mx={0}  py={"10%"} px={"10%"}  
           bg={``}
           _dark={{
             bg: ``,
