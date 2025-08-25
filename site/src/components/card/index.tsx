@@ -8,7 +8,7 @@ function OpenCard({ card, onClose }: { card: CardProps; onClose: any }) {
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (ref.current && !ref.current.contains(event.target as Node)) {
+      if (ref.current && !event.composedPath().includes(ref.current)) {
         onClose();
       }
     }
