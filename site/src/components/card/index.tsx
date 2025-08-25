@@ -49,9 +49,9 @@ function StaticOpenCard({ card, onClose }: { card: CardProps; onClose: any }) {
         flexDirection="column"
         borderRadius="lg"
         overflow="hidden"
-        backdropFilter={"blur(15px)"}
-        bg={"rgba(255, 255, 255, 0.4)"}
-        _dark={{ bg: "rgba(0,0,0, 0.7)" }}
+        backdropFilter={"saturate(120%) blur(20px)"}
+        bg={"rgba(255, 255, 255, 0.1)"}
+        _dark={{ bg: "rgba(0,0,0, 0)" }}
         minH={"500px"}
         minW={"300px"}
         maxW={"500px"}

@@ -17,8 +17,8 @@ import {motion as _motion} from "framer-motion";
             _dark={{ bg: "linear-gradient(-90deg, #0005 10%, rgba(0, 0, 0, 0.56) 90%)"  }}
             backdropFilter="saturate(180%) blur(8px)" 
             borderBottomWidth="1px"
-            {...props}
             py={4}
+            {...props}
         >
             <Container display="flex" alignItems="center" justifyContent="space-between">
                 <HStack  gap={3}>
