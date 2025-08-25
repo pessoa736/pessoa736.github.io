@@ -26,7 +26,8 @@ function OpenCard({ card, onClose }: { card: CardProps; onClose: any }) {
       left={0}
       width={"100%"}
       height={"100%"}
-      bg={"rgba(0, 0, 0, 0.7)"}
+      bg={"rgba(255, 255, 255, 0.3)"}
+      _dark={{ bg: "rgba(0,0,0, 0.7)" }}
       zIndex={10}
       display="flex"
       justifyContent="center"
@@ -37,8 +38,9 @@ function OpenCard({ card, onClose }: { card: CardProps; onClose: any }) {
         borderWidth="1px"
         borderRadius="lg"
         overflow="hidden"
-        backdropFilter={"blur(18px)"}
-        bg={"linear-gradient(-45deg, #0005 , #1295)"}
+        backdropFilter={"blur(15px)"}
+        bg={"rgba(255, 255, 255, 0.4)"}
+        _dark={{ bg: "rgba(0,0,0, 0.7)" } }
         width={["80%", "70%", "50%"]}
         height={"80%"}
         maxW={"500px"}
@@ -46,7 +48,7 @@ function OpenCard({ card, onClose }: { card: CardProps; onClose: any }) {
       >
         <Image
           w={"100%"}
-          aspectRatio={1}
+          aspectRatio={4/3}
           borderRadius={"md"}
           src={card.image}
           alt={card.title}
@@ -99,7 +101,7 @@ export function Card(props: CardProps) {
 
 export default function RenderCardList({ projects }: { projects: CardProps[] }) {
   return (
-    <Box display="grid" gridTemplateColumns="repeat(auto-fill, minmax(300px, 1fr))" gap={4}>
+    <Box display="grid" gridTemplateColumns="repeat(auto-fill, minmax(200px, 1fr))" gap={4}>
       {projects.map((project, idx) => (
         <Card key={idx} {...project} />
       ))}

@@ -10,7 +10,7 @@ import {motion as _motion} from "framer-motion";
     return (
         <Box 
             as="header" 
-            position="fixed"
+            position="sticky"
             width={"100%"} 
             top={0} zIndex={10} 
             bg="linear-gradient(-90deg, #fff5 10%, rgba(255, 255, 255, 0.65) 90%)" 
