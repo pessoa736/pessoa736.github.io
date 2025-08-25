@@ -42,8 +42,9 @@ function OpenCard({ card, onClose }: { card: CardProps; onClose: any }) {
         bg={"rgba(255, 255, 255, 0.4)"}
         _dark={{ bg: "rgba(0,0,0, 0.7)" } }
         width={["80%", "70%", "50%"]}
-        height={"80%"}
+        height={["80%", "70%", "60%"]}
         maxW={"500px"}
+        maxH={"600px"}
         zIndex={20}
       >
         <Image
