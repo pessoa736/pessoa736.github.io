@@ -15,7 +15,7 @@ import {motion as _motion} from "framer-motion";
             top={0} zIndex={30} 
             bg="linear-gradient(-90deg, #fff5 10%, rgba(255, 255, 255, 0.65) 90%)" 
             _dark={{ bg: "linear-gradient(-90deg, #0005 10%, rgba(0, 0, 0, 0.56) 90%)"  }}
-            backdropFilter="saturate(180%) blur(8px)" 
+            backdropFilter="saturate(180%) blur(20px)" 
             borderBottomWidth="1px"
             py={4}
             {...props}
