@@ -1,6 +1,6 @@
 "use client"
 import { Box, BoxProps, Grid } from "@chakra-ui/react";
-import { AnimatePresence, motion, MotionConfigProps} from "framer-motion";
+import { AnimatePresence, motion} from "framer-motion";
 
 
 const MotionBox = motion.div;

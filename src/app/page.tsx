@@ -1,4 +1,4 @@
-import { Flex,  } from "@chakra-ui/react";
+import { Flex } from "@chakra-ui/react";
 import AnimationBalls from "site/components/animationBalls";
 import Saudacao from "site/components/saudacao";
 import TemplatePage from "site/components/templatePage";
