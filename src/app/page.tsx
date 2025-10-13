@@ -61,7 +61,7 @@ export default function Home() {
           h={staticPropotion(475)} 
         />
       </Flex>
-      <Separator my={staticPropotion(20)} />
+      <Separator my={staticPropotion(20)} w={staticPropotion(1210)}/>
       <Flex direction={"row"}>
         <Flex direction={"column"}>
           <Box 
@@ -80,7 +80,7 @@ export default function Home() {
             lineHeight={"150%"}
           >
             Tenho  19 anos, e sou do tipo de  pessoa que gosta criar projetos bem trabalhados e detalhados a nivel tecnico e artistico, principalmente quando mexe com algo novo ou diferente.  Adoro resolver problemas e aprender no processo.<br /><br />
-            Atualmente estou focado em aprender tecnologias web, principalmente React, Node.js, TypeScript e bancos de dados relacionais e não relacionais. Também estou estudando design de interfaces e experiência do usuário para criar aplicações mais intuitivas e agradáveis. 
+            Atualmente estou focado em aprender tecnologias web, principalmente React, Node.js, TypeScript e bancos de dados relacionais e não relacionais. Também estou estudando design de interfaces e experiência do usuário para criar aplicações mais intuitivas e agradáveis.<br /><br />
           
           </Heading>
           
@@ -94,9 +94,71 @@ export default function Home() {
             minH={staticPropotion(13)}
           />
 
+          <Heading
+            fontSize={staticPropotion(20)}
+            fontWeight={"100"}
+            mt={staticPropotion(30)}
+            w={staticPropotion(482)}
+            lineHeight={"150%"}
+          >
+            Linguagens que eu tenho dominio: 
+          </Heading>
+          <Flex mt={staticPropotion(5)} gapX={staticPropotion(5)}>
+            <Tag color="#264de4" textColor="#fff">TypeScript</Tag>
+            <Tag color="#f7df1e" textColor="#000">JavaScript</Tag>
+            <Tag color={"#d98415"} textColor="#fff">HTML</Tag>
+            <Tag color={"#61dbfb"} textColor="#fff">JSX/TSX</Tag>
+            <Tag color="#264de4" textColor="#fff">CSS</Tag>
+            <Tag color="#300075" textColor="#fff">Lua</Tag>
+          </Flex>
+
+          <Heading
+            fontSize={staticPropotion(20)}
+            fontWeight={"100"}
+            mt={staticPropotion(20)}
+            w={staticPropotion(482)}
+            lineHeight={"150%"}
+          >
+            Frameworks e bibliotecas que eu utilizo: 
+          </Heading>
+          <Flex mt={staticPropotion(5)} gapX={staticPropotion(15)} pl={staticPropotion(10)}>
+            {[
+              {bgImage: "url(/react.jpg)"},
+              {bgImage: "url(/nodejs.png)"},
+              {bgImage: "url(/chakraui.png)"},
+              {bgImage: "url(/nextjs.png)"},
+              {bgImage: "url(/prisma.png)"},
+              {bgImage: "url(/jwt.png)"},
+            ].map((_, id) => (
+              <QuadradoSombreado 
+                key={id} 
+                maxWidth={staticPropotion(65)}
+                minW={staticPropotion(65)}
+                maxH={staticPropotion(65)}
+                minH={staticPropotion(65)}
+                boxShadow={`${staticPropotion(-2)} ${staticPropotion(2)} 0 #fff`}
+                transition={"all 0.5s "}
+                _hover={{
+                  boxShadow: `${staticPropotion(-10)} ${staticPropotion(10)} 0 #fff`,
+                  translate: `${staticPropotion(8)} ${staticPropotion(-8)}`,
+                  scale: 1.1,
+                  zIndex: 10
+                }}
+              />
+            ))}
+          </Flex>
         </Flex>
         <Separator orientation={"vertical"} mx={staticPropotion(40)}/>
         <Flex direction={"column"}>
+          <Box
+            mb={staticPropotion(20)} 
+            bg="#fff" 
+            borderRadius={0}
+            maxW={staticPropotion(628)}
+            minW={staticPropotion(628)}
+            maxH={staticPropotion(13)}
+            minH={staticPropotion(13)}
+          />
           <Heading 
             fontSize={staticPropotion(20)}
             fontWeight={"100"}
@@ -107,7 +169,7 @@ export default function Home() {
             Sou estudante de ciencia e tecnologia na  ECT (escola de ciência e tecnologia) na  UFRN ( Universidade Federal do Rio Grande Do Norte), ingressei em 2025.2
           </Heading>
           <QuadradoSombreado 
-            mt={staticPropotion(40)}
+            mt={staticPropotion(30)}
             bgImage={"url(/ect.jpg)"}
             bgPos={"center"}
             bgSize={"100%"}
@@ -115,6 +177,15 @@ export default function Home() {
             minW={staticPropotion(628)}
             maxH={staticPropotion(290)}
             minH={staticPropotion(290)}
+          />
+          <Box
+            mt={staticPropotion(30)} 
+            bg="#fff" 
+            borderRadius={0}
+            maxW={staticPropotion(628)}
+            minW={staticPropotion(628)}
+            maxH={staticPropotion(13)}
+            minH={staticPropotion(13)}
           />
         </Flex>
       </Flex>
