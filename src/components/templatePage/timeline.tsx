@@ -1,11 +1,12 @@
 import { Box } from "@chakra-ui/react";
+import { staticPropotion } from "site/utils/staticPropotion";
 
 
 
 
 export default function Timeline({children}: {children?: React.ReactNode}) {
     return (
-        <Box mx={"calc(100vmax * 45/1300)"} my={"calc(100vmax * 30/700)"} overflowX={"hidden"}>
+        <Box mx={staticPropotion(45)} w={"100%"} overflowX={"hidden"}>
             {children}
         </Box>
     );

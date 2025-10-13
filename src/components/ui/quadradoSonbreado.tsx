@@ -1,4 +1,5 @@
 import { Box, BoxProps } from "@chakra-ui/react";
+import { staticPropotion } from "site/utils/staticPropotion";
 
 
 
@@ -6,9 +7,9 @@ export default function QuadradoSombreado({children, ...props }: {children?: Rea
     return (
     <Box
         overflow={"hidden"}
-        boxShadow="calc(100vmax * -10/1300) calc(100vmax * 10/1300) 0 #ffffff"
-        borderRadius={"calc(100vmax * 10/1300)"}
-        border={"calc(100vmax * 2/1300) solid"}
+        boxShadow={`${staticPropotion(-10)} ${staticPropotion(10)} 0 #ffffff`}
+        borderRadius={staticPropotion(10)}
+        border={`${staticPropotion(2)} solid`}
         borderColor={"#ffffff"}
         {...props}
     >{children}</Box>);
