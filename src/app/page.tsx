@@ -1,4 +1,4 @@
-import { Flex, Grid, HStack, Separator, Stack, VStack } from "@chakra-ui/react";
+import { Box, Flex, Separator } from "@chakra-ui/react";
 import AnimationBalls from "site/components/animationBalls";
 import Saudacao from "site/components/saudacao";
 import Tag from "site/components/tag";
@@ -61,7 +61,63 @@ export default function Home() {
           h={staticPropotion(475)} 
         />
       </Flex>
-      <Separator mt={staticPropotion(20)}/>
+      <Separator my={staticPropotion(20)} />
+      <Flex direction={"row"}>
+        <Flex direction={"column"}>
+          <Box 
+            bg="#fff" 
+            borderRadius={0}
+            maxW={staticPropotion(482)}
+            minW={staticPropotion(482)}
+            maxH={staticPropotion(13)}
+            minH={staticPropotion(13)}
+          />
+          <Heading
+            fontSize={staticPropotion(20)}
+            fontWeight={"100"}
+            mt={staticPropotion(30)}
+            w={staticPropotion(482)}
+            lineHeight={"150%"}
+          >
+            Tenho  19 anos, e sou do tipo de  pessoa que gosta criar projetos bem trabalhados e detalhados a nivel tecnico e artistico, principalmente quando mexe com algo novo ou diferente.  Adoro resolver problemas e aprender no processo.<br /><br />
+            Atualmente estou focado em aprender tecnologias web, principalmente React, Node.js, TypeScript e bancos de dados relacionais e não relacionais. Também estou estudando design de interfaces e experiência do usuário para criar aplicações mais intuitivas e agradáveis. 
+          
+          </Heading>
+          
+          <Box
+            mt={staticPropotion(20)} 
+            bg="#fff" 
+            borderRadius={0}
+            maxW={staticPropotion(482)}
+            minW={staticPropotion(482)}
+            maxH={staticPropotion(13)}
+            minH={staticPropotion(13)}
+          />
+
+        </Flex>
+        <Separator orientation={"vertical"} mx={staticPropotion(40)}/>
+        <Flex direction={"column"}>
+          <Heading 
+            fontSize={staticPropotion(20)}
+            fontWeight={"100"}
+            mt={staticPropotion(0)}
+            w={staticPropotion(628)}
+            lineHeight={"150%"}
+          >
+            Sou estudante de ciencia e tecnologia na  ECT (escola de ciência e tecnologia) na  UFRN ( Universidade Federal do Rio Grande Do Norte), ingressei em 2025.2
+          </Heading>
+          <QuadradoSombreado 
+            mt={staticPropotion(40)}
+            bgImage={"url(/ect.jpg)"}
+            bgPos={"center"}
+            bgSize={"100%"}
+            maxW={staticPropotion(628)}
+            minW={staticPropotion(628)}
+            maxH={staticPropotion(290)}
+            minH={staticPropotion(290)}
+          />
+        </Flex>
+      </Flex>
     </TemplatePage>
   );
 }
