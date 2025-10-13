@@ -42,7 +42,7 @@ export default function animationBalls({...props}: BoxProps) {
                 {balls.map((ball) => (
                         <MotionBox key={ball.id}
                             animate={{
-                                scale: [0.75, 1, 0.75],
+                                scale: [0.25, 1, 0.25],
                             }}
                             transition={{
                                 duration: 2,

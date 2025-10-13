@@ -1,5 +1,4 @@
 import { Box, Flex } from "@chakra-ui/react";
-import { s } from "framer-motion/client";
 import { staticPropotion } from "site/utils/staticPropotion";
 import Heading from "../ui/heading";
 

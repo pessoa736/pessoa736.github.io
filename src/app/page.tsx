@@ -1,3 +1,4 @@
+"use client";
 import { Box, Flex, Separator } from "@chakra-ui/react";
 import AnimationBalls from "site/components/animationBalls";
 import Saudacao from "site/components/saudacao";
@@ -5,9 +6,17 @@ import Tag from "site/components/tag";
 import TemplatePage from "site/components/templatePage";
 import Heading from "site/components/ui/heading";
 import QuadradoSombreado from "site/components/ui/quadradoSonbreado";
+import { useIsMobile } from "site/utils/isMobile";
 import { staticPropotion } from "site/utils/staticPropotion";
+import MobileHome from "./mobile_version";
+
+
+
 export default function Home() {
-  return (
+  const isMobile = useIsMobile(true);
+  return isMobile ? (
+    <MobileHome />
+  ) : (
     <TemplatePage>
       <Flex direction={"row"} mt={staticPropotion(100)}>
         <Flex direction={"column"}>
