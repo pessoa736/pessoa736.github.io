@@ -1,7 +1,14 @@
 import type { Metadata } from "next";
-import { Provider } from "site/components/ui/provider";
+import { JetBrains_Mono } from "next/font/google";
 import "./globals.css";
-import { AnimatePresence } from "framer-motion";
+
+const JetBrainsMono = JetBrains_Mono({
+  variable: "--font-Jetbrains-mono",
+  preload: true,
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700", "800"]
+});
+
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -14,9 +21,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body>
-        <Provider><AnimatePresence>{children}</AnimatePresence></Provider>
+    <html lang="en">
+      <body
+        className={`${JetBrainsMono.variable} ${JetBrainsMono.variable} antialiased`}
+      >
+        {children}
       </body>
     </html>
   );
