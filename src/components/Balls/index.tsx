@@ -35,11 +35,12 @@ export default function Balls({children}:{children?: ReactElement| ReactElement[
         ()=>{
             const canvas = canvasRef.current
             const container = containerRef.current
-            if (!canvas || !container)return null;
+            if (!canvas || !container)return;
 
-            const ctx = (canvas.getContext("2d"))
+            const ctx = canvas.getContext("2d")
             
             let frame = 0;
+            let rafId = 0;
             function updateCanvas(){
                 const rect = container?.getBoundingClientRect()
                 if (!ctx || !canvas || !rect) return;
@@ -89,10 +90,12 @@ export default function Balls({children}:{children?: ReactElement| ReactElement[
                     ctx.fill()
                 }
                 frame++;
-                requestAnimationFrame(updateCanvas)
+                rafId = requestAnimationFrame(updateCanvas);
             }
 
             updateCanvas()
+
+            return ()=>cancelAnimationFrame(rafId)
         }, 
     [])
 
