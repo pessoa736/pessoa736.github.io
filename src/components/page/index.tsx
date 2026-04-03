@@ -3,12 +3,19 @@ import { ReactElement } from "react";
 
 
 
-export default function Page({children}: {children?: ReactElement | ReactElement[]}){
+export default function Page(
+    {
+        children, 
+        className
+    }:
+    React.ComponentPropsWithRef<"body">
+)
+{
     return <div
-        className="relative flex min-h-screen items-center justify-center jetbrains-mono"
+        className="max-h-screen items-center justify-center jetbrains-mono box-color"
     >
         <main
-            className="box-content"
+            className={"" + (className|| "")}
         >
             {children}
         </main>
