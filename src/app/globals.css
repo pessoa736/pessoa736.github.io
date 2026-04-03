@@ -1,32 +1,112 @@
-@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Odibee+Sans&family=Quicksand:wght@300..700&display=swap');
+@import "tailwindcss";
+
 
 :root {
-  --background: #ffffff;
-  --foreground: #000000;
+  --white: #e5e5e5;
+  --black: #0a0a0a;
+  --red: #F5334C;
+  --trBlack: #0a0a0a24;
+  --trWhite: #e5e5e524;
+  --trRed: #F5334C24;
+
+  --background: var(--white);
+  --foreground: var(--black);
+  --secondcolor: var(--red);
+  --backgroundTR: var(--trWhite);
+  --foregroundTR: var(--trBlack);
+  --secondcolorTR: var(--trRed);
 }
+
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: var(--black);
+    --foreground: var(--white);
+    --backgroundTR: var(--trBlack);
+    --foregroundTR: var(--trWhite);
+  }
+}
+
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+}
+
+
+.jetbrains-mono{
+  font-family: "Jetbrains mono", monospace;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+
+.box-color {
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+.box-color-inverted {
+  background-color: var(--foreground);
+  color: var(--background);
+}
+
+.box-colored-color {
+  background-color: var(--secondcolor);
+  color: var(--foreground);
+}
+
+.box-colored-color-inverted {
+  background-color: var(--background);
+  color: var(--secondcolor);
+}
+
+.box-transparent-blur{
+  backdrop-filter: blur(1vmax);
+  border-color: var(--foreground);
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #000000;
-    --foreground: #ffffff;
+  .box-transparent-blur{
+    background-color: #0a0a0a11;
+  }
+}
+@media (prefers-color-scheme: light) {
+  .box-transparent-blur{
+    background-color: #ededed11;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: "odibee sans", "quicksand", sans-serif;
-  overflow-x: hidden;
+.shadowLumi {
+  box-shadow: 
+    0px -2px 1px var(--backgroundTR),
+    0px 2px 5px 2px var(--backgroundTR), 
+    0px 2px 1px var(--foregroundTR), 
+    0px 2px 5px 2px var(--foregroundTR);
 }
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: "odibee sans", "quicksand", sans-serif;
+.grid{
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-auto-rows: 50px;
+  gap: 10px;
+}
+
+.item {
+  grid-column: span 1;
+  grid-row: span 1;
+}
+
+.item-big {
+  grid-column: span 2;
+  grid-row: span 3;
+}
+
+
+
+* {}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  
 }
