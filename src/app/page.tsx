@@ -8,9 +8,17 @@ import HoverHomePage from "mySite/plates/hoverHomePage";
 import { useEffect, useState } from "react";
 
 
+interface project {
+  name: string
+  id: number
+  updated_at: string
+  html_url: string
+}
+
+
 export default function Home() 
 {
-  const [projs, setProjs] = useState<[]>([])
+  const [projs, setProjs] = useState<project[]>([])
 
   const data = new Date().getTime()
   const meuaniversario = new Date(2005, 9, 21).getTime()
