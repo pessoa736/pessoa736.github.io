@@ -12,7 +12,7 @@ export default function TrBlock(
     return <div 
         className=
         {
-            (className || "")+`box-content p-10 rounded-2xl box-transparent-blur shadowLumi`
+            (className || "")+`box-content p-10 rounded-2xl animated box-transparent-blur shadowLumi`
         } 
 
         style={{border: "1px solid var(--foregroundTR)"}}

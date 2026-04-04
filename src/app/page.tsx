@@ -13,6 +13,10 @@ interface project {
   id: number
   updated_at: string
   html_url: string
+  thumbnail?: string
+  homepage?: string
+  has_pages: boolean
+  idmap: number
 }
 
 
@@ -29,12 +33,41 @@ export default function Home()
 
 
   useEffect(()=>{
-    const loadrepos = async ()=>{
-      try {
+    let idmap = 0
+    const loadrepos = async ()=>
+    {
+      try 
+      {
         const response = await fetch("https://api.github.com/users/pessoa736/repos")
-        const data = await response.json()
+        let data = (await response.json()) as project[]
+        
+        if (data)
+        {
+          data = data 
+            .sort((a,b)=>new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
+            .slice(0, 5)
+            .map((v:project)=>
+              {
+                if (!v.has_pages){ idmap++; return {...v, idmap} }
+
+                const imagerota = 
+                  v.name == "pessoa736.github.io" 
+                    ? "https://pessoa736.github.io/images/projImg.png"
+                    : "https://pessoa736.github.io/" + v.name + "/images/projImg.png"
+
+                console.log(imagerota)
+
+                idmap++
+                return{...v, thumbnail: imagerota, idmap}
+              }
+            )
+        }
+        
+        console.log(data)
         setProjs(data)
-      } catch (error) {
+      } 
+      catch (error) 
+      {
         console.error("error :", error)
       }
     }
@@ -48,34 +81,53 @@ export default function Home()
           <HoverHomePage />
       </Balls>
       <div
-        className="flex flex-col text-center items-center mx-40 md:mx-80 gap-1.5"
+        className="flex flex-col text-center items-center mx-20 md:mx-40 lg:mx-60 animated gap-1.5"
       >
-        <hr className=" my-8 w-full min-w-96 max-w-5xl"/>
+        <hr className=" my-8 w-full animated min-w-96 "/>
+        <div className="flex flex-col lg:flex-row gap-5">
+          <div className="min-w-96 animated max-w-7xl pt-6">
+            <Heading Level={3} className="mb-1">minha stack</Heading>
+          </div>
 
-        <div className="min-w-96 w-full pt-6">
-          <Heading Level={3}>meu projetos recentes</Heading>
-          <div className="grid justify-center items-center mb-6 gap-3">
-            {
-              projs
-              .sort((a,b)=>new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
-              .slice(0, 6)
-              .map(
-                (v)=>
-                  <div 
-                    key={v.id}
-                    className={`${v.id%3 !== 0 ? "item": "item-big"}  box-content rounded-2xl`}
-                    style={{
-                      backgroundImage: "url()",
-                      gridColumn: "span 2"
-                    }}
-                    onClick={()=>{window.location.href = v.html_url}}
-                  >
-                    {v.name || ""}
-                  </div>
-              )
-            }
+          <div className="min-w-96 animated max-w-6xl pt-6">
+            <Heading Level={3} className="mb-1">meu projetos recentes</Heading>
+            <Heading Level={9} className="mb-7">(diretamente vinculado no github)</Heading>
+            <div className="grid grid-flow-dense grid-cols-2 md:grid-cols-3  auto-rows-[250px] auto-cols-[100px] animated  mb-6 gap-3">
+              {
+                projs
+                .map(
+                  (v, i)=>
+                  {
+                    const sizeClass = 
+                      i % 7 === 0
+                        ? "col-span-2 row-span-2"
+                        : i % 5 === 0 
+                          ? "row-span-2"
+                          : i % 4 === 0
+                            ? "col-span-2"
+                            : "col-span-1 row-span-1"
+
+                    return <a 
+                      key={v.id} 
+                      href={v.html_url}
+                      className={sizeClass + " flex items-center rounded-2xl hover:scale-105 hover:z-10 z-auto animated overflow-hidden justify-center relative"}
+                      style={{
+                        backgroundImage: v.thumbnail ? `linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.75)),url(${v.thumbnail})` : "none",
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
+                        backgroundColor: "var(--foregroundTR)"
+                      }}
+                      
+                    >
+                      <Heading Level={6}>{ v.name }</Heading>
+                    </a>
+                  }
+                )
+              }
+            </div>
           </div>
         </div>
+        <hr className=" my-8 w-full animated min-w-96 max-w-5xl"/>
 
         {/* <Heading Level={2}>minha stack</Heading>
         <div className="flex flex gap-5">
