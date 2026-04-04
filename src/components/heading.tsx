@@ -17,10 +17,10 @@ export default function Heading(
     }
 )
 {
-    const sizes = ["text-6xl", "text-5xl", "text-4xl", "text-3xl", "text-2xl", "text-xl"];
-    const sizeClass = sizes[clamp(1, 6, Level) - 1] || "text-xl";
+    const sizes = ["text-6xl", "text-5xl", "text-4xl", "text-3xl", "text-2xl", "text-xl", "text-sm"];
+    const sizeClass = sizes[clamp(1, 7, Level) - 1] || "text-xl";
     
-    return <h1 className={(className || "")+` jetbrains-mono ${sizeClass} mb-4`} {...props}>
+    return <h1 className={(className || "")+` jetbrains-mono animated ${sizeClass} mb-4`} {...props}>
         {children}
     </h1>
 }
