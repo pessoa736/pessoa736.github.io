@@ -14,7 +14,7 @@ export default function OnAirList({ repos }: Props) {
   return (
     <section>
       <h2 className="jetbrains-mono text-xs uppercase tracking-[0.2em] opacity-50 mb-4">
-        {/* no ar */}
+       // no ar
       </h2>
       <ul className="flex flex-col">
         {repos.map((r) => {
@@ -31,7 +31,7 @@ export default function OnAirList({ repos }: Props) {
               className="group flex items-center gap-4 py-3 border-b last:border-b-0 border-[color:var(--foregroundTR)]"
             >
               <div
-                className="size-10 rounded-lg shrink-0 bg-cover bg-center box-ghost"
+                className="size-10 rounded-lg shrink-0 bg-cover bg-center box-glass"
                 style={{ backgroundImage: `url(${thumb})` }}
               />
               <div className="flex-1 min-w-0">
@@ -52,7 +52,7 @@ export default function OnAirList({ repos }: Props) {
                 href={live}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-1 text-xs px-3 py-1.5 rounded-full box-ghost animated hover:text-[color:var(--red)]"
+                className="inline-flex items-center gap-1 text-xs px-3 py-1.5 rounded-full box-glass animated hover:text-[color:var(--red)]"
               >
                 abrir <ArrowUpRight size={12} strokeWidth={1.6} />
               </Link>
