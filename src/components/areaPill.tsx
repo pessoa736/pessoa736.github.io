@@ -12,7 +12,7 @@ export default function AreaPill({ language, className = "" }: Props) {
   return (
     <span
       className={
-        "text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full box-ghost " +
+        "text-[10px] uppercase box-ghost tracking-wider px-2 py-0.5 rounded-full" +
         className
       }
     >
