@@ -13,11 +13,11 @@ export default function FeaturedGrid({ featured }: Props) {
     <section>
       <div className="flex items-end justify-between mb-4 gap-4 flex-wrap">
         <h2 className="jetbrains-mono text-xs uppercase tracking-[0.2em] opacity-50">
-           {/* projetos em destaque */}
+            // projetos em destaque 
         </h2>
         <Link
           href="/projetos"
-          className="inline-flex items-center gap-1 text-xs px-3 py-1 rounded-full box-ghost animated hover:text-[color:var(--red)]"
+          className="inline-flex items-center gap-1 text-xs px-3 py-1 rounded-full box-glass animated hover:text-[color:var(--red)]"
         >
           ver todos <ArrowRight size={12} strokeWidth={1.6} />
         </Link>
