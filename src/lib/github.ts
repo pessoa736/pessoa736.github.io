@@ -53,9 +53,31 @@ export async function getAllRepos(): Promise<GhRepo[]> {
   const data = await fetchJson<GhRepo[]>(
     `${API}/users/${siteConfig.owner}/repos?per_page=100&sort=updated`,
   );
-  return data.filter(
-    (r) => !r.archived && !r.fork && r.name !== siteConfig.self.repoName,
+  const blacklist = new Set(siteConfig.blacklist);
+  const filtered = data.filter(
+    (r) =>
+      !r.archived &&
+      !r.fork &&
+      r.name !== siteConfig.self.repoName &&
+      !blacklist.has(r.name),
   );
+
+  // Ordena: quem tem README vem antes, mantendo a ordem original (updated) dentro de cada grupo.
+  // Detecta README via tentativa de fetch do endpoint /readme (404 = não tem).
+  const withReadme = await Promise.all(
+    filtered.map(async (r) => {
+      try {
+        await fetchJson(`${API}/repos/${siteConfig.owner}/${r.name}/readme`);
+        return { repo: r, hasReadme: true };
+      } catch {
+        return { repo: r, hasReadme: false };
+      }
+    }),
+  );
+
+  return withReadme
+    .sort((a, b) => Number(b.hasReadme) - Number(a.hasReadme))
+    .map((x) => x.repo);
 }
 
 export interface GhReadme {
