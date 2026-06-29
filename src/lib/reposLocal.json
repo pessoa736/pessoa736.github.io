@@ -1,0 +1,4 @@
+{
+  "_comment": "Backup local da lista de repos. Usado quando a API do GitHub está indisponível (rate-limit, sem rede, etc) durante BUILD ou prerender. Mantém só os campos mínimos que o site usa.",
+  "repos": []
+}
