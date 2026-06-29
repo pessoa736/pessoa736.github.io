@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getAllRepos } from "mySite/lib/github";
+import { withCachedAssets } from "mySite/lib/repoDocsCache";
 import ProjectGrid from "mySite/plates/projectGrid";
 
 export const metadata: Metadata = {
@@ -11,7 +12,8 @@ export const dynamic = "force-static";
 export const revalidate = 3600;
 
 export default async function ProjetosPage() {
-  const repos = await getAllRepos();
+  // Sem rede: lista do GitHub + assets via cache local (`.cache/repo-docs/`).
+  const repos = await withCachedAssets(await getAllRepos());
   return (
     <main className="pt-24 pb-16 px-4 sm:px-8 max-w-5xl mx-auto">
       <header className="mb-10">

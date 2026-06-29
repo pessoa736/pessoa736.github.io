@@ -42,7 +42,7 @@ export default function OnAirList({ repos }: Props) {
                   {r.name}
                 </Link>
                 {(() => {
-                  const desc = r.docs?.description ?? r.description;
+                  const desc = r.assets?.description ?? r.description;
                   return desc ? (
                     <p className="text-xs opacity-60 line-clamp-1 mt-0.5">
                       {desc}

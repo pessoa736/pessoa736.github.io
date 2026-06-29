@@ -24,7 +24,7 @@ export default function ProjectGrid({ repos }: Props) {
         if (ra !== area) return false;
       }
       if (q) {
-        const desc = r.docs?.description ?? r.description ?? "";
+        const desc = r.assets?.description ?? r.description ?? "";
         const haystack = `${r.name} ${desc} ${r.language ?? ""}`.toLowerCase();
         if (!haystack.includes(q)) return false;
       }

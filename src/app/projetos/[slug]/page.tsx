@@ -10,7 +10,7 @@ import {
   ghPagesThumb,
   projectSlug,
 } from "mySite/lib/github";
-import { getRepoDocsCached } from "mySite/lib/repoDocsCache";
+import { getRepoAssetsCached } from "mySite/lib/repoDocsCache";
 import { siteConfig } from "mySite/config/site";
 
 export const dynamic = "force-static";
@@ -42,11 +42,11 @@ export default async function ProjectPage({ params }: PageProps) {
   const repo = repos.find((r) => projectSlug(r.name) === slug);
   if (!repo) notFound();
 
-  // docs/ enriquecido SEM rede — só lê de `.cache/repo-docs/`.
-  // Cache é populado pelo endpoint /api/enrich-docs.
-  const docs = await getRepoDocsCached(repo.name);
+  // assets enriquecido SEM rede — só lê de `.cache/repo-docs/`.
+  // Cache é populado por `npm run enrich-docs`.
+  const assets = await getRepoAssetsCached(repo.name);
 
-  const thumb = docs?.thumbnail ?? ghPagesThumb(repo);
+  const thumb = assets?.thumb ?? ghPagesThumb(repo);
   const live =
     repo.homepage || (repo.has_pages ? `https://${siteConfig.owner}.github.io/${repo.name}/` : null);
 
@@ -61,7 +61,9 @@ export default async function ProjectPage({ params }: PageProps) {
     readmeHtml = "<p>README indisponível.</p>";
   }
 
-  const description = docs?.description ?? repo.description;
+  const description = assets?.description ?? repo.description;
+  const gallery = assets?.gallery ?? [];
+  const settingFeatured = assets?.settings?.featured === true;
 
   return (
     <main className="pt-24 pb-16 px-4 sm:px-8 max-w-3xl mx-auto">
