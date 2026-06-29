@@ -7,7 +7,7 @@ import Image from "next/image";
  */
 export default function Hero() {
   return (
-    <section className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-8 items-center">
+    <section className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-8 items-center ">
       <div>
         <p className="text-xs opacity-50 jetbrains-mono tracking-[0.2em] uppercase mb-3">
           UFRN · ECT · 2025
