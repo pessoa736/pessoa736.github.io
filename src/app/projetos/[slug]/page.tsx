@@ -10,6 +10,7 @@ import {
   ghPagesThumb,
   projectSlug,
 } from "mySite/lib/github";
+import { getRepoDocsCached } from "mySite/lib/repoDocsCache";
 import { siteConfig } from "mySite/config/site";
 
 export const dynamic = "force-static";
@@ -41,7 +42,11 @@ export default async function ProjectPage({ params }: PageProps) {
   const repo = repos.find((r) => projectSlug(r.name) === slug);
   if (!repo) notFound();
 
-  const thumb = ghPagesThumb(repo);
+  // docs/ enriquecido SEM rede — só lê de `.cache/repo-docs/`.
+  // Cache é populado pelo endpoint /api/enrich-docs.
+  const docs = await getRepoDocsCached(repo.name);
+
+  const thumb = docs?.thumbnail ?? ghPagesThumb(repo);
   const live =
     repo.homepage || (repo.has_pages ? `https://${siteConfig.owner}.github.io/${repo.name}/` : null);
 
@@ -56,6 +61,8 @@ export default async function ProjectPage({ params }: PageProps) {
     readmeHtml = "<p>README indisponível.</p>";
   }
 
+  const description = docs?.description ?? repo.description;
+
   return (
     <main className="pt-24 pb-16 px-4 sm:px-8 max-w-3xl mx-auto">
       <Link
@@ -69,8 +76,8 @@ export default async function ProjectPage({ params }: PageProps) {
         <h1 className="jetbrains-mono font-bold text-3xl md:text-5xl tracking-tight">
           {repo.name}
         </h1>
-        {repo.description && (
-          <p className="mt-3 opacity-80 leading-relaxed">{repo.description}</p>
+        {description && (
+          <p className="mt-3 opacity-80 leading-relaxed">{description}</p>
         )}
         <div className="mt-5 flex flex-wrap items-center gap-2">
           <Link
