@@ -17,10 +17,8 @@ export const siteConfig = {
   // Quem aparece na vitrine da home (cartões grandes em "projetos").
   // Slug = nome do repo (igual vem da API). Ordem = ordem de exibição.
   featured: [
-    "puddingMoon",
     "Mathmancer",
-    "Pudim-Luarix",
-    "Apollo-Hotel",
+    "chainsawKernel",
     "LogLua",
   ],
 
@@ -28,10 +26,10 @@ export const siteConfig = {
   // Se vazio, escondo a seção inteira. Aceita slugs com has_pages OU homepage preenchida.
   onAirSlugs: [
     "lifegameConway-react",
-    "Apollo-Hotel",
-    "Apollo-Hotel-front",
     "Super-Careca-Man",
-    "roleta",
+    "Jogo-de-batalha-naval-no-p5.js",
+    "impar-ou-par",
+    "ODS7"
   ],
 
   // Mapa de área/relações por linguagem. Adiciono conforme puxo os repos.
@@ -73,4 +71,13 @@ export const siteConfig = {
   // Categorias visíveis no filtro de /projetos
   // "all" sempre presente. `badge` controla se a categoria aparece como tag nos cards.
   areas: ["front", "linguagens", "sistemas", "devops"] as const,
+
+  // Repos que nunca aparecem em lugar nenhum (nem /projetos, nem /sites).
+  // Útil pra forks, arquivados, ou coisas que não são projetos de verdade.
+  blacklist: [
+    "Apollo-Hotel",
+    "Apollo-Hotel-front",
+    "loboCozinhaFront",
+    "atividade-de-html-e-css"
+  ] as readonly string[],
 };
