@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "enrich-docs": "tsx scripts/enrich-docs.ts",
+    "enrich-docs:fast": "tsx scripts/enrich-docs.ts 0 999 1500"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.18",
@@ -27,6 +29,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "tailwindcss": "^4.1.18",
+    "tsx": "^4.22.4",
     "typescript": "^5"
   }
 }
