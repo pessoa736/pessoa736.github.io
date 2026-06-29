@@ -30,7 +30,7 @@ export default function SobrePage() {
            {/* formação */}
         </h2>
         <ul className="flex flex-col gap-3">
-          <li className="box-ghost rounded-2xl p-4">
+          <li className="box-glass rounded-2xl p-4">
             <div className="font-medium">Universidade Federal do Rio Grande do Norte</div>
             <div className="opacity-80 text-sm">
               Bacharelado Interdisciplinar em Ciência e Tecnologia (ECT)
@@ -51,7 +51,7 @@ export default function SobrePage() {
             ["design", "sistemas com identidade própria"],
             ["música", "rock, disco, anos 80, vaporwave, jpop, punk"],
           ].map(([title, sub]) => (
-            <li key={title} className="box-ghost rounded-2xl p-4">
+            <li key={title} className="box-glass rounded-2xl p-4">
               <div className="font-medium">{title}</div>
               <div className="opacity-60 text-xs mt-1">{sub}</div>
             </li>
