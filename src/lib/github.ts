@@ -28,23 +28,31 @@ export interface GhRepo {
   docs?: RepoDocs | null;
 }
 
-/**
- * Conteúdo enriquecido vindo da pasta `docs/` do repositório.
+/** Conteúdo enriquecido vindo da pasta `docs/` do repositório.
  *
- * Contrato esperado em cada repo:
- *   docs/images/thumbnail/*    → primeiro arquivo encontrado vira `thumbnail`
- *   docs/images/icon*          → primeiro "icon*" vira `icon`
- *   docs/icons/*               → fallback de ícone
- *   docs/description.md        → se existir, sobrescreve `repo.description`
- *   docs/setting.json          → overrides de exibição (featured/area/color…)
+ *  Contrato esperado em `docs/`:
+ *    docs/images/thumbnail/*    → capas alternativas (rotacionadas por X min
+ *                                 no card do projeto) — 1 imagem = capa fixa
+ *    docs/images/icon*          → ícone pequeno do projeto
+ *    docs/icons/*               → fallback de ícone
+ *    docs/description.md        → se existir, SUBSTITUI repo.description e
+ *                                 o próprio README do repo na página de detalhes
+ *    docs/setting.json          → overrides (featured/area/color/tags/…)
+ *    qualquer outra imagem      → entra na galeria exibida no topo da página
+ *                                 /projetos/[slug], e vira background ao
+ *                                 rolar pra baixo
  *
- * Se um arquivo específico não existir, a busca cai pra "qualquer imagem em
- * docs/" como fallback flexível.
+ *  Se um arquivo específico não existir, a busca cai pra "qualquer imagem em
+ *  docs/" como fallback flexível.
  */
 export interface RepoDocs {
+  /** Thumbnail principal. `docs/images/thumbnail/*` ou 1ª imagem em docs/. */
   thumbnail: string | null;
+  /** Ícone pequeno. `docs/images/icon*` ou 1º arquivo em `docs/icons/`. */
   icon: string | null;
+  /** Conteúdo bruto de `docs/description.md` (markdown). */
   description: string | null;
+  /** Conteúdo parseado de `docs/setting.json`. */
   settings: RepoSettings | null;
   /** Lista bruta de nomes de arquivos em `docs/images/*` — útil pra debug. */
   imagesFound: string[];
