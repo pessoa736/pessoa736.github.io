@@ -129,7 +129,7 @@ export default function CartesianAura({
     <div
       ref={containerRef}
       aria-hidden
-      className="pointer-events-none fixed inset-0 z-0"
+      className="pointer-events-none box-ghost fixed inset-0 z-0"
     >
       <canvas ref={canvasRef} className="block w-full h-full" />
     </div>
