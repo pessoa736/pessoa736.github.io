@@ -21,12 +21,16 @@ function readTheme(): Theme {
 
 export default function ThemeToggle() {
   const [theme, setTheme] = useState<Theme | null>(null);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const current = readTheme();
-    setTheme(current);
-    applyTheme(current);
+    setTheme(readTheme());
+    setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (theme) applyTheme(theme);
+  }, [theme]);
 
   function toggle() {
     if (!theme) return;
@@ -48,7 +52,7 @@ export default function ThemeToggle() {
       title={isLight ? "trocar para escuro" : "trocar para claro"}
       className="size-8 grid place-items-center rounded-full box-ghost animated hover:scale-105"
     >
-      {isLight ? <SunIcon /> : isDark ? <MoonIcon /> : <HalfIcon />}
+      {mounted && isLight ? <SunIcon /> : mounted && isDark ? <MoonIcon /> : <HalfIcon />}
     </button>
   );
 }
