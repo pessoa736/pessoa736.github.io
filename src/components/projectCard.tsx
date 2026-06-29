@@ -24,7 +24,7 @@ export default function ProjectCard({ repo, size = "md" }: Props) {
     >
       <div
         className={
-          "relative rounded-2xl box-ghost overflow-hidden " +
+          "relative rounded-2xl box-glass overflow-hidden " +
           (size === "lg" ? "aspect-[4/3]" : "aspect-[16/10]")
         }
       >
