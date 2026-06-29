@@ -16,15 +16,14 @@ export default function Nav() {
   const path = usePathname() || "/";
 
   return (
-    <header className="fixed top-4 left-4 right-4 z-50 max-w-5xl mx-auto">
-      <nav className="box-glass rounded-2xl px-4 py-2.5 flex items-center justify-between gap-4">
+      <header className="fixed top-4 left-4 right-4 z-50 max-w-5xl mx-auto">
+      <nav className="box-glass-strong rounded-2xl px-4 py-2.5 flex items-center justify-between gap-4">
         <Link
           href="/"
-          className="jetbrains-mono font-bold text-base tracking-tight animated hover:opacity-80 flex items-center gap-2"
+          className="jetbrains-mono font-bold text-base tracking-tight animated hover:opacity-80 flex items-center"
           aria-label="voltar ao início"
         >
-          <span className="size-2 rounded-full bg-[color:var(--red)]" />
-          davi.
+          davi <span className="text-[color:var(--red)]">.</span>
         </Link>
 
         <ul className="hidden sm:flex items-center gap-1 text-sm">
