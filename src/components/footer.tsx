@@ -2,8 +2,8 @@ import { ArrowUpRight } from "lucide-react";
 
 export default function Footer() {
   return (
-    <footer className="mt-32 px-4 sm:px-8 max-w-5xl mx-auto pb-12 text-sm opacity-70">
-      <div className="box-ghost rounded-2xl px-5 py-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+    <footer className="mt-32 px-4 sm:px-8 max-w-5xl mx-auto pb-12 text-sm relative z-10">
+      <div className="box-glass rounded-2xl px-5 py-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 opacity-70">
         <div>
           <span className="jetbrains-mono font-medium">davi.</span>
           <span className="ml-2 opacity-70">
