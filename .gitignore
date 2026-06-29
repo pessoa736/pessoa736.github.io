@@ -36,6 +36,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# cache local do site (gerado por scripts/enrich-docs)
+.cache/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
