@@ -45,7 +45,7 @@ export default function ProjectGrid({ repos }: Props) {
                   "px-3 py-1.5 rounded-full text-xs uppercase tracking-wider animated " +
                   (active
                     ? "text-[color:var(--red)] border border-[color:var(--red)]"
-                    : "box-ghost opacity-70 hover:opacity-100")
+                    : "box-glass opacity-70 hover:opacity-100")
                 }
               >
                 {a as string}
@@ -57,7 +57,7 @@ export default function ProjectGrid({ repos }: Props) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="filtrar por nome, descrição ou linguagem…"
-          className="w-full sm:max-w-sm px-3 py-2 rounded-xl text-sm box-ghost outline-none focus:border-[color:var(--red)]"
+          className="w-full sm:max-w-sm px-3 py-2 rounded-xl text-sm box-glass outline-none focus:border-[color:var(--red)]"
         />
       </div>
 
