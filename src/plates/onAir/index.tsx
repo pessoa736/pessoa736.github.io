@@ -41,11 +41,14 @@ export default function OnAirList({ repos }: Props) {
                 >
                   {r.name}
                 </Link>
-                {r.description && (
-                  <p className="text-xs opacity-60 line-clamp-1 mt-0.5">
-                    {r.description}
-                  </p>
-                )}
+                {(() => {
+                  const desc = r.docs?.description ?? r.description;
+                  return desc ? (
+                    <p className="text-xs opacity-60 line-clamp-1 mt-0.5">
+                      {desc}
+                    </p>
+                  ) : null;
+                })()}
               </div>
               <LangChip language={r.language} />
               <Link
