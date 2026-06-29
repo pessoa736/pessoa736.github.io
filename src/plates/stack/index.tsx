@@ -29,13 +29,13 @@ export default function Stack() {
   return (
     <section>
       <h2 className="jetbrains-mono text-xs uppercase tracking-[0.2em] opacity-50 mb-4">
-        {/* stack em uso */}
+       // stack em uso
       </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {areas.map((area) => (
           <article
             key={area.name}
-            className="box-ghost rounded-2xl p-4 animated hover:-translate-y-0.5"
+            className="box-glass rounded-2xl p-4 animated hover:-translate-y-0.5"
           >
             <h3 className="jetbrains-mono text-xs uppercase tracking-wider opacity-50 mb-3">
               {area.name}
