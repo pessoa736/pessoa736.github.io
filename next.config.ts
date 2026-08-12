@@ -10,6 +10,11 @@ import type { NextConfig } from "next";
 // pro cache em `.cache/repos.json` populado por `npm run enrich-docs`).
 const nextConfig: NextConfig = {
   output: "export",
+  images: {
+    // `output: 'export'` não tem server runtime pra otimizar imagens.
+    // `next/image` exige `unoptimized: true` nesse modo.
+    unoptimized: true,
+  },
 };
 
 export default nextConfig;
