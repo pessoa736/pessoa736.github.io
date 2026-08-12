@@ -20,7 +20,7 @@ export default function Hero() {
           <span className="opacity-60">programa.</span>
         </h1>
         <p className="mt-6 max-w-prose opacity-80 leading-relaxed">
-          sou garoto muito sonhador, amante da tecnologia, atualmete cursando o Bacharelado interdicliplinar em Ciencia e Tecnologia(BCT) da Escola de Ciencia e Tecnologia(ECT) Da Universidade Federal do Rio Grande do Norte(UFRN)
+          sou garoto muito sonhador, amante da tecnologia, atualmente cursando o bacharelado interdisciplinar em ciência e tecnologia (BCT) da escola de ciência e tecnologia (ECT) da Universidade Federal do Rio Grande do Norte (UFRN)
         </p>
       </div>
 
@@ -30,7 +30,7 @@ export default function Hero() {
         height={360}
         alt="davi"
         priority
-        className="rounded-2xl box-ghost w-32 md:w-48 h-auto self-end md:self-center"
+        className="rounded-2xl box-ghost w-48 md:w-64 h-auto self-end md:self-center"
       />
     </section>
   );
