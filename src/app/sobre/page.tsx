@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ArrowUpRight } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "sobre",
@@ -16,9 +17,10 @@ export default function SobrePage() {
           sobre.
         </h1>
         <p className="opacity-80 leading-relaxed mt-4">
-          sou <span className="text-[color:var(--red)]">davi</span>, estudante de
-          bacharelado interdisciplinar em ciência e tecnologia na ufrn. construo
-          engines, ferramentas e sistemas fictícios coerentes — a maioria em{" "}
+          sou <span className="text-[color:var(--red)]">davi</span>, estudante
+          do bacharelado interdisciplinar em ciência e tecnologia (BCT) na
+          escola de ciência e tecnologia (ECT) da UFRN. construo engines,
+          ferramentas e sistemas fictícios coerentes — a maioria em{" "}
           <span className="text-[color:var(--red)]">lua</span>, alguns em{" "}
           typescript/next.js quando o assunto pede. curiosidade arquitetural:
           quero entender princípios, não decorar procedimentos.
@@ -33,7 +35,7 @@ export default function SobrePage() {
           <li className="box-glass rounded-2xl p-4">
             <div className="font-medium">Universidade Federal do Rio Grande do Norte</div>
             <div className="opacity-80 text-sm">
-              Bacharelado Interdisciplinar em Ciência e Tecnologia (ECT)
+              Bacharelado Interdisciplinar em Ciência e Tecnologia (BCT) — ECT
             </div>
             <div className="opacity-50 text-xs mt-1">ago/2025 – ago/2028 · em curso</div>
           </li>
@@ -69,6 +71,33 @@ export default function SobrePage() {
           mentalidade: explicar princípios, mostrar trade-offs, evitar abstrações
           que escondem o que importa.
         </p>
+      </section>
+
+      <section>
+        <h2 className="jetbrains-mono text-xs uppercase tracking-[0.2em] opacity-50 mb-4">
+          {/* contato */}
+        </h2>
+        <ul className="flex flex-col gap-2 text-sm">
+          <li>
+            <a
+              href="mailto:pessoa736@users.noreply.github.com"
+              className="hover:text-[color:var(--red)] animated"
+            >
+              pessoa736@users.noreply.github.com
+            </a>
+          </li>
+          <li>
+            <a
+              href="https://github.com/pessoa736"
+              target="_blank"
+              rel="noreferrer"
+              className="hover:text-[color:var(--red)] animated inline-flex items-center gap-1"
+            >
+              github.com/pessoa736
+              <ArrowUpRight size={12} strokeWidth={1.6} />
+            </a>
+          </li>
+        </ul>
       </section>
     </main>
   );
