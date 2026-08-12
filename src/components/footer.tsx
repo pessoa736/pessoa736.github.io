@@ -12,6 +12,12 @@ export default function Footer() {
         </div>
         <div className="flex items-center gap-4">
           <a
+            href="mailto:pessoa736@users.noreply.github.com"
+            className="flex items-center gap-1 hover:text-[color:var(--red)] animated"
+          >
+            email
+          </a>
+          <a
             href="https://github.com/pessoa736"
             className="flex items-center gap-1 hover:text-[color:var(--red)] animated"
           >
