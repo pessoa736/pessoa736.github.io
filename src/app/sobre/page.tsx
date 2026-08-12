@@ -51,7 +51,6 @@ export default function SobrePage() {
             ["computação", "kernels, compiladores, redes, engines"],
             ["matemática", "álgebra linear, transformações, espaços vetoriais"],
             ["design", "sistemas com identidade própria"],
-            ["desenho", "raro, mas eventual. posto no instagram e X"],
             ["música", "rock, disco, anos 80, vaporwave, jpop, punk"],
           ].map(([title, sub]) => (
             <li key={title} className="box-glass rounded-2xl p-4">
@@ -71,6 +70,33 @@ export default function SobrePage() {
           a estrutura interna e as consequências. comento código com essa
           mentalidade: explicar princípios, mostrar trade-offs, evitar abstrações
           que escondem o que importa.
+        </p>
+      </section>
+
+      <section>
+        <h2 className="jetbrains-mono text-xs uppercase tracking-[0.2em] opacity-50 mb-4">
+          {/* fora do código */}
+        </h2>
+        <p className="opacity-80 leading-relaxed text-sm">
+          desenho raramente, mas posto no{" "}
+          <a
+            href="https://instagram.com/pessoa736"
+            target="_blank"
+            rel="noreferrer"
+            className="text-[color:var(--red)] animated"
+          >
+            instagram
+          </a>{" "}
+          e no{" "}
+          <a
+            href="https://x.com/pessoa736"
+            target="_blank"
+            rel="noreferrer"
+            className="text-[color:var(--red)] animated"
+          >
+            X
+          </a>{" "}
+          quando acontece.
         </p>
       </section>
 
