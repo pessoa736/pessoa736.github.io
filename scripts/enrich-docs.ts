@@ -13,17 +13,32 @@
 import { fetchRepoDocs } from "../src/lib/github";
 import { writeRepoDocsCache } from "../src/lib/repoDocsCache";
 import { siteConfig } from "../src/config/site";
+import { writeFileSync } from "node:fs";
+import { join } from "node:path";
 
 const DEFAULT_GAP_MS = 3500;
 const HARD_CAP = 32;
 
-interface GhRepoLite {
+interface GhRepoFull {
+  id: number;
   name: string;
+  full_name: string;
+  description: string | null;
+  html_url: string;
+  homepage: string | null;
+  language: string | null;
+  topics?: string[];
+  has_pages: boolean;
+  updated_at: string;
+  pushed_at: string;
+  stargazers_count: number;
+  forks_count: number;
   archived: boolean;
   fork: boolean;
+  default_branch: string;
 }
 
-async function listReposOrdered(owner: string): Promise<string[]> {
+async function listReposOrdered(owner: string): Promise<GhRepoFull[]> {
   const res = await fetch(
     `https://api.github.com/users/${owner}/repos?per_page=100&sort=updated`,
     {
@@ -40,17 +55,7 @@ async function listReposOrdered(owner: string): Promise<string[]> {
   if (!res.ok) {
     throw new Error(`GitHub ${res.status} ao listar repos`);
   }
-  const data = (await res.json()) as GhRepoLite[];
-  const blacklist = new Set(siteConfig.blacklist);
-  return data
-    .filter(
-      (r) =>
-        !r.archived &&
-        !r.fork &&
-        r.name !== siteConfig.self.repoName &&
-        !blacklist.has(r.name),
-    )
-    .map((r) => r.name);
+  return (await res.json()) as GhRepoFull[];
 }
 
 function sleep(ms: number): Promise<void> {
@@ -71,10 +76,23 @@ async function main() {
   const owner = siteConfig.owner;
   console.log(`[enrich-docs] owner=${owner} start=${start} count=${count} gapMs=${gapMs}`);
 
-  const names = await listReposOrdered(owner);
-  const sliced = names.slice(start, start + count);
+  const all = await listReposOrdered(owner);
+  // Cacheia a lista COMPLETA (sem filtro) em `.cache/repos.json` — a build
+  // lê daqui e nunca mais faz rede pra listar repos. Também atualiza o
+  // `reposLocal.json` (fallback offline) só com repos válidos.
+  persistReposList(all);
+
+  const blacklist = new Set(siteConfig.blacklist);
+  const valid = all.filter(
+    (r) =>
+      !r.archived &&
+      !r.fork &&
+      r.name !== siteConfig.self.repoName &&
+      !blacklist.has(r.name),
+  );
+  const sliced = valid.slice(start, start + count);
   if (!sliced.length) {
-    console.log(`[enrich-docs] nada pra fazer (total=${names.length})`);
+    console.log(`[enrich-docs] nada pra fazer (total=${valid.length})`);
     return;
   }
 
@@ -83,7 +101,7 @@ async function main() {
   let fail = 0;
 
   for (let i = 0; i < sliced.length; i++) {
-    const repo = sliced[i];
+    const repo = sliced[i].name;
     process.stdout.write(`[enrich-docs] ${i + 1}/${sliced.length} ${repo} ... `);
     try {
       const docs = await fetchRepoDocs(owner, repo);
@@ -103,6 +121,51 @@ async function main() {
   console.log(
     `\n[enrich-docs] done. ok=${ok} empty=${empty} fail=${fail} total=${sliced.length}`,
   );
+}
+
+/** Escreve `.cache/repos.json` (cache de build) e `src/lib/reposLocal.json` (fallback offline). */
+function persistReposList(repos: GhRepoFull[]): void {
+  const cacheDir = join(process.cwd(), ".cache");
+  try {
+    writeFileSync(
+      join(cacheDir, "repos.json"),
+      JSON.stringify({ _cachedAt: new Date().toISOString(), repos }, null, 2),
+      "utf8",
+    );
+  } catch {
+    /* best-effort */
+  }
+  // Fallback offline: só os repos válidos (sem archived/fork/self/blacklist).
+  // Mantém o shape `{"repos":[...]}` esperado por loadLocalRepos().
+  const blacklist = new Set(siteConfig.blacklist);
+  const valid = repos.filter(
+    (r) =>
+      !r.archived &&
+      !r.fork &&
+      r.name !== siteConfig.self.repoName &&
+      !blacklist.has(r.name),
+  );
+  try {
+    writeFileSync(
+      join(process.cwd(), "src", "lib", "reposLocal.json"),
+      JSON.stringify(
+        {
+          _comment:
+            "Backup local da lista de repos. Usado quando a API do GitHub está indisponível (rate-limit, sem rede, etc) durante BUILD ou prerender. Mantém só os campos mínimos que o site usa.",
+          _updatedAt: new Date().toISOString(),
+          repos: valid,
+        },
+        null,
+        2,
+      ),
+      "utf8",
+    );
+    console.log(
+      `[enrich-docs] reposLocal.json atualizado com ${valid.length} repos válidos`,
+    );
+  } catch {
+    /* best-effort */
+  }
 }
 
 main().catch((e) => {
