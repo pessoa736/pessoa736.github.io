@@ -7,7 +7,6 @@ import {
   getRepoReadme,
   decodeBase64Utf8,
   renderMarkdown,
-  ghPagesThumb,
   projectSlug,
 } from "mySite/lib/github";
 import { getRepoDocsCached } from "mySite/lib/repoDocsCache";
@@ -46,7 +45,6 @@ export default async function ProjectPage({ params }: PageProps) {
   // Cache é populado pelo endpoint /api/enrich-docs.
   const docs = await getRepoDocsCached(repo.name);
 
-  const thumb = docs?.thumbnail ?? ghPagesThumb(repo);
   const live =
     repo.homepage || (repo.has_pages ? `https://${siteConfig.owner}.github.io/${repo.name}/` : null);
 
