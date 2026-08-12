@@ -51,6 +51,7 @@ export default function SobrePage() {
             ["computação", "kernels, compiladores, redes, engines"],
             ["matemática", "álgebra linear, transformações, espaços vetoriais"],
             ["design", "sistemas com identidade própria"],
+            ["desenho", "raro, mas eventual. posto no instagram e X"],
             ["música", "rock, disco, anos 80, vaporwave, jpop, punk"],
           ].map(([title, sub]) => (
             <li key={title} className="box-glass rounded-2xl p-4">
@@ -94,6 +95,28 @@ export default function SobrePage() {
               className="hover:text-[color:var(--red)] animated inline-flex items-center gap-1"
             >
               github.com/pessoa736
+              <ArrowUpRight size={12} strokeWidth={1.6} />
+            </a>
+          </li>
+          <li>
+            <a
+              href="https://instagram.com/pessoa736"
+              target="_blank"
+              rel="noreferrer"
+              className="hover:text-[color:var(--red)] animated inline-flex items-center gap-1"
+            >
+              @pessoa736
+              <ArrowUpRight size={12} strokeWidth={1.6} />
+            </a>
+          </li>
+          <li>
+            <a
+              href="https://x.com/pessoa736"
+              target="_blank"
+              rel="noreferrer"
+              className="hover:text-[color:var(--red)] animated inline-flex items-center gap-1"
+            >
+              @pessoa736
               <ArrowUpRight size={12} strokeWidth={1.6} />
             </a>
           </li>
