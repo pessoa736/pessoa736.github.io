@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 
 type Theme = "light" | "dark";
 
@@ -13,33 +13,37 @@ function readTheme(): Theme {
   try {
     const stored = localStorage.getItem("theme");
     if (stored === "light" || stored === "dark") return stored;
-  } catch (_) {}
+  } catch {}
   return window.matchMedia("(prefers-color-scheme: light)").matches
     ? "light"
     : "dark";
 }
 
-export default function ThemeToggle() {
-  const [theme, setTheme] = useState<Theme | null>(null);
-  const [mounted, setMounted] = useState(false);
+// useSyncExternalStore: retorna true só depois do hidrate no client.
+// Evita setMounted(true) dentro de useEffect (lint react-hooks/set-state-in-effect).
+const emptySubscribe = () => () => {};
+function getMounted() {
+  return typeof window !== "undefined";
+}
+function getServerSnapshot() {
+  return false;
+}
 
-  useEffect(() => {
-    setTheme(readTheme());
-    setMounted(true);
-  }, []);
+export default function ThemeToggle() {
+  const mounted = useSyncExternalStore(emptySubscribe, getMounted, getServerSnapshot);
+  const [theme, setTheme] = useState<Theme>(readTheme);
 
   useEffect(() => {
     if (theme) applyTheme(theme);
   }, [theme]);
 
   function toggle() {
-    if (!theme) return;
     const next: Theme = theme === "light" ? "dark" : "light";
     setTheme(next);
     applyTheme(next);
     try {
       localStorage.setItem("theme", next);
-    } catch (_) {}
+    } catch {}
   }
 
   const isLight = theme === "light";
