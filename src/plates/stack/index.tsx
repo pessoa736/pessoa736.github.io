@@ -5,23 +5,23 @@
 const areas = [
   {
     name: "linguagens",
-    items: ["lua", "typescript", "javascript", "rust", "c++"],
+    items: ["lua", "typescript", "javascript", "rust"],
     tone: "mais minhas preferidas são lua e rust.",
   },
   {
     name: "kernel/os",
-    items: ["limine", "rust", "nalgebra", "Rhai"],
-    tone: "to com bastante interesse atualmente em sitemas bare-metal",
+    items: ["rust", "c", "lua"],
+    tone: "to com bastante interesse atualmente em sistemas bare-metal.",
   },
   {
     name: "web",
-    items: ["react", "next.js", "tailwind", "chakra-ui", "prisma"],
+    items: ["react", "next.js", "tailwind"],
     tone: "este site é o exemplo. server components quando dá.",
   },
   {
     name: "devops",
-    items: ["git", "github actions", "github pages", "docker", "versel"],
-    tone: "entrega continua leve. sem orquestração desnecessária.",
+    items: ["git", "github", "github pages"],
+    tone: "entrega contínua leve. sem orquestração desnecessária.",
   },
 ];
 
