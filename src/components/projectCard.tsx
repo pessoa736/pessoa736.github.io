@@ -1,6 +1,6 @@
 import Link from "next/link";
-import type { GhRepo } from "mySite/lib/github";
-import { ghPagesThumb, projectSlug } from "mySite/lib/github";
+import type { GhRepo } from "mySite/lib/github-utils";
+import { ghPagesThumb, projectSlug } from "mySite/lib/github-utils";
 import LangChip from "mySite/components/langChip";
 import AreaPill from "mySite/components/areaPill";
 
