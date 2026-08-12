@@ -39,6 +39,9 @@ yarn-error.log*
 # cache local do site (gerado por scripts/enrich-docs)
 .cache/
 
+# misc binaries
+*.tar.gz
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
