@@ -1,6 +1,6 @@
 import Link from "next/link";
-import type { GhRepo } from "mySite/lib/github";
-import { ghPagesThumb, projectSlug } from "mySite/lib/github";
+import type { GhRepo } from "mySite/lib/github-utils";
+import { ghPagesThumb, projectSlug } from "mySite/lib/github-utils";
 import LangChip from "mySite/components/langChip";
 import { ArrowUpRight } from "lucide-react";
 
@@ -14,7 +14,7 @@ export default function OnAirList({ repos }: Props) {
   return (
     <section>
       <h2 className="jetbrains-mono text-xs uppercase tracking-[0.2em] opacity-50 mb-4">
-       // no ar
+       {"// no ar"}
       </h2>
       <ul className="flex flex-col">
         {repos.map((r) => {
