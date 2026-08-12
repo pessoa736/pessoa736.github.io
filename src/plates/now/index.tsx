@@ -13,7 +13,7 @@ export default function Now({ items, title = "agora" }: Props) {
   return (
     <section>
       <h2 className="jetbrains-mono text-xs uppercase tracking-[0.2em] opacity-50 mb-4">
-        // {title}
+        {`// ${title}`}
       </h2>
       <ul className="flex flex-wrap gap-2">
         {items.map((it) => (

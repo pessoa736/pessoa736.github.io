@@ -12,9 +12,9 @@ export default function FeaturedGrid({ featured }: Props) {
   return (
     <section>
       <div className="flex items-end justify-between mb-4 gap-4 flex-wrap">
-        <h2 className="jetbrains-mono text-xs uppercase tracking-[0.2em] opacity-50">
-            // projetos em destaque 
-        </h2>
+        <h2 className="jetbrains-mono text-xs uppercase tracking-[0.2em] opacity-50 mb-4">
+        {"// projetos em destaque"}
+      </h2>
         <Link
           href="/projetos"
           className="inline-flex items-center gap-1 text-xs px-3 py-1 rounded-full box-glass animated hover:text-[color:var(--red)]"
