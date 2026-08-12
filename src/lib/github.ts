@@ -1,76 +1,79 @@
 // Helper central para falar com a GitHub API.
-// Cacheia em memória pelo tempo da sessão pra evitar rate-limit.
-// `next: { revalidate: 3600 }` chama o cache do Next quando em Route/Page server.
+// SERVER-ONLY: usa node:fs e node:path (cache em disco). NÃO importar em
+// Client Components — pra isso use `mySite/lib/github-utils` (puro, sem I/O).
+//
+// Reexporta tipos/funções puras de github-utils pra manter compat com callers
+// existentes que ainda importam de "mySite/lib/github".
 
 import { siteConfig } from "mySite/config/site";
+import fs from "node:fs";
+import nodePath from "node:path";
+import reposLocal from "./reposLocal.json";
+
+// Reexporta o que é puro (Client-safe) pra callers legados não quebrarem.
+export {
+  type GhRepo,
+  type RepoDocs,
+  type RepoSettings,
+  type GhReadme,
+  ghPagesThumb,
+  projectSlug,
+  repoDescription,
+  decodeBase64Utf8,
+} from "./github-utils";
+import type { GhRepo, RepoDocs, RepoSettings, GhReadme } from "./github-utils";
 
 const API = "https://api.github.com";
 const TOKEN = process.env.GITHUB_TOKEN; // opcional, aumenta rate-limit
 
-export interface GhRepo {
-  id: number;
-  name: string;
-  full_name: string;
-  description: string | null;
-  html_url: string;
-  homepage: string | null;
-  language: string | null;
-  topics?: string[];
-  has_pages: boolean;
-  updated_at: string;
-  pushed_at: string;
-  stargazers_count: number;
-  forks_count: number;
-  archived: boolean;
-  fork: boolean;
-  default_branch: string;
-  /** Extraído da pasta `docs/` do repositório (best-effort). */
-  docs?: RepoDocs | null;
-}
-
-/** Conteúdo enriquecido vindo da pasta `docs/` do repositório.
- *
- *  Contrato esperado em `docs/`:
- *    docs/images/thumbnail/*    → capas alternativas (rotacionadas por X min
- *                                 no card do projeto) — 1 imagem = capa fixa
- *    docs/images/icon*          → ícone pequeno do projeto
- *    docs/icons/*               → fallback de ícone
- *    docs/description.md        → se existir, SUBSTITUI repo.description e
- *                                 o próprio README do repo na página de detalhes
- *    docs/setting.json          → overrides (featured/area/color/tags/…)
- *    qualquer outra imagem      → entra na galeria exibida no topo da página
- *                                 /projetos/[slug], e vira background ao
- *                                 rolar pra baixo
- *
- *  Se um arquivo específico não existir, a busca cai pra "qualquer imagem em
- *  docs/" como fallback flexível.
- */
-export interface RepoDocs {
-  /** Thumbnail principal. `docs/images/thumbnail/*` ou 1ª imagem em docs/. */
-  thumbnail: string | null;
-  /** Ícone pequeno. `docs/images/icon*` ou 1º arquivo em `docs/icons/`. */
-  icon: string | null;
-  /** Conteúdo bruto de `docs/description.md` (markdown). */
-  description: string | null;
-  /** Conteúdo parseado de `docs/setting.json`. */
-  settings: RepoSettings | null;
-  /** Lista bruta de nomes de arquivos em `docs/images/*` — útil pra debug. */
-  imagesFound: string[];
-}
-
-/** Conteúdo parseado de `docs/setting.json` (todos os campos opcionais). */
-export interface RepoSettings {
-  featured?: boolean;
-  area?: string;
-  languageColor?: string;
-  order?: number;
-  tags?: string[];
-  [key: string]: unknown;
-}
-
 interface CacheEntry<T> { ts: number; data: T }
 const cache = new Map<string, CacheEntry<unknown>>();
 const TTL = 1000 * 60 * 10; // 10 min
+
+// — helpers de baixo nível pra navegar `docs/` sem estourar rate-limit —
+
+/**
+ * Cache em disco da lista de repos, em `.cache/repos.json`.
+ * `getAllRepos()` lê daqui primeiro; só faz rede se o cache não existir
+ * OU se `NO_CACHE=1` estiver setado. Em build estática (output: 'export')
+ * isso reduz N fetches por página pra 1 fetch por build inteiro.
+ */
+function cacheReposPath(): string {
+  // Server-only. Em Client Components este módulo não roda.
+  return nodePath.join(process.cwd(), ".cache", "repos.json");
+}
+
+function tryReadReposCache(): GhRepo[] | null {
+  try {
+    const file = cacheReposPath();
+    if (!fs.existsSync(file)) return null;
+    const raw = fs.readFileSync(file, "utf8");
+    const parsed = JSON.parse(raw) as { repos?: GhRepo[] };
+    return Array.isArray(parsed?.repos) && parsed.repos.length
+      ? parsed.repos
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+function tryWriteReposCache(repos: GhRepo[]): void {
+  try {
+    const file = cacheReposPath();
+    const dir = nodePath.dirname(file);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(
+      file,
+      JSON.stringify({ _cachedAt: new Date().toISOString(), repos }, null, 2),
+      "utf8",
+    );
+  } catch {
+    /* best-effort */
+  }
+}
+
+/** Formatos de imagem aceitos como thumbs/icons (case-insensitive). */
+const IMG_EXT = /\.(png|jpe?g|gif|webp|avif|svg)$/i;
 
 async function fetchJson<T>(url: string): Promise<T> {
   const hit = cache.get(url) as CacheEntry<T> | undefined;
@@ -82,7 +85,9 @@ async function fetchJson<T>(url: string): Promise<T> {
       "X-GitHub-Api-Version": "2022-11-28",
       ...(TOKEN ? { Authorization: `Bearer ${TOKEN}` } : {}),
     },
-    next: { revalidate: 3600 },
+    // No modo output: 'export' o Next ignora `next.revalidate` (sem ISR).
+    // Mantém só cache em memória por sessão (TTL acima) e disco (tryWriteReposCache).
+    cache: "no-store",
   });
 
   if (!res.ok) throw new Error(`GitHub ${res.status}: ${url}`);
@@ -90,11 +95,6 @@ async function fetchJson<T>(url: string): Promise<T> {
   cache.set(url, { ts: Date.now(), data });
   return data;
 }
-
-// — helpers de baixo nível pra navegar `docs/` sem estourar rate-limit —
-
-/** Formatos de imagem aceitos como thumbs/icons (case-insensitive). */
-const IMG_EXT = /\.(png|jpe?g|gif|webp|avif|svg)$/i;
 
 /** Lê o conteúdo de `docs/<path>` num repo. Retorna `null` se 404. */
 async function fetchDocsFile(
@@ -128,15 +128,7 @@ async function listDocsDir(
   }
 }
 
-/**
- * Extrai da pasta `docs/`:
- *   - thumbnail: `docs/images/thumbnail/*` ou cai pra primeira imagem em docs/
- *   - icon: `docs/images/icon*` ou `docs/icons/*` (primeiro)
- *   - description: `docs/description.md` (decodificado)
- *   - settings: `docs/setting.json` (parseado)
- *
- * Best-effort: nunca lança. Repos sem `docs/` recebem `null`.
- */
+/** Best-effort: nunca lança. Repos sem `docs/` recebem `null`. */
 export async function fetchRepoDocs(
   owner: string,
   repo: string,
@@ -159,7 +151,6 @@ export async function fetchRepoDocs(
   }
 
   // — thumbnail —
-  // prioridade: docs/images/thumbnail/* (qualquer extensão/nome)
   let thumbnail: string | null = null;
   const thumbDir = imgs.find(
     (e) => e.type === "dir" && e.name.toLowerCase() === "thumbnail",
@@ -169,7 +160,6 @@ export async function fetchRepoDocs(
     const first = thumbImgs.find((e) => e.type === "file" && IMG_EXT.test(e.name));
     if (first?.download_url) thumbnail = first.download_url;
   }
-  // fallback: primeira imagem em docs/images/
   if (!thumbnail) {
     const firstImg = imgs.find(
       (e) => e.type === "file" && IMG_EXT.test(e.name),
@@ -188,7 +178,10 @@ export async function fetchRepoDocs(
   let description: string | null = null;
   if (descFile?.content) {
     try {
-      description = decodeBase64Utf8(descFile.content).trim();
+      description = Buffer.from(
+        descFile.content.replace(/\s/g, ""),
+        "base64",
+      ).toString("utf8").trim();
     } catch {
       description = null;
     }
@@ -198,9 +191,11 @@ export async function fetchRepoDocs(
   let settings: RepoSettings | null = null;
   if (settingFile?.content) {
     try {
-      const raw = decodeBase64Utf8(settingFile.content);
+      const raw = Buffer.from(
+        settingFile.content.replace(/\s/g, ""),
+        "base64",
+      ).toString("utf8");
       const parsed = JSON.parse(raw);
-      // valida que é objeto não-array
       if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
         settings = parsed as RepoSettings;
       }
@@ -209,7 +204,6 @@ export async function fetchRepoDocs(
     }
   }
 
-  // se tudo for null e as duas listas vazias, repo não tem pasta docs/ útil
   const nothingUseful =
     !thumbnail &&
     !icon &&
@@ -228,33 +222,14 @@ export async function fetchRepoDocs(
   };
 }
 
-/**
- * Promise.all com concurrency limit. Evita estourar rate-limit ao enriquecer
- * muitos repos por vez.
- */
-async function mapWithLimit<T, R>(
-  items: T[],
-  limit: number,
-  fn: (item: T) => Promise<R>,
-): Promise<R[]> {
-  const out: R[] = new Array(items.length);
-  let idx = 0;
-  const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
-    while (true) {
-      const i = idx++;
-      if (i >= items.length) return;
-      out[i] = await fn(items[i]);
-    }
-  });
-  await Promise.all(workers);
-  return out;
-}
+export async function getAllRepos(): Promise<GhRepo[]> {
+  // 1) Cache em disco (.cache/repos.json) — 0 rede na build se já populado.
+  //    Populado por npm run enrich-docs (ou automaticamente na 1ª chamada).
+  if (process.env.NO_CACHE !== "1") {
+    const cached = tryReadReposCache();
+    if (cached) return applyFiltersAndSort(cached);
+  }
 
-export async function getAllRepos(opts?: {
-  /** Quando true, enriquece cada repo com info de `docs/`. Default: false. */
-  withDocs?: boolean;
-}): Promise<GhRepo[]> {
-  const withDocs = opts?.withDocs === true;
   let data: GhRepo[];
   try {
     data = await fetchJson<GhRepo[]>(
@@ -265,20 +240,19 @@ export async function getAllRepos(opts?: {
     // backup local `reposLocal.json` se existir e não estiver vazio.
     const fallback = loadLocalRepos();
     if (fallback.length) {
-      return applyFiltersAndSort(fallback, withDocs);
+      return applyFiltersAndSort(fallback);
     }
     // Sem nada: propaga o erro pra página mostrar "GitHub indisponível"
     // em vez de site silenciosamente vazio.
     throw e;
   }
-  return applyFiltersAndSort(data, withDocs);
+  // Salvou no disco pra próximas chamadas da mesma build não refazer fetch.
+  tryWriteReposCache(data);
+  return applyFiltersAndSort(data);
 }
 
-/** Aplica blacklist/filtros/hasReadme/sort a uma lista já carregada. */
-async function applyFiltersAndSort(
-  data: GhRepo[],
-  withDocs: boolean,
-): Promise<GhRepo[]> {
+/** Aplica blacklist/filtros/sort a uma lista já carregada. Não faz rede. */
+function applyFiltersAndSort(data: GhRepo[]): GhRepo[] {
   const blacklist = new Set(siteConfig.blacklist);
   const filtered = data.filter(
     (r) =>
@@ -288,48 +262,17 @@ async function applyFiltersAndSort(
       !blacklist.has(r.name),
   );
 
-  // Enriquece cada repo com info vinda de `docs/` apenas se o caller pediu.
-  // Concurrency limit 6 pra não estourar rate-limit não-autenticado. Falhas
-  // viram `docs: null` e não derrubam a página.
-  const enriched = withDocs
-    ? await mapWithLimit(filtered, 6, async (r) => {
-        try {
-          const docs = await fetchRepoDocs(siteConfig.owner, r.name);
-          return docs ? { ...r, docs } : r;
-        } catch {
-          return r;
-        }
-      })
-    : filtered;
-
-  // Ordena: quem tem README vem antes, mantendo a ordem original (updated) dentro de cada grupo.
-  const withReadme = await Promise.all(
-    enriched.map(async (r) => {
-      try {
-        await fetchJson(`${API}/repos/${siteConfig.owner}/${r.name}/readme`);
-        return { repo: r, hasReadme: true };
-      } catch {
-        return { repo: r, hasReadme: false };
-      }
-    }),
+  // Ordena por `pushed_at` (desc) — já vem da API em `sort=updated`. Sem rede.
+  // Antes isso fazia 1 fetch por repo só pra checar "tem README?"; pra um
+  // site estático isso era ~30 fetches extras por chamada de getAllRepos().
+  return filtered.sort(
+    (a, b) => Date.parse(b.pushed_at) - Date.parse(a.pushed_at),
   );
-
-  return withReadme
-    .sort((a, b) => Number(b.hasReadme) - Number(a.hasReadme))
-    .map((x) => x.repo);
 }
 
 /** Carrega a lista de backup de `reposLocal.json`. Retorna [] se falhar. */
 function loadLocalRepos(): GhRepo[] {
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const local = require("./reposLocal.json") as {
-      repos?: GhRepo[];
-    };
-    return Array.isArray(local?.repos) ? local.repos : [];
-  } catch {
-    return [];
-  }
+  return Array.isArray(reposLocal?.repos) ? reposLocal.repos : [];
 }
 
 /**
@@ -339,8 +282,7 @@ function loadLocalRepos(): GhRepo[] {
  *
  * NOTA: essa função FAZ rede. Pra leitura **só do cache** sem rede
  * (recomendado em build estático), importe `getRepoDocsCached` diretamente
- * de `mySite/lib/repoDocsCache` (este módulo é server-only — não pode ser
- * usado em componentes client).
+ * de `mySite/lib/repoDocsCache`.
  */
 export async function getRepoDocs(repo: string): Promise<RepoDocs | null> {
   try {
@@ -348,23 +290,6 @@ export async function getRepoDocs(repo: string): Promise<RepoDocs | null> {
   } catch {
     return null;
   }
-}
-
-/**
- * Descrição canônica de um repo: prefere `docs/description.md` quando
- * preenchido, cai pra `repo.description` do GitHub. Útil pra cards e listas.
- */
-export function repoDescription(r: GhRepo): string | null {
-  return r.docs?.description ?? r.description ?? null;
-}
-
-export interface GhReadme {
-  name: string;
-  path: string;
-  content: string;
-  encoding: "base64";
-  html_url: string;
-  download_url: string | null;
 }
 
 export async function getRepoReadme(repo: string): Promise<GhReadme | null> {
@@ -375,34 +300,6 @@ export async function getRepoReadme(repo: string): Promise<GhReadme | null> {
   } catch {
     return null;
   }
-}
-
-export function decodeBase64Utf8(input: string): string {
-  const clean = input.replace(/\s/g, "");
-  if (typeof Buffer !== "undefined") {
-    return Buffer.from(clean, "base64").toString("utf8");
-  }
-  const bin = atob(clean);
-  const bytes = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-  return new TextDecoder("utf-8").decode(bytes);
-}
-
-/**
- * Resolve a URL da thumb. Ordem de prioridade:
- *   1. `docs.images.thumbnail/*` ou primeira imagem em `docs/` (já preenchido
- *      em `repo.docs.thumbnail` por `fetchRepoDocs`)
- *   2. Regra antiga: `/images/projImg.png` no gh-pages do repo
- *   3. Self-repo → `/images/projImg.png` local
- */
-export function ghPagesThumb(repo: GhRepo): string {
-  if (repo.docs?.thumbnail) return repo.docs.thumbnail;
-  if (repo.name === siteConfig.self.repoName) return "/images/projImg.png";
-  return `https://${siteConfig.owner}.github.io/${repo.name}/images/projImg.png`;
-}
-
-export function projectSlug(name: string): string {
-  return name.replace(/[^A-Za-z0-9._-]/g, "-");
 }
 
 /**
@@ -420,9 +317,8 @@ export async function renderMarkdown(raw: string): Promise<string> {
       ...(TOKEN ? { Authorization: `Bearer ${TOKEN}` } : {}),
     },
     body: JSON.stringify({ mode: "gfm", text: raw }),
-    next: { revalidate: 3600 },
+    cache: "no-store",
   });
   if (!res.ok) throw new Error(`GitHub markdown ${res.status}`);
   return await res.text();
 }
-
