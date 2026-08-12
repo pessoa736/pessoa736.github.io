@@ -19,11 +19,10 @@ export default function SobrePage() {
         <p className="opacity-80 leading-relaxed mt-4">
           sou <span className="text-[color:var(--red)]">davi</span>, estudante
           do bacharelado interdisciplinar em ciência e tecnologia (BCT) na
-          escola de ciência e tecnologia (ECT) da UFRN. construo engines,
-          ferramentas e sistemas fictícios coerentes — a maioria em{" "}
-          <span className="text-[color:var(--red)]">lua</span>, alguns em{" "}
-          typescript/next.js quando o assunto pede. curiosidade arquitetural:
-          quero entender princípios, não decorar procedimentos.
+          escola de ciência e tecnologia (ECT) da UFRN. programo principalmente
+          em <span className="text-[color:var(--red)]">lua</span> e{" "}
+          typescript. gosto de sistemas bem estruturados — código que se entende
+          sozinho, sem precisar de decoração.
         </p>
       </header>
 
@@ -66,10 +65,9 @@ export default function SobrePage() {
           {/* como trabalho */}
         </h2>
         <p className="opacity-80 leading-relaxed text-sm">
-          aprendo melhor quando consigo ver o problema, a motivação da solução,
-          a estrutura interna e as consequências. comento código com essa
-          mentalidade: explicar princípios, mostrar trade-offs, evitar abstrações
-          que escondem o que importa.
+          aprendo melhor quando vejo o problema de verdade, não só a solução.
+          gosto de entender por que algo funciona antes de usar. comento código
+          pensando nisso — explico o porquê, não o óbvio.
         </p>
       </section>
 
