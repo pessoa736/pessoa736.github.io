@@ -5,23 +5,23 @@
 const areas = [
   {
     name: "linguagens",
-    items: ["lua", "typescript", "javascript", "python"],
-    tone: "faço ferramentas, engines e jogos nisso.",
+    items: ["lua", "typescript", "javascript", "rust", "c++"],
+    tone: "mais minhas preferidas são lua e rust.",
   },
   {
-    name: "front",
-    items: ["react", "next.js", "tailwind"],
+    name: "kernel/os",
+    items: ["limine", "rust", "nalgebra", "Rhai"],
+    tone: "to com bastante interesse atualmente em sitemas bare-metal",
+  },
+  {
+    name: "web",
+    items: ["react", "next.js", "tailwind", "chakra-ui", "prisma"],
     tone: "este site é o exemplo. server components quando dá.",
   },
   {
     name: "devops",
-    items: ["git", "github actions", "github pages", "docker"],
+    items: ["git", "github actions", "github pages", "docker", "versel"],
     tone: "entrega continua leve. sem orquestração desnecessária.",
-  },
-  {
-    name: "sistemas",
-    items: ["so", "compiladores", "redes", "kernels"],
-    tone: "estudo isso na ufrn. só começo, mas já ligo os pontos.",
   },
 ];
 
@@ -29,7 +29,7 @@ export default function Stack() {
   return (
     <section>
       <h2 className="jetbrains-mono text-xs uppercase tracking-[0.2em] opacity-50 mb-4">
-       // stack em uso
+       {"// stack em uso"}
       </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {areas.map((area) => (

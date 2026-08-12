@@ -20,9 +20,7 @@ export default function Hero() {
           <span className="opacity-60">programa.</span>
         </h1>
         <p className="mt-6 max-w-prose opacity-80 leading-relaxed">
-          construo engines, ferramentas e sistemas fictícios coerentes — quase todos em{" "}
-          <span className="text-[color:var(--red)]">lua</span>. estudante de
-          ciência e tecnologia na ufrn.
+          sou garoto muito sonhador, amante da tecnologia, atualmete cursando o Bacharelado interdicliplinar em Ciencia e Tecnologia(BCT) da Escola de Ciencia e Tecnologia(ECT) Da Universidade Federal do Rio Grande do Norte(UFRN)
         </p>
       </div>
 
