@@ -10,17 +10,17 @@ const areas = [
   },
   {
     name: "kernel/os",
-    items: ["rust", "c", "lua"],
-    tone: "to com bastante interesse atualmente em sistemas bare-metal.",
+    items: ["rust", "limine", "spin", "nalgebra"],
+    tone: "sistemas bare-metal no motosseraKernel: bootloader, spin locks, álgebra linear.",
   },
   {
     name: "web",
-    items: ["react", "next.js", "tailwind"],
+    items: ["react", "next.js", "tailwind", "chakra-ui"],
     tone: "este site é o exemplo. server components quando dá.",
   },
   {
     name: "devops",
-    items: ["git", "github", "github pages"],
+    items: ["git", "github actions", "github pages", "vercel"],
     tone: "entrega contínua leve. sem orquestração desnecessária.",
   },
 ];
