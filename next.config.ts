@@ -1,29 +1,15 @@
 import type { NextConfig } from "next";
 
+// Termux/Android não tem bindings nativos do Turbopack — o next cai pra WASM,
+// que quebra em `turbo.createProject`. Por isso o script `dev` usa
+// `next dev --webpack` aqui.
+//
+// `output: 'export'` gera HTML/CSS/JS 100% estático em `out/`. Sem server
+// runtime, sem ISR, sem API routes. Ideal pra GitHub Pages. As rotas deixam
+// de fazer fetch em runtime: tudo é prerenderizado no build (com fallback
+// pro cache em `.cache/repos.json` populado por `npm run enrich-docs`).
 const nextConfig: NextConfig = {
   output: "export",
-  trailingSlash: true,
-  images: {
-    // Thumbnails vêm do GitHub Pages (pessoa736.github.io/<repo>/).
-    // Em modo estático, `next/image` normalmente é limitado — mas como usamos
-    // background-image em CSS, isso não bloqueia.
-    unoptimized: true,
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "pessoa736.github.io",
-      },
-      {
-        protocol: "https",
-        hostname: "raw.githubusercontent.com",
-      },
-      {
-        protocol: "https",
-        hostname: "avatars.githubusercontent.com",
-      },
-    ],
-  },
-  reactCompiler: true,
 };
 
 export default nextConfig;
