@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getAllRepos } from "mySite/lib/github";
 import ProjectGrid from "mySite/plates/projectGrid";
+import Reveal from "mySite/components/reveal";
 
 export const metadata: Metadata = {
   title: "projetos",
@@ -22,7 +23,7 @@ export default async function ProjetosPage() {
           projetos.
         </h1>
       </header>
-      <ProjectGrid repos={repos} />
+      <Reveal><ProjectGrid repos={repos} /></Reveal>
     </main>
   );
 }

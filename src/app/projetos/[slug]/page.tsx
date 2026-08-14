@@ -11,6 +11,8 @@ import {
 } from "mySite/lib/github";
 import { getRepoDocsCached } from "mySite/lib/repoDocsCache";
 import { siteConfig } from "mySite/config/site";
+import Reveal from "mySite/components/reveal";
+import Highlight from "mySite/components/highlight";
 
 export const dynamic = "force-static";
 export const revalidate = 3600;
@@ -75,7 +77,9 @@ export default async function ProjectPage({ params }: PageProps) {
           {repo.name}
         </h1>
         {description && (
-          <p className="mt-3 opacity-80 leading-relaxed">{description}</p>
+          <p className="mt-3 opacity-80 leading-relaxed">
+            <Highlight text={description} />
+          </p>
         )}
         <div className="mt-5 flex flex-wrap items-center gap-2">
           <Link
@@ -103,25 +107,27 @@ export default async function ProjectPage({ params }: PageProps) {
         </div>
       </header>
 
-      <article
-        className="
-          prose-jetbrains
-          [&_h1]:jetbrains-mono [&_h1]:text-2xl [&_h1]:mt-8 [&_h1]:font-semibold
-          [&_h2]:jetbrains-mono [&_h2]:text-xl [&_h2]:mt-8 [&_h2]:font-semibold
-          [&_h3]:jetbrains-mono [&_h3]:text-lg [&_h3]:mt-6 [&_h3]:font-semibold
-          [&_p]:opacity-90 [&_p]:leading-relaxed [&_p]:my-4
-          [&_a]:text-[color:var(--red)] [&_a]:underline-offset-4
-          [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:my-4 [&_ul]:opacity-90
-          [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:my-4 [&_ol]:opacity-90
-          [&_code]:text-[color:var(--red)] [&_code]:text-sm
-          [&_pre]:box-ghost [&_pre]:rounded-xl [&_pre]:p-4 [&_pre]:overflow-x-auto [&_pre]:my-4
-          [&_blockquote]:border-l-2 [&_blockquote]:border-[color:var(--red)] [&_blockquote]:pl-4 [&_blockquote]:opacity-70 [&_blockquote]:my-4
-          [&_img]:rounded-xl [&_img]:my-4
-          [&_hr]:border-[color:var(--foregroundTR)] [&_hr]:my-8
-          [&_table]:w-full [&_th]:text-left [&_td]:py-1
-        "
-        dangerouslySetInnerHTML={{ __html: readmeHtml }}
-      />
+      <Reveal>
+        <article
+          className="
+            prose-jetbrains
+            [&_h1]:jetbrains-mono [&_h1]:text-2xl [&_h1]:mt-8 [&_h1]:font-semibold
+            [&_h2]:jetbrains-mono [&_h2]:text-xl [&_h2]:mt-8 [&_h2]:font-semibold
+            [&_h3]:jetbrains-mono [&_h3]:text-lg [&_h3]:mt-6 [&_h3]:font-semibold
+            [&_p]:opacity-90 [&_p]:leading-relaxed [&_p]:my-4
+            [&_a]:text-[color:var(--red)] [&_a]:underline-offset-4
+            [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:my-4 [&_ul]:opacity-90
+            [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:my-4 [&_ol]:opacity-90
+            [&_code]:text-[color:var(--red)] [&_code]:text-sm
+            [&_pre]:box-ghost [&_pre]:rounded-xl [&_pre]:p-4 [&_pre]:overflow-x-auto [&_pre]:my-4
+            [&_blockquote]:border-l-2 [&_blockquote]:border-[color:var(--red)] [&_blockquote]:pl-4 [&_blockquote]:opacity-70 [&_blockquote]:my-4
+            [&_img]:rounded-xl [&_img]:my-4
+            [&_hr]:border-[color:var(--foregroundTR)] [&_hr]:my-8
+            [&_table]:w-full [&_th]:text-left [&_td]:py-1
+          "
+          dangerouslySetInnerHTML={{ __html: readmeHtml }}
+        />
+      </Reveal>
     </main>
   );
 }

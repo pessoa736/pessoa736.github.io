@@ -5,6 +5,7 @@ import Now from "mySite/plates/now";
 import Stack from "mySite/plates/stack";
 import FeaturedGrid from "mySite/plates/featured";
 import OnAirList from "mySite/plates/onAir";
+import Reveal from "mySite/components/reveal";
 
 const now = [
   { label: "compiladores", href: "/projetos?area=sistemas" },
@@ -30,11 +31,13 @@ export default async function Home() {
   return (
     <div className="relative pt-24 pb-16 px-4 sm:px-8 max-w-5xl mx-auto flex flex-col gap-16">
       <Hero />
-      <Now items={now} />
-      <Stack />
-      <FeaturedGrid featured={featured} />
+      <Reveal><Now items={now} /></Reveal>
+      <Reveal delay={0.1}><Stack /></Reveal>
+      <Reveal delay={0.15}><FeaturedGrid featured={featured} /></Reveal>
       {withSite.length > onAir.length && (
-        <OnAirList repos={onAir.length ? onAir : withSite} />
+        <Reveal delay={0.2}>
+          <OnAirList repos={onAir.length ? onAir : withSite} />
+        </Reveal>
       )}
     </div>
   );

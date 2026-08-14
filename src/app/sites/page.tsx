@@ -3,6 +3,8 @@ import Link from "next/link";
 import { getAllRepos } from "mySite/lib/github";
 import { siteConfig } from "mySite/config/site";
 import LangChip from "mySite/components/langChip";
+import Reveal from "mySite/components/reveal";
+import Highlight from "mySite/components/highlight";
 
 export const metadata: Metadata = {
   title: "no ar",
@@ -42,7 +44,8 @@ export default async function SitesPage() {
         </p>
       </header>
 
-      <ul className="flex flex-col">
+      <Reveal>
+        <ul className="flex flex-col">
         {live.map(({ repo, url }) => (
           <li
             key={repo.id}
@@ -62,7 +65,7 @@ export default async function SitesPage() {
               </Link>
               {repo.description && (
                 <p className="opacity-60 text-sm mt-0.5 line-clamp-2">
-                  {repo.description}
+                  <Highlight text={repo.description} />
                 </p>
               )}
             </div>
@@ -78,6 +81,7 @@ export default async function SitesPage() {
           </li>
         ))}
       </ul>
+      </Reveal>
     </main>
   );
 }
