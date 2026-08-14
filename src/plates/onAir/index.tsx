@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { GhRepo } from "mySite/lib/github-utils";
 import { ghPagesThumb, projectSlug } from "mySite/lib/github-utils";
+import { siteConfig } from "mySite/config/site";
 import LangChip from "mySite/components/langChip";
 import { ArrowUpRight } from "lucide-react";
 
@@ -25,15 +26,34 @@ export default function OnAirList({ repos }: Props) {
               : null);
           if (!live) return null;
           const thumb = ghPagesThumb(r);
+          const color = siteConfig.languageColor[r.language ?? ""] ?? "#888";
+          const initial = r.name.charAt(0).toUpperCase();
           return (
             <li
               key={r.id}
               className="group flex items-center gap-4 py-3 border-b last:border-b-0 border-[color:var(--foregroundTR)]"
             >
               <div
-                className="size-10 rounded-lg shrink-0 bg-cover bg-center box-glass"
-                style={{ backgroundImage: `url(${thumb})` }}
-              />
+                className="size-10 rounded-lg shrink-0 overflow-hidden relative box-glass"
+              >
+                {/* Fallback: letra + cor da linguagem */}
+                <div
+                  className="absolute inset-0 grid place-items-center"
+                  style={{ backgroundColor: color + "22" }}
+                >
+                  <span
+                    className="font-bold text-sm leading-none select-none"
+                    style={{ color }}
+                  >
+                    {initial}
+                  </span>
+                </div>
+                {/* Thumb por cima se carregar */}
+                <div
+                  className="absolute inset-0 bg-cover bg-center"
+                  style={{ backgroundImage: `url(${thumb})` }}
+                />
+              </div>
               <div className="flex-1 min-w-0">
                 <Link
                   href={`/projetos/${projectSlug(r.name)}/`}
