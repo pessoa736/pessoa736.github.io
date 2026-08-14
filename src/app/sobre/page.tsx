@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ArrowUpRight } from "lucide-react";
+import Highlight from "mySite/components/highlight";
 
 export const metadata: Metadata = {
   title: "sobre",
@@ -19,10 +20,8 @@ export default function SobrePage() {
         <p className="opacity-80 leading-relaxed mt-4">
           sou <span className="text-[color:var(--red)]">davi</span>, estudante
           do bacharelado interdisciplinar em ciência e tecnologia (BCT) na
-          escola de ciência e tecnologia (ECT) da UFRN. programo principalmente
-          em <span className="text-[color:var(--red)]">lua</span> e{" "}
-          typescript. gosto de sistemas bem estruturados — código que se entende
-          sozinho, sem precisar de decoração.
+          escola de ciência e tecnologia (ECT) da UFRN.{" "}
+          <Highlight text="programo principalmente em lua e typescript. gosto de sistemas bem estruturados — código que se entende sozinho, sem precisar de decoração." />
         </p>
       </header>
 
@@ -65,9 +64,7 @@ export default function SobrePage() {
           {/* como trabalho */}
         </h2>
         <p className="opacity-80 leading-relaxed text-sm">
-          aprendo melhor quando vejo o problema de verdade, não só a solução.
-          gosto de entender por que algo funciona antes de usar. comento código
-          pensando nisso — explico o porquê, não o óbvio.
+          <Highlight text="aprendo melhor quando vejo o problema de verdade, não só a solução. gosto de entender por que algo funciona antes de usar. comento código pensando nisso — explico o porquê, não o óbvio." />
         </p>
       </section>
 
