@@ -53,7 +53,7 @@ export const siteConfig = {
 
   // Cor de destaque por linguagem (heurística conhecida, fallback cinza).
   languageColor: {
-    Lua: "#000080",
+    Lua: "#3970ff",
     JavaScript: "#f1e05a",
     TypeScript: "#3178c6",
     TSX: "#3178c6",
