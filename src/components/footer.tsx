@@ -1,4 +1,5 @@
 import { ArrowUpRight } from "lucide-react";
+import Link from "next/link";
 
 export default function Footer() {
   return (
@@ -11,6 +12,12 @@ export default function Footer() {
           </span>
         </div>
         <div className="flex items-center gap-4">
+          <Link
+            href="/privacidade"
+            className="flex items-center gap-1 hover:text-[color:var(--red)] animated"
+          >
+            privacidade
+          </Link>
           <a
             href="mailto:pessoa736@users.noreply.github.com"
             className="flex items-center gap-1 hover:text-[color:var(--red)] animated"
