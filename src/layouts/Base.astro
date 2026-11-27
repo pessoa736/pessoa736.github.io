@@ -37,7 +37,7 @@ const isCurrent = (href: string) => (href === "/" ? path === "/" : path === href
   <body>
     <a class="skip" href="#conteudo">Pular para o conteúdo</a>
 
-    <header class="wrap"><div class="topbar">
+    <header class="site-header"><div class="wrap"><div class="topbar">
       <a class="brand" href="/" aria-label="davi, página inicial">davi<span>.</span></a>
       <nav aria-label="Principal">
         <ul>
@@ -46,7 +46,7 @@ const isCurrent = (href: string) => (href === "/" ? path === "/" : path === href
           ))}
         </ul>
       </nav>
-    </div></header>
+    </div></div></header>
 
     <main id="conteudo" class="wrap">
       <slot />
@@ -65,9 +65,15 @@ const isCurrent = (href: string) => (href === "/" ? path === "/" : path === href
 
 <style>
   /* brutalist frame: the nav is a ruled box, each link its own cell */
+  /* the header follows the scroll: it sticks to the top with a strip of page
+     colour behind it, so content passes under it instead of showing through */
+  .site-header {
+    position: sticky; top: 0; z-index: 50;
+    padding-top: var(--gutter); padding-bottom: 0.75rem;
+    background: var(--bg);
+  }
   .topbar {
     display: flex; align-items: stretch; justify-content: space-between; flex-wrap: wrap;
-    margin-top: var(--gutter);
     border: var(--frame) solid var(--line);
   }
   .brand { display: flex; align-items: center; padding: 0.7rem 1.1rem; font: 700 var(--step-1)/1 var(--font-text); text-decoration: none; }
