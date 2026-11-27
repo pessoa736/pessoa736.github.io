@@ -10,11 +10,7 @@
 
 html { color-scheme: light dark; -webkit-text-size-adjust: 100%; }
 body {
-  /* paper grain: an SVG noise tile painted UNDER the content (part of the background),
-     never as an overlay on top of it */
-  background:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
-    var(--bg);
+  background: var(--bg);
   color: var(--text);
   font: var(--step-0)/1.6 var(--font-text);
   -webkit-font-smoothing: antialiased;
@@ -66,3 +62,45 @@ main { padding-block: 3.5rem 5rem; }
 @media (prefers-reduced-motion: no-preference) {
   html { scroll-behavior: smooth; }
 }
+
+/* ── tube TV screen ──────────────────────────────────────────
+   One fixed layer over the whole viewport, so every component (the dark
+   plates included) gets the same grain and scanlines. Kept very light:
+   it must never make text harder to read, and it never takes clicks. */
+body::before, body::after {
+  content: ""; position: fixed; inset: 0; z-index: 100; pointer-events: none;
+}
+/* scanlines + a soft dark edge, like the curved glass of a tube */
+body::before {
+  background:
+    repeating-linear-gradient(to bottom, rgb(0 0 0 / 0.035) 0 1px, transparent 1px 3px),
+    radial-gradient(140% 110% at 50% 50%, transparent 60%, rgb(0 0 0 / 0.14) 100%);
+}
+/* grain */
+body::after {
+  opacity: 0.07;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+@media (prefers-color-scheme: dark) {
+  body::before {
+    background:
+      repeating-linear-gradient(to bottom, rgb(0 0 0 / 0.08) 0 1px, transparent 1px 3px),
+      radial-gradient(140% 110% at 50% 50%, transparent 60%, rgb(0 0 0 / 0.25) 100%);
+  }
+  body::after { opacity: 0.05; }
+}
+/* the refresh band rolling down, barely there; off with reduced motion */
+@media (prefers-reduced-motion: no-preference) {
+  body::before {
+    background:
+      linear-gradient(to bottom, transparent, rgb(255 245 220 / 0.035) 50%, transparent) 0 -40% / 100% 25% no-repeat,
+      repeating-linear-gradient(to bottom, rgb(0 0 0 / 0.035) 0 1px, transparent 1px 3px),
+      radial-gradient(140% 110% at 50% 50%, transparent 60%, rgb(0 0 0 / 0.14) 100%);
+    animation: tube-roll 9s linear infinite;
+  }
+}
+@keyframes tube-roll {
+  from { background-position: 0 -40%, 0 0, 0 0; }
+  to   { background-position: 0 140%, 0 0, 0 0; }
+}
+@media print { body::before, body::after { display: none; } }

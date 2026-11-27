@@ -1,6 +1,6 @@
 ---
 // Davi's cut-out portrait on a piece of deep space, seen through an old tube TV:
-// scanlines, grain, a soft vignette and one slow refresh band.
+// the tube-TV texture itself is applied to the whole screen in global.css.
 // The image file is clean (background removed by `npm run foto`); every effect is CSS,
 // so changing the photo never means redoing the filter.
 interface Props { src?: string; alt?: string }
@@ -34,31 +34,4 @@ const { src = "/images/eu-recorte.webp", alt = "Foto do Davi" } = Astro.props;
     filter: grayscale(1) sepia(0.45) contrast(1.15) brightness(1.02);
   }
 
-  /* scanlines + grain + vignette, all on top of the picture, none of it on the page text */
-  .tv::before, .tv::after { content: ""; position: absolute; inset: 0; z-index: 2; pointer-events: none; }
-  .tv::before {
-    background:
-      repeating-linear-gradient(to bottom, rgb(0 0 0 / 0.16) 0 1px, transparent 1px 3px),
-      radial-gradient(130% 100% at 50% 50%, transparent 55%, rgb(0 0 0 / 0.45) 100%);
-  }
-  .tv::after {
-    opacity: 0.22; mix-blend-mode: overlay;
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  }
-
-  /* the one moving thing: a faint bright band rolling down, like a tube refreshing.
-     Off for people who ask the system for less motion. */
-  @media (prefers-reduced-motion: no-preference) {
-    .tv::before {
-      background:
-        linear-gradient(to bottom, transparent 0%, rgb(255 240 210 / 0.07) 50%, transparent 100%) 0 -100% / 100% 30% no-repeat,
-        repeating-linear-gradient(to bottom, rgb(0 0 0 / 0.16) 0 1px, transparent 1px 3px),
-        radial-gradient(130% 100% at 50% 50%, transparent 55%, rgb(0 0 0 / 0.45) 100%);
-      animation: roll 7s linear infinite;
-    }
-  }
-  @keyframes roll {
-    from { background-position: 0 -40%, 0 0, 0 0; }
-    to   { background-position: 0 140%, 0 0, 0 0; }
-  }
 </style>
