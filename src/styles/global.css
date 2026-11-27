@@ -73,7 +73,7 @@ body::before, body::after {
 /* scanlines + a soft dark edge, like the curved glass of a tube */
 body::before {
   background:
-    repeating-linear-gradient(to bottom, rgb(0 0 0 / 0.035) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(to bottom, rgb(0 0 0 / 0.075) 0 1px, transparent 1px 3px),
     radial-gradient(140% 110% at 50% 50%, transparent 60%, rgb(0 0 0 / 0.14) 100%);
 }
 /* grain */
@@ -84,7 +84,7 @@ body::after {
 @media (prefers-color-scheme: dark) {
   body::before {
     background:
-      repeating-linear-gradient(to bottom, rgb(0 0 0 / 0.08) 0 1px, transparent 1px 3px),
+      repeating-linear-gradient(to bottom, rgb(0 0 0 / 0.15) 0 1px, transparent 1px 3px),
       radial-gradient(140% 110% at 50% 50%, transparent 60%, rgb(0 0 0 / 0.25) 100%);
   }
   body::after { opacity: 0.05; }
@@ -94,7 +94,7 @@ body::after {
   body::before {
     background:
       linear-gradient(to bottom, transparent, rgb(255 245 220 / 0.035) 50%, transparent) 0 -40% / 100% 25% no-repeat,
-      repeating-linear-gradient(to bottom, rgb(0 0 0 / 0.035) 0 1px, transparent 1px 3px),
+      repeating-linear-gradient(to bottom, rgb(0 0 0 / 0.075) 0 1px, transparent 1px 3px),
       radial-gradient(140% 110% at 50% 50%, transparent 60%, rgb(0 0 0 / 0.14) 100%);
     animation: tube-roll 9s linear infinite;
   }
