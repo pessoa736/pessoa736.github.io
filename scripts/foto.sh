@@ -5,7 +5,7 @@
 #   npm run foto -- caminho/da/foto.jpg
 #
 # Needs `uv` (runs rembg in a throwaway Python 3.12 env; the first run downloads the
-# ~180 MB isnet model) and Python with Pillow. The TV filter itself is CSS
+# ~900 MB birefnet-portrait model, made for people: it leaves out desks and bags that isnet kept) and Python with Pillow. The TV filter itself is CSS
 # (src/components/Portrait.astro); the sepia tone is baked into the file.
 set -euo pipefail
 
@@ -15,7 +15,7 @@ tmp="$(mktemp --suffix=.png)"
 trap 'rm -f "$tmp"' EXIT
 
 echo "removendo o fundo de $input ..."
-uvx -q --python 3.12 --from "rembg[cpu,cli]" rembg i -m isnet-general-use -a "$input" "$tmp" 2>/dev/null
+uvx -q --python 3.12 --from "rembg[cpu,cli]" rembg i -m birefnet-portrait -a "$input" "$tmp" 2>/dev/null
 
 python3 - "$tmp" "$out" <<'EOF'
 import sys
