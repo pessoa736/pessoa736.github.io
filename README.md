@@ -21,6 +21,7 @@ npm run build      # static output in dist/
 | Projects (name, status, summary, notes, links) | `src/data/projects.ts`: edited by hand, the source of truth |
 | Stars and last push date | GitHub API at build time (`src/lib/github.ts`) |
 | Fallback when the API fails | `src/data/github-cache.json`; refresh with `npm run cache:github` |
+| Gallery | drop images in `galeria-entrada/` (not committed), run `npm run galeria:add`; light WebP copies land in `src/assets/galeria/`, duplicates are detected by content. Optional title/description in `src/data/galeria.ts` |
 | Technical notes | one Markdown file per post in `src/content/escritos/` (see `_modelo.md`) |
 | Colours, fonts, spacing | `src/styles/tokens.css` |
 | Privacy policy | `src/pages/privacidade.astro` (linked from the Google OAuth screen: keep the URL) |

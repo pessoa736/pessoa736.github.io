@@ -9,7 +9,8 @@
     "preview": "astro preview",
     "check": "astro check",
     "cache:github": "node scripts/cache-github.mjs",
-    "foto": "bash scripts/foto.sh"
+    "foto": "bash scripts/foto.sh",
+    "galeria:add": "node scripts/galeria-add.mjs"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.12",

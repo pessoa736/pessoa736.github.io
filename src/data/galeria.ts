@@ -1,7 +1,7 @@
 // Gallery: drawings and photos.
 //
-// To add a picture: put the file in src/assets/galeria/ (jpg, png or webp, any size;
-// the build makes light versions). That's enough for it to show up.
+// To add a picture: drop it in galeria-entrada/ and run `npm run galeria:add`.
+// It lands here as <id>.webp, already light. Duplicates are refused by content.
 // To give it a title, a description, a type or a date (all optional), add an entry
 // below with the same file name.
 // Newest first: entries with a date go by date, the rest keep file-name order.

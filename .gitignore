@@ -6,6 +6,9 @@ dist/
 # env files: GITHUB_TOKEN lives in .env.local, never commit it
 .env*
 
+# gallery inbox: drop originals here, `npm run galeria:add` puts light copies in src/assets/galeria/
+galeria-entrada/
+
 # misc
 .DS_Store
 npm-debug.log*
