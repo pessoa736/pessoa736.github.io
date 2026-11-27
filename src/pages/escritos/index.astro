@@ -32,8 +32,8 @@ const posts = (await getCollection("escritos", ({ data }) => !(import.meta.env.P
 <style>
   .page-head p { margin-top: 0.75rem; font-size: var(--step-1); }
   .empty { margin-top: 3rem; padding: 1.5rem; border: 1px dashed var(--line); border-radius: var(--radius); }
-  .list { list-style: none; padding: 0; margin-top: 2.5rem; border-bottom: 1px solid var(--line); }
-  .list li { padding-block: 1.4rem; border-top: 1px solid var(--line); }
+  .list { list-style: none; padding: 0; margin-top: 2.5rem; border-bottom: var(--frame) solid var(--line); }
+  .list li { padding-block: 1.4rem; border-top: var(--frame) solid var(--line); }
   .list h2 { font-size: var(--step-1); }
   .list h2 a { text-decoration: none; }
   .list h2 a:hover { text-decoration: underline; }

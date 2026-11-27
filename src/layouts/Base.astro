@@ -36,7 +36,7 @@ const isCurrent = (href: string) => (href === "/" ? path === "/" : path === href
   <body>
     <a class="skip" href="#conteudo">Pular para o conteúdo</a>
 
-    <header class="topbar wrap">
+    <header class="wrap"><div class="topbar">
       <a class="brand" href="/" aria-label="davi, página inicial">davi<span>.</span></a>
       <nav aria-label="Principal">
         <ul>
@@ -45,39 +45,48 @@ const isCurrent = (href: string) => (href === "/" ? path === "/" : path === href
           ))}
         </ul>
       </nav>
-    </header>
+    </div></header>
 
     <main id="conteudo" class="wrap">
       <slot />
     </main>
 
-    <footer class="footer wrap">
+    <footer class="wrap"><div class="footer">
       <p class="links">
         <a href="https://github.com/pessoa736">GitHub</a>
         <a href="mailto:pessoa736@users.noreply.github.com">e-mail</a>
         <a href="/privacidade">privacidade</a>
       </p>
       <p class="muted">Feito com <a href="https://astro.build">Astro</a>. Código em <a href="https://github.com/pessoa736/pessoa736.github.io">pessoa736.github.io</a>.</p>
-    </footer>
+    </div></footer>
   </body>
 </html>
 
 <style>
+  /* brutalist frame: the nav is a ruled box, each link its own cell */
   .topbar {
-    display: flex; align-items: center; justify-content: space-between; gap: 1rem 2rem; flex-wrap: wrap;
-    padding-block: 1.5rem;
-    border-bottom: 1px solid var(--line);
+    display: flex; align-items: stretch; justify-content: space-between; flex-wrap: wrap;
+    margin-top: var(--gutter);
+    border: var(--frame) solid var(--line);
   }
-  .brand { font: 600 var(--step-1)/1 var(--font-mono); text-decoration: none; }
+  .brand { display: flex; align-items: center; padding: 0.7rem 1.1rem; font: 700 var(--step-1)/1 var(--font-text); text-decoration: none; }
   .brand span { color: var(--accent); }
-  nav ul { display: flex; flex-wrap: wrap; gap: 0.25rem 1.5rem; list-style: none; padding: 0; }
-  nav a { display: inline-block; padding-block: 0.4rem; text-decoration: none; color: var(--muted); }
-  nav a:hover { color: var(--text); }
-  nav a[aria-current="page"] { color: var(--text); text-decoration: underline; text-decoration-color: var(--accent); text-decoration-thickness: 2px; text-underline-offset: 0.45em; }
+  nav ul { display: flex; flex-wrap: wrap; list-style: none; padding: 0; height: 100%; }
+  nav li { display: flex; border-left: var(--frame) solid var(--line); }
+  nav a { display: flex; align-items: center; padding: 0.7rem 1.2rem; min-height: 2.75rem; text-decoration: none; font-weight: 500; }
+  nav a:hover { background: var(--surface); color: var(--text); }
+  nav a[aria-current="page"] { background: var(--text); color: var(--bg); }
+  @media (max-width: 560px) {
+    .topbar { flex-direction: column; }
+    nav { border-top: var(--frame) solid var(--line); }
+    nav ul { display: grid; grid-template-columns: repeat(4, 1fr); }
+    nav li:first-child { border-left: 0; }
+    nav a { flex: 1; justify-content: center; padding-inline: 0.4rem; }
+  }
 
   .footer {
     display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.75rem 2rem;
-    padding-block: 2rem 3rem; border-top: 1px solid var(--line);
+    padding-block: 1.25rem 3rem; border-top: var(--frame) solid var(--line); margin-top: 1rem;
     font-size: var(--step--1);
   }
   .footer .links { display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem; }

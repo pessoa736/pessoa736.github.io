@@ -64,11 +64,11 @@ const updated = stats && new Date(stats.pushedAt).toLocaleDateString("pt-BR", { 
   .main section + section { margin-top: 2.5rem; }
   h2 { font-size: var(--step-1); margin-bottom: 0.75rem; }
   .main ul { padding-left: 1.2rem; display: grid; gap: 0.4rem; }
-  .facts { display: grid; gap: 1rem; align-content: start; padding-left: 1.5rem; border-left: 1px solid var(--line); }
+  .facts { display: grid; gap: 1rem; align-content: start; padding-left: 1.5rem; border-left: var(--frame) solid var(--line); }
   .facts dt { font-size: var(--step--1); color: var(--muted); }
   .facts dd { margin: 0; }
   @media (max-width: 720px) {
     .body { grid-template-columns: 1fr; }
-    .facts { padding-left: 0; border-left: 0; border-top: 1px solid var(--line); padding-top: 1.5rem; }
+    .facts { padding-left: 0; border-left: 0; border-top: var(--frame) solid var(--line); padding-top: 1.5rem; }
   }
 </style>

@@ -1,9 +1,8 @@
 /* Base styles shared by every page. Colours and sizes come from tokens.css. */
-@import "@fontsource/ibm-plex-sans/400.css";
-@import "@fontsource/ibm-plex-sans/400-italic.css";
-@import "@fontsource/ibm-plex-sans/600.css";
-@import "@fontsource/ibm-plex-mono/400.css";
-@import "@fontsource/ibm-plex-mono/600.css";
+@import "@fontsource/jost/400.css";
+@import "@fontsource/jost/500.css";
+@import "@fontsource/jost/700.css";
+@import "@fontsource/space-mono/400.css";
 @import "./tokens.css";
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -11,7 +10,11 @@
 
 html { color-scheme: light dark; -webkit-text-size-adjust: 100%; }
 body {
-  background: var(--bg);
+  /* paper grain: an SVG noise tile painted UNDER the content (part of the background),
+     never as an overlay on top of it */
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+    var(--bg);
   color: var(--text);
   font: var(--step-0)/1.6 var(--font-text);
   -webkit-font-smoothing: antialiased;
@@ -19,11 +22,11 @@ body {
 
 img { display: block; max-width: 100%; height: auto; }
 
-a { color: inherit; text-decoration-color: var(--line); text-underline-offset: 0.2em; text-decoration-thickness: 1px; }
+a { color: inherit; text-decoration-color: var(--accent); text-underline-offset: 0.2em; text-decoration-thickness: 1px; }
 a:hover { color: var(--accent-text); text-decoration-color: currentColor; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
 
-h1, h2, h3 { line-height: 1.15; font-weight: 600; letter-spacing: -0.01em; }
+h1, h2, h3 { line-height: 1.05; font-weight: 700; letter-spacing: -0.01em; }
 h1 { font-size: var(--step-3); }
 h2 { font-size: var(--step-2); }
 h3 { font-size: var(--step-1); }
@@ -56,9 +59,9 @@ main { padding-block: 3.5rem 5rem; }
 .prose h2 { margin-top: 2.2em; }
 .prose h3 { margin-top: 1.8em; }
 .prose ul, .prose ol { padding-left: 1.3em; }
-.prose pre { padding: 1rem 1.1rem; overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); line-height: 1.5; }
-.prose :not(pre) > code { background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 0.05em 0.3em; }
-.prose blockquote { border-left: 3px solid var(--line); padding-left: 1rem; color: var(--muted); }
+.prose pre { padding: 1rem 1.1rem; overflow-x: auto; background: var(--void); color: var(--paper); border: var(--frame) solid var(--line); line-height: 1.5; }
+.prose :not(pre) > code { background: var(--surface); padding: 0.05em 0.3em; }
+.prose blockquote { border-left: 4px solid var(--accent); padding-left: 1rem; color: var(--muted); }
 
 @media (prefers-reduced-motion: no-preference) {
   html { scroll-behavior: smooth; }

@@ -83,11 +83,11 @@ const sorted = [...projects].sort((a, b) =>
     font: inherit; font-size: var(--step--1);
     min-height: 2.5rem; padding: 0.35rem 0.9rem;
     color: var(--text); background: transparent;
-    border: 1px solid var(--line); border-radius: 999px; cursor: pointer;
+    border: var(--frame) solid var(--line); border-radius: 0; cursor: pointer;
   }
   .filters button:hover { border-color: var(--muted); }
   .filters button[aria-pressed="true"] { background: var(--text); color: var(--bg); border-color: var(--text); }
   .count { margin-top: 1.25rem; font-size: var(--step--1); }
-  .list { list-style: none; padding: 0; margin-top: 0.5rem; border-bottom: 1px solid var(--line); }
+  .list { list-style: none; padding: 0; margin-top: 0.5rem; border-bottom: var(--frame) solid var(--line); }
   @media (max-width: 520px) { .legend div { grid-template-columns: 1fr; gap: 0; } }
 </style>
