@@ -21,6 +21,7 @@ const items = await Promise.all(
     return {
       file,
       title: info.title,
+      description: info.description,
       kind: (info.kind ?? "foto") as Kind,
       date: info.date ? new Date(info.date + "T12:00:00") : undefined,
       alt: info.alt ?? info.title ?? "",
@@ -53,7 +54,7 @@ const kinds = (["desenho", "foto"] as Kind[]).filter((k) => items.some((i) => i.
       <ul class="wall" id="parede">
         {items.map((item) => (
           <li data-kind={item.kind}>
-            <a href={item.full.src} class="frame" data-full={item.full.src}>
+            <a href={item.full.src} class="frame" data-full={item.full.src} data-title={item.title} data-description={item.description}>
               <img
                 src={item.thumb.src}
                 width={item.thumb.attributes.width}
@@ -65,10 +66,11 @@ const kinds = (["desenho", "foto"] as Kind[]).filter((k) => items.some((i) => i.
             </a>
             {(item.title || item.date) && (
               <p class="caption">
-                {item.title && <span>{item.title}</span>}
+                {item.title && <span class="title">{item.title}</span>}
                 {item.date && <time class="muted" datetime={item.date.toISOString()}>{item.date.toLocaleDateString("pt-BR", { month: "short", year: "numeric" })}</time>}
               </p>
             )}
+            {item.description && <p class="description">{item.description}</p>}
           </li>
         ))}
       </ul>
@@ -76,6 +78,10 @@ const kinds = (["desenho", "foto"] as Kind[]).filter((k) => items.some((i) => i.
       <!-- full-size viewer; without JavaScript the links simply open the image -->
       <dialog id="visor" aria-label="Imagem ampliada">
         <img alt="" />
+        <div class="info">
+          <p class="v-title"></p>
+          <p class="v-description"></p>
+        </div>
         <form method="dialog"><button type="submit">Fechar</button></form>
       </dialog>
     </>
@@ -94,6 +100,11 @@ const kinds = (["desenho", "foto"] as Kind[]).filter((k) => items.some((i) => i.
     const big = dialog.querySelector("img")!;
     big.src = link.dataset.full!;
     big.alt = link.querySelector("img")!.alt;
+    // title and description are optional: hide the box when both are missing
+    const title = link.dataset.title ?? "", description = link.dataset.description ?? "";
+    dialog.querySelector(".v-title")!.textContent = title;
+    dialog.querySelector(".v-description")!.textContent = description;
+    dialog.querySelector<HTMLElement>(".info")!.hidden = !title && !description;
     dialog.showModal();
   });
   // a click on the dark area around the picture closes it too
@@ -138,13 +149,23 @@ const kinds = (["desenho", "foto"] as Kind[]).filter((k) => items.some((i) => i.
   .frame img { width: 100%; height: auto; }
   .frame:hover { border-color: var(--accent); }
   .caption { display: flex; justify-content: space-between; gap: 1rem; margin-top: 0.4rem; font-size: var(--step--1); }
+  .caption .title { font-weight: 500; }
+  .description { margin-top: 0.25rem; font-size: var(--step--1); color: var(--muted); }
 
   dialog {
+    margin: auto;   /* the global `* { margin: 0 }` would pin it to the top-left corner */
     max-width: min(96vw, 1400px); max-height: 94vh; padding: 0;
     border: var(--frame) solid var(--paper); background: var(--void); color: var(--paper);
   }
   dialog::backdrop { background: rgb(16 32 31 / 0.88); }
   dialog img { display: block; max-width: 100%; max-height: calc(94vh - 3.5rem); margin-inline: auto; }
+  dialog .info { padding: 0.8rem 1.1rem; border-top: var(--frame) solid var(--paper); }
+  dialog .info p { max-width: 70ch; }
+  dialog .info[hidden] { display: none; }
+  .v-title { font-weight: 500; }
+  .v-title:empty, .v-description:empty { display: none; }
+  .v-description { margin-top: 0.25rem; color: #cbbd99; }
+  dialog img { max-height: calc(94vh - 9rem); }
   dialog form { display: flex; justify-content: flex-end; border-top: var(--frame) solid var(--paper); }
   dialog button { font: inherit; min-height: 2.75rem; padding: 0.4rem 1.2rem; color: var(--paper); background: transparent; border: 0; border-left: var(--frame) solid var(--paper); cursor: pointer; }
   dialog button:hover { background: var(--paper); color: var(--void); }
