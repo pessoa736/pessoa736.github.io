@@ -1,0 +1,17 @@
+---
+// Status of a project: a coloured dot plus the word, so colour is never the only signal.
+import { STATUS_INFO, type Status } from "../data/projects";
+
+interface Props { status: Status }
+const { status } = Astro.props;
+const key = status === "em desenvolvimento" ? "dev" : status;
+---
+<span class="status" style={`--c: var(--st-${key})`} title={STATUS_INFO[status]}>{status}</span>
+
+<style>
+  .status {
+    display: inline-flex; align-items: center; gap: 0.4em;
+    font-size: var(--step--1); color: var(--c); white-space: nowrap;
+  }
+  .status::before { content: ""; width: 0.55em; height: 0.55em; border-radius: 50%; background: var(--c); }
+</style>

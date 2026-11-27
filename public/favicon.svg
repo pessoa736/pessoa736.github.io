@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- "d." in the site's mono face: the letter plus the red dot from the logo -->
+  <rect width="64" height="64" rx="12" fill="#18181a"/>
+  <text x="11" y="46" font-family="IBM Plex Mono, monospace" font-weight="600" font-size="40" fill="#fbfbfa">d</text>
+  <circle cx="48" cy="42" r="5" fill="#ff4d5e"/>
+</svg>

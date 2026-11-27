@@ -1,0 +1,58 @@
+/* Design tokens. The whole look of the site comes from this file:
+   colours, type, spacing and the reading width. Swapping the visual identity
+   later (Davi is collecting references) should mean editing this file, not the pages.
+
+   Light by default, dark when the system asks for it. */
+
+:root {
+  /* colour */
+  --bg: #fbfbfa;
+  --surface: #ffffff;
+  --text: #18181a;
+  --muted: #5e5e66;
+  --line: #e1e1e5;
+  --accent: #d7263d;          /* the red dot after "davi." */
+  --accent-text: #b0182c;     /* accent dark enough for text on --bg (contrast ≥ 4.5) */
+
+  /* status colours: each one also has a word, colour is never the only signal */
+  --st-ativo: #2f7d4f;
+  --st-dev: #2f5f9c;
+  --st-pausado: #9a6a12;
+  --st-descontinuado: #8a3a3a;
+  --st-arquivo: #6b6b6b;
+  --st-estudo: #6a4c9c;
+
+  /* type */
+  --font-text: "IBM Plex Sans", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --step--1: 0.875rem;
+  --step-0: 1rem;
+  --step-1: 1.25rem;
+  --step-2: 1.6rem;
+  --step-3: clamp(2rem, 5vw, 3rem);
+  --step-4: clamp(2.6rem, 8vw, 4.75rem);
+
+  /* layout */
+  --measure: 68ch;
+  --page: 64rem;
+  --gutter: clamp(1.25rem, 4vw, 2.5rem);
+  --radius: 6px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #121214;
+    --surface: #1a1a1d;
+    --text: #ececef;
+    --muted: #a1a1aa;
+    --line: #2e2e33;
+    --accent: #ff4d5e;
+    --accent-text: #ff7a87;
+    --st-ativo: #6cc28f;
+    --st-dev: #7fa8e0;
+    --st-pausado: #d9a84a;
+    --st-descontinuado: #e08a8a;
+    --st-arquivo: #a0a0a0;
+    --st-estudo: #b49ae0;
+  }
+}

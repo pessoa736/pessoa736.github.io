@@ -1,0 +1,296 @@
+// Curated list of projects. This file is the source of truth for what the site says
+// about each project: the GitHub API is only used for stars and dates (src/lib/github.ts).
+//
+// To add a project: append an entry. `repo` must be the exact repository name on GitHub,
+// because it is also the URL (/projetos/<repo>), the same slugs the old site used.
+
+/** Where a project stands, in plain words. Same vocabulary as the READMEs. */
+export type Status =
+  | "ativo"
+  | "em desenvolvimento"
+  | "pausado"
+  | "descontinuado"
+  | "arquivo"
+  | "estudo";
+
+export const STATUS_INFO: Record<Status, string> = {
+  "ativo": "funciona e eu ainda mexo nele",
+  "em desenvolvimento": "ainda não está pronto pra usar",
+  "pausado": "parado por enquanto; pode voltar",
+  "descontinuado": "não vou continuar",
+  "arquivo": "guardado como registro",
+  "estudo": "feito pra aprender uma matéria ou um assunto",
+};
+
+export type Area = "sistemas" | "lua" | "web" | "ia e redes" | "jogos";
+export const AREAS: Area[] = ["sistemas", "lua", "web", "ia e redes", "jogos"];
+
+export interface Project {
+  repo: string;              // GitHub repository name (also the URL slug)
+  title: string;             // display name
+  summary: string;           // one sentence: what it is
+  status: Status;
+  area: Area;
+  stack: string[];
+  featured?: boolean;        // shown on the home page
+  notes?: string[];          // honest details: what works, what doesn't
+  links?: { label: string; href: string }[];
+}
+
+export const projects: Project[] = [
+  // ── sistemas ──────────────────────────────────────────────
+  {
+    repo: "motosseraKernel",
+    title: "motosseraKernel",
+    summary: "Kernel bare-metal em Rust, feito por hobby e para aprender como um sistema operacional funciona por dentro.",
+    status: "em desenvolvimento",
+    area: "sistemas",
+    stack: ["Rust", "no_std", "Limine", "spin", "nalgebra"],
+    featured: true,
+    notes: ["boot pelo Limine", "sem biblioteca padrão (no_std)"],
+  },
+  {
+    repo: "PudimBasicsOpenGL",
+    title: "PudimBasicsGl",
+    summary: "Wrapper em Lua de uma biblioteca gráfica em C, base da minha engine de jogos.",
+    status: "pausado",
+    area: "sistemas",
+    stack: ["C", "Lua", "OpenGL"],
+    notes: ["feito com muita ajuda de IA (vibe code)", "testado pelo mathmancer"],
+  },
+
+  // ── lua ───────────────────────────────────────────────────
+  {
+    repo: "DLuaXML",
+    title: "DSLX",
+    summary: "Sintaxe parecida com JSX para Lua: funções viram tags XML e o arquivo é compilado para Lua puro.",
+    status: "ativo",
+    area: "lua",
+    stack: ["Lua 5.5", "LPeg", "LuaRocks"],
+    featured: true,
+    notes: [
+      "publicado no LuaRocks como daviluaxml",
+      "a versão 2.2-1 publicada não declara a dependência inspect: a instalação limpa falha até sair a 2.2-2",
+    ],
+    links: [
+      { label: "documentação", href: "https://pessoa736.github.io/DLuaXML/" },
+      { label: "LuaRocks", href: "https://luarocks.org/modules/pessoa736/daviluaxml" },
+    ],
+  },
+  {
+    repo: "Action-Chainsaw",
+    title: "Action-Chainsaw",
+    summary: "Framework web em Lua: páginas escritas em DSLX, servidas pelo Pegasus.",
+    status: "em desenvolvimento",
+    area: "lua",
+    stack: ["Lua", "DSLX", "pegasus.lua"],
+    notes: ["estágio inicial", "vai ocupar o lugar do PudimWeb e do PudimServer"],
+  },
+  {
+    repo: "HFDSLX",
+    title: "HFDSLX",
+    summary: "Funções de tags HTML para usar com DSLX; a camada de HTML do Action-Chainsaw.",
+    status: "em desenvolvimento",
+    area: "lua",
+    stack: ["Lua", "DSLX"],
+    notes: ["será reescrito: hoje sobrescreve globais e não escapa HTML"],
+  },
+  {
+    repo: "luaVirtualTypes",
+    title: "luaVirtualTypes",
+    summary: "Tipos simbólicos (virtuais) para Lua.",
+    status: "ativo",
+    area: "lua",
+    stack: ["Lua", "LuaRocks"],
+    links: [{ label: "LuaRocks", href: "https://luarocks.org/modules/pessoa736/luavirtualtypes" }],
+  },
+  {
+    repo: "puddingMoon",
+    title: "puddingMoon",
+    summary: "Minha própria linguagem de programação, escrita em Lua, por hobby.",
+    status: "pausado",
+    area: "lua",
+    stack: ["Lua"],
+  },
+  {
+    repo: "PudimWeb",
+    title: "PudimWeb",
+    summary: "Framework web para Lua inspirado em React e Next.js; foi onde o DSLX nasceu.",
+    status: "pausado",
+    area: "lua",
+    stack: ["Lua 5.4", "LuaRocks"],
+    notes: ["vai ser refeito do zero com DSLX", "o Action-Chainsaw ocupa o papel por enquanto"],
+    links: [{ label: "LuaRocks", href: "https://luarocks.org/modules/pessoa736/pudimweb" }],
+  },
+  {
+    repo: "PudimServerAPIs",
+    title: "PudimServer",
+    summary: "Servidores HTTP simples e configuráveis em Lua.",
+    status: "pausado",
+    area: "lua",
+    stack: ["Lua", "LuaRocks"],
+    notes: ["talvez não volte: o Action-Chainsaw usa o Pegasus no lugar"],
+    links: [{ label: "LuaRocks", href: "https://luarocks.org/modules/pessoa736/pudimserver" }],
+  },
+  {
+    repo: "PudimTSL",
+    title: "PudimTSL",
+    summary: "Geração de certificados TLS (autoridade e servidor) via openssl.",
+    status: "pausado",
+    area: "lua",
+    stack: ["Lua", "openssl"],
+    notes: ["o nome deveria ser TLS", "chaves salvas com permissão aberta demais; não usar em produção"],
+  },
+  {
+    repo: "loglua",
+    title: "loglua",
+    summary: "Sistema de log em memória, com seções, modo ao vivo e gravação em arquivo.",
+    status: "pausado",
+    area: "lua",
+    stack: ["Lua", "LuaRocks"],
+    notes: ["feito com muita ajuda de IA (vibe code)", "funciona, mas não uso nos meus projetos hoje"],
+    links: [{ label: "LuaRocks", href: "https://luarocks.org/modules/pessoa736/loglua" }],
+  },
+  {
+    repo: "Pudim-Structures-Mapper",
+    title: "Pudim-Structures-Mapper",
+    summary: "Mapeador de estruturas do ecossistema Pudim.",
+    status: "pausado",
+    area: "lua",
+    stack: ["Lua"],
+    notes: ["ainda não sei se ele precisa existir; se voltar, será reescrito"],
+  },
+  {
+    repo: "VectorAndMatrixSystemLua",
+    title: "VMSL",
+    summary: "Vetores e matrizes em N dimensões, com o núcleo em C.",
+    status: "estudo",
+    area: "lua",
+    stack: ["Lua", "C", "LuaRocks"],
+    notes: ["feito para estudar álgebra matricial e vetorial no 1º semestre", "inacabado"],
+    links: [{ label: "LuaRocks", href: "https://luarocks.org/modules/pessoa736/vmsl" }],
+  },
+  {
+    repo: "allua",
+    title: "allua",
+    summary: "Recomeço do VMSL com tensores, para estudar álgebra linear.",
+    status: "estudo",
+    area: "lua",
+    stack: ["Lua"],
+    notes: ["os arquivos de matrizes e vetores se perderam quando meu celular foi furtado", "inacabado"],
+  },
+  {
+    repo: "pudding-transforms",
+    title: "pudding-transforms",
+    summary: "Tentativa de biblioteca de transformações em Lua.",
+    status: "descontinuado",
+    area: "lua",
+    stack: ["Lua"],
+    notes: ["feito com muita ajuda de IA (vibe code)", "o deeplearniglua seguiu a ideia"],
+  },
+
+  // ── ia e redes ────────────────────────────────────────────
+  {
+    repo: "SixEyesDNS",
+    title: "SixEyesDNS",
+    summary: "Detecção de tunelamento DNS com autoencoders, projeto da disciplina de Deep Learning.",
+    status: "em desenvolvimento",
+    area: "ia e redes",
+    stack: ["Python", "PyTorch", "Gradio", "Docker"],
+    featured: true,
+    notes: ["aprovado na parte 1 da disciplina"],
+  },
+  {
+    repo: "redes-de-computadores-2",
+    title: "Redes de Computadores 2",
+    summary: "Laboratório da disciplina: Nginx com balanceamento, DHCP, DNS e DDNS em Docker, com testes em Bash.",
+    status: "estudo",
+    area: "ia e redes",
+    stack: ["Docker", "Nginx", "Bash"],
+    featured: true,
+  },
+  {
+    repo: "deeplearniglua",
+    title: "deeplearniglua",
+    summary: "Rede neural escrita em Lua para estudar a matéria de Deep Learning.",
+    status: "estudo",
+    area: "ia e redes",
+    stack: ["Lua"],
+  },
+
+  // ── web ───────────────────────────────────────────────────
+  {
+    repo: "ODS7",
+    title: "ODS7",
+    summary: "Site interativo sobre engenharia de energia (fontes, matriz energética brasileira), feito para a disciplina de ICT.",
+    status: "arquivo",
+    area: "web",
+    stack: ["TypeScript", "Next.js", "shadcn/ui"],
+    links: [{ label: "no ar", href: "https://ods-7.vercel.app" }],
+  },
+  {
+    repo: "lifegameConway-react",
+    title: "Jogo da vida de Conway",
+    summary: "O jogo da vida de Conway em Next.js com TypeScript.",
+    status: "arquivo",
+    area: "web",
+    stack: ["TypeScript", "Next.js"],
+    links: [{ label: "no ar", href: "https://pessoa736.github.io/lifegameConway-react/" }],
+  },
+  {
+    repo: "pdv-test-in-rust-with-leptos",
+    title: "PDV em Rust",
+    summary: "Teste de ponto de venda em Rust com Leptos.",
+    status: "pausado",
+    area: "web",
+    stack: ["Rust", "Leptos"],
+  },
+
+  // ── jogos ─────────────────────────────────────────────────
+  {
+    repo: "mathmancer",
+    title: "mathmancer",
+    summary: "Jogo que comecei no GameMaker e virou o teste da minha engine.",
+    status: "pausado",
+    area: "jogos",
+    stack: ["Lua", "PudimBasicsGl"],
+    notes: ["por enquanto só dá pra andar", "a arte é minha"],
+  },
+  {
+    repo: "tic80-projetos",
+    title: "Projetos de TIC-80",
+    summary: "Meus projetos de TIC-80 de 2020 a 2024, resgatados de um HD antigo.",
+    status: "arquivo",
+    area: "jogos",
+    stack: ["Lua", "TIC-80"],
+  },
+  {
+    repo: "Jogo-de-batalha-naval-no-p5.js",
+    title: "Batalha naval",
+    summary: "Batalha naval em p5.js, desafio da disciplina de Lógica de Programação.",
+    status: "arquivo",
+    area: "jogos",
+    stack: ["JavaScript", "p5.js"],
+    links: [{ label: "no ar", href: "https://pessoa736.github.io/Jogo-de-batalha-naval-no-p5.js/" }],
+  },
+  {
+    repo: "impar-ou-par",
+    title: "Ímpar ou par",
+    summary: "Jogo de ímpar ou par da disciplina de Lógica de Programação.",
+    status: "arquivo",
+    area: "jogos",
+    stack: ["JavaScript"],
+    links: [{ label: "no ar", href: "https://pessoa736.github.io/impar-ou-par/" }],
+  },
+  {
+    repo: "Super-Careca-Man",
+    title: "Super Careca Man",
+    summary: "Jogo de plataforma 2D da disciplina de HTML, CSS e JavaScript do curso técnico em informática.",
+    status: "arquivo",
+    area: "jogos",
+    stack: ["JavaScript"],
+    links: [{ label: "no ar", href: "https://pessoa736.github.io/Super-Careca-Man/" }],
+  },
+];
+
+export const projectByRepo = (repo: string) => projects.find((p) => p.repo === repo);

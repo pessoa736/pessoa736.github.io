@@ -1,0 +1,74 @@
+---
+// One page per project, at /projetos/<repo name> (same URLs as the old site).
+import Base from "../../layouts/Base.astro";
+import StatusBadge from "../../components/StatusBadge.astro";
+import { projects, STATUS_INFO, type Project } from "../../data/projects";
+import { getRepoStats } from "../../lib/github";
+
+export function getStaticPaths() {
+  return projects.map((project) => ({ params: { repo: project.repo }, props: { project } }));
+}
+
+const { project } = Astro.props as { project: Project };
+const stats = (await getRepoStats())[project.repo];
+const repoUrl = `https://github.com/pessoa736/${project.repo}`;
+
+// The homepage set on GitHub counts as a link too, unless it's already listed.
+const links = [...(project.links ?? [])];
+if (stats?.homepage && !links.some((l) => l.href.replace(/\/$/, "") === stats.homepage!.replace(/\/$/, ""))) {
+  links.push({ label: "site", href: stats.homepage });
+}
+const updated = stats && new Date(stats.pushedAt).toLocaleDateString("pt-BR", { day: "numeric", month: "long", year: "numeric" });
+---
+<Base title={project.title} description={project.summary}>
+  <p class="back"><a href="/projetos">Todos os projetos</a></p>
+
+  <header class="head">
+    <h1>{project.title}</h1>
+    <p class="summary">{project.summary}</p>
+    <p class="state"><StatusBadge status={project.status} /> <span class="muted">{STATUS_INFO[project.status]}</span></p>
+  </header>
+
+  <div class="body">
+    <div class="main">
+      {project.notes && project.notes.length > 0 && (
+        <section>
+          <h2>Bom saber</h2>
+          <ul>{project.notes.map((n) => <li>{n}</li>)}</ul>
+        </section>
+      )}
+      <section>
+        <h2>Links</h2>
+        <ul class="links">
+          <li><a href={repoUrl}>Código no GitHub</a></li>
+          {links.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
+        </ul>
+      </section>
+    </div>
+
+    <dl class="facts">
+      <div><dt>área</dt><dd>{project.area}</dd></div>
+      <div><dt>feito com</dt><dd>{project.stack.join(", ")}</dd></div>
+      {stats && <div><dt>último envio</dt><dd>{updated}</dd></div>}
+      {stats && <div><dt>estrelas</dt><dd>{stats.stars}</dd></div>}
+    </dl>
+  </div>
+</Base>
+
+<style>
+  .back { font-size: var(--step--1); }
+  .head { margin-top: 1.5rem; }
+  .summary { font-size: var(--step-1); line-height: 1.5; margin-top: 0.9rem; }
+  .state { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; align-items: baseline; margin-top: 1rem; }
+  .body { display: grid; grid-template-columns: 1fr 16rem; gap: 2rem 4rem; margin-top: 3rem; }
+  .main section + section { margin-top: 2.5rem; }
+  h2 { font-size: var(--step-1); margin-bottom: 0.75rem; }
+  .main ul { padding-left: 1.2rem; display: grid; gap: 0.4rem; }
+  .facts { display: grid; gap: 1rem; align-content: start; padding-left: 1.5rem; border-left: 1px solid var(--line); }
+  .facts dt { font-size: var(--step--1); color: var(--muted); }
+  .facts dd { margin: 0; }
+  @media (max-width: 720px) {
+    .body { grid-template-columns: 1fr; }
+    .facts { padding-left: 0; border-left: 0; border-top: 1px solid var(--line); padding-top: 1.5rem; }
+  }
+</style>

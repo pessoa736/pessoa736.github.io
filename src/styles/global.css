@@ -1,0 +1,65 @@
+/* Base styles shared by every page. Colours and sizes come from tokens.css. */
+@import "@fontsource/ibm-plex-sans/400.css";
+@import "@fontsource/ibm-plex-sans/400-italic.css";
+@import "@fontsource/ibm-plex-sans/600.css";
+@import "@fontsource/ibm-plex-mono/400.css";
+@import "@fontsource/ibm-plex-mono/600.css";
+@import "./tokens.css";
+
+*, *::before, *::after { box-sizing: border-box; }
+* { margin: 0; }
+
+html { color-scheme: light dark; -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font: var(--step-0)/1.6 var(--font-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+img { display: block; max-width: 100%; height: auto; }
+
+a { color: inherit; text-decoration-color: var(--line); text-underline-offset: 0.2em; text-decoration-thickness: 1px; }
+a:hover { color: var(--accent-text); text-decoration-color: currentColor; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
+
+h1, h2, h3 { line-height: 1.15; font-weight: 600; letter-spacing: -0.01em; }
+h1 { font-size: var(--step-3); }
+h2 { font-size: var(--step-2); }
+h3 { font-size: var(--step-1); }
+
+p, li { max-width: var(--measure); }
+code, kbd, pre { font-family: var(--font-mono); font-size: 0.92em; }
+
+/* page frame */
+.wrap { max-width: var(--page); margin-inline: auto; padding-inline: var(--gutter); }
+main { padding-block: 3.5rem 5rem; }
+.stack > * + * { margin-top: 1rem; }
+.muted { color: var(--muted); }
+.mono { font-family: var(--font-mono); }
+
+.skip {
+  position: absolute; left: 1rem; top: -3rem; z-index: 10;
+  padding: 0.5rem 0.9rem; border-radius: var(--radius);
+  background: var(--text); color: var(--bg); text-decoration: none;
+}
+.skip:focus { top: 1rem; }
+
+/* section heading with a short description under it */
+.section { margin-top: 4.5rem; }
+.section > header { margin-bottom: 1.5rem; }
+.section > header p { color: var(--muted); margin-top: 0.35rem; }
+
+/* prose (blog posts, project text) */
+.prose { max-width: var(--measure); }
+.prose > * + * { margin-top: 1.1em; }
+.prose h2 { margin-top: 2.2em; }
+.prose h3 { margin-top: 1.8em; }
+.prose ul, .prose ol { padding-left: 1.3em; }
+.prose pre { padding: 1rem 1.1rem; overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); line-height: 1.5; }
+.prose :not(pre) > code { background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 0.05em 0.3em; }
+.prose blockquote { border-left: 3px solid var(--line); padding-left: 1rem; color: var(--muted); }
+
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
