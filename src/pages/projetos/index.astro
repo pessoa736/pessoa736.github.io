@@ -1,0 +1,93 @@
+---
+import Base from "../../layouts/Base.astro";
+import ProjectRow from "../../components/ProjectRow.astro";
+import StatusBadge from "../../components/StatusBadge.astro";
+import { projects, AREAS, STATUS_INFO, type Status } from "../../data/projects";
+import { getRepoStats } from "../../lib/github";
+
+const stats = await getRepoStats();
+
+// Most alive first, then most recently pushed.
+const ORDER: Status[] = ["ativo", "em desenvolvimento", "estudo", "pausado", "arquivo", "descontinuado"];
+const sorted = [...projects].sort((a, b) =>
+  ORDER.indexOf(a.status) - ORDER.indexOf(b.status) ||
+  (stats[b.repo]?.pushedAt ?? "").localeCompare(stats[a.repo]?.pushedAt ?? ""),
+);
+---
+<Base title="projetos" description="Todos os projetos do Davi, com o estado real de cada um.">
+  <header class="page-head">
+    <h1>Projetos</h1>
+    <p class="muted">
+      Tudo o que está no meu GitHub e vale mostrar, com o estado real de cada projeto:
+      o que funciona, o que parou e o que foi feito para estudar.
+    </p>
+  </header>
+
+  <details class="legend">
+    <summary>O que cada estado quer dizer</summary>
+    <dl>
+      {ORDER.map((s) => (<div><dt><StatusBadge status={s} /></dt><dd>{STATUS_INFO[s]}</dd></div>))}
+    </dl>
+  </details>
+
+  <!-- Filters work without a page reload; without JavaScript every project stays visible. -->
+  <div class="filters" role="group" aria-label="Filtrar por área" hidden>
+    <button type="button" data-area="" aria-pressed="true">todas</button>
+    {AREAS.map((a) => <button type="button" data-area={a} aria-pressed="false">{a}</button>)}
+  </div>
+  <p class="count muted" aria-live="polite"><span id="count">{sorted.length}</span> projetos</p>
+
+  <ul class="list" id="lista">
+    {sorted.map((p) => <ProjectRow project={p} stats={stats[p.repo]} />)}
+  </ul>
+</Base>
+
+<script>
+  const group = document.querySelector<HTMLElement>(".filters")!;
+  const rows = [...document.querySelectorAll<HTMLElement>("#lista > li")];
+  const count = document.getElementById("count")!;
+  group.hidden = false;
+
+  function apply(area: string) {
+    let shown = 0;
+    for (const row of rows) {
+      const visible = !area || row.dataset.area === area;
+      row.hidden = !visible;
+      if (visible) shown++;
+    }
+    count.textContent = String(shown);
+    for (const b of group.querySelectorAll("button")) b.setAttribute("aria-pressed", String(b.dataset.area === area));
+    // keep the choice in the URL so it can be shared and survives "back"
+    const url = new URL(location.href);
+    area ? url.searchParams.set("area", area) : url.searchParams.delete("area");
+    history.replaceState(null, "", url);
+  }
+
+  group.addEventListener("click", (e) => {
+    const button = (e.target as HTMLElement).closest("button");
+    if (button) apply(button.dataset.area ?? "");
+  });
+  apply(new URL(location.href).searchParams.get("area") ?? "");
+</script>
+
+<style>
+  .page-head p { margin-top: 0.75rem; font-size: var(--step-1); line-height: 1.5; }
+  .legend { margin-top: 2rem; }
+  .legend summary { cursor: pointer; color: var(--muted); padding-block: 0.4rem; }
+  .legend dl { display: grid; gap: 0.4rem; margin-top: 0.6rem; }
+  .legend div { display: grid; grid-template-columns: 11rem 1fr; gap: 1rem; }
+  .legend dd { margin: 0; color: var(--muted); }
+
+  .filters { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 2rem; }
+  .filters button {
+    font: inherit; font-size: var(--step--1);
+    min-height: 2.5rem; padding: 0.35rem 0.9rem;
+    color: var(--text); background: transparent;
+    border: var(--frame) solid var(--line); border-radius: 0; cursor: pointer;
+  }
+  .filters button:hover { border-color: var(--muted); }
+  .filters button[aria-pressed="true"] { background: var(--text); color: var(--bg); border-color: var(--text); }
+  .count { margin-top: 1.25rem; font-size: var(--step--1); }
+  .list { list-style: none; padding: 0; margin-top: 0.5rem; border-bottom: var(--frame) solid var(--line); }
+  @media (max-width: 520px) { .legend div { grid-template-columns: 1fr; gap: 0; } }
+</style>

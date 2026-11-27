@@ -1,0 +1,42 @@
+---
+import Base from "../../layouts/Base.astro";
+import { getCollection } from "astro:content";
+
+const posts = (await getCollection("escritos", ({ data }) => !(import.meta.env.PROD && data.draft)))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+---
+<Base title="escritos" description="Notas técnicas do Davi sobre o que estou aprendendo e construindo.">
+  <header class="page-head">
+    <h1>Escritos</h1>
+    <p class="muted">Notas técnicas sobre o que estou aprendendo e construindo.</p>
+  </header>
+
+  {posts.length === 0 ? (
+    <p class="empty">Ainda não publiquei nenhum texto. Enquanto isso, os <a href="/projetos">projetos</a> mostram no que estou trabalhando.</p>
+  ) : (
+    <ul class="list">
+      {posts.map((post) => (
+        <li>
+          <h2><a href={`/escritos/${post.id}`}>{post.data.title}</a></h2>
+          <p>{post.data.description}</p>
+          <p class="meta muted">
+            <time datetime={post.data.date.toISOString()}>{post.data.date.toLocaleDateString("pt-BR", { day: "numeric", month: "long", year: "numeric" })}</time>
+            {post.data.tags.length > 0 && <span>{post.data.tags.join(", ")}</span>}
+          </p>
+        </li>
+      ))}
+    </ul>
+  )}
+</Base>
+
+<style>
+  .page-head p { margin-top: 0.75rem; font-size: var(--step-1); }
+  .empty { margin-top: 3rem; padding: 1.5rem; border: 1px dashed var(--line); border-radius: var(--radius); }
+  .list { list-style: none; padding: 0; margin-top: 2.5rem; border-bottom: var(--frame) solid var(--line); }
+  .list li { padding-block: 1.4rem; border-top: var(--frame) solid var(--line); }
+  .list h2 { font-size: var(--step-1); }
+  .list h2 a { text-decoration: none; }
+  .list h2 a:hover { text-decoration: underline; }
+  .list p { margin-top: 0.4rem; }
+  .meta { display: flex; gap: 1.25rem; font-size: var(--step--1); }
+</style>

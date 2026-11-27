@@ -1,0 +1,111 @@
+---
+import Base from "../layouts/Base.astro";
+
+const stack = [
+  { area: "linguagens", items: "Lua, Rust, C, TypeScript, JavaScript, Python", note: "as preferidas são Lua e Rust" },
+  { area: "sistemas", items: "Rust no_std, Limine, spin", note: "o motosseraKernel é onde isso vive" },
+  { area: "redes e infraestrutura", items: "Docker, Nginx, DHCP, DNS, Bash", note: "do laboratório de Redes 2" },
+  { area: "web", items: "Astro, Next.js, React, Tailwind", note: "este site é feito com Astro" },
+  { area: "ferramentas", items: "Git, GitHub Actions, GitHub Pages, LuaRocks, Neovim", note: "" },
+];
+const interests = [
+  ["computação", "kernels, compiladores, redes, engines"],
+  ["matemática", "álgebra linear, transformações, espaços vetoriais"],
+  ["design", "sistemas com identidade própria"],
+  ["música", "rock, disco, anos 80, vaporwave, jpop, punk"],
+];
+---
+<Base title="sobre" description="Quem é o Davi: formação, o que sei fazer, o que procuro e como falar comigo.">
+  <header class="page-head">
+    <h1>Sobre</h1>
+    <p>
+      Sou o Davi, estudante do Bacharelado Interdisciplinar em Ciência e Tecnologia na
+      Escola de Ciência e Tecnologia (ECT) da UFRN. Gosto de entender por que algo funciona
+      antes de usar, e de construir as coisas do zero para ver por dentro.
+    </p>
+  </header>
+
+  <section class="section" aria-labelledby="procuro">
+    <h2 id="procuro">O que procuro</h2>
+    <p class="callout">
+      <strong>Bolsa de pesquisa ou estágio.</strong> Tenho mais experiência com sistemas,
+      linguagens e redes, mas topo aprender o que o trabalho pedir.
+      Fale comigo por <a href="mailto:pessoa736@users.noreply.github.com">e-mail</a>.
+    </p>
+  </section>
+
+  <section class="section" aria-labelledby="formacao">
+    <h2 id="formacao">Formação</h2>
+    <dl class="cv">
+      <div>
+        <dt>ago/2025 a ago/2028 (em curso)</dt>
+        <dd>
+          <strong>Bacharelado Interdisciplinar em Ciência e Tecnologia</strong><br />
+          Escola de Ciência e Tecnologia, Universidade Federal do Rio Grande do Norte
+        </dd>
+      </div>
+      <div>
+        <dt>antes da UFRN (não concluído)</dt>
+        <dd>
+          <strong>Curso técnico em informática</strong>, Grau Técnico<br />
+          saí faltando 5 matérias quando entrei na UFRN; foi onde fiz os primeiros jogos em HTML, CSS e JavaScript
+        </dd>
+      </div>
+    </dl>
+  </section>
+
+  <section class="section" aria-labelledby="sei">
+    <h2 id="sei">O que sei usar</h2>
+    <dl class="cv">
+      {stack.map((s) => (
+        <div>
+          <dt>{s.area}</dt>
+          <dd>{s.items}{s.note && <span class="muted"> ({s.note})</span>}</dd>
+        </div>
+      ))}
+    </dl>
+    <p class="more"><a href="/projetos">Os projetos mostram isso na prática.</a></p>
+  </section>
+
+  <section class="section" aria-labelledby="como">
+    <h2 id="como">Como eu trabalho</h2>
+    <p>
+      Aprendo melhor quando vejo o problema de verdade, não só a solução. Comento código
+      explicando o porquê, não o óbvio. E digo quando algo foi feito com muita ajuda de IA,
+      quando está pela metade ou quando parou: está escrito em cada projeto.
+    </p>
+  </section>
+
+  <section class="section" aria-labelledby="interesses">
+    <h2 id="interesses">Interesses</h2>
+    <dl class="cv">
+      {interests.map(([a, b]) => (<div><dt>{a}</dt><dd>{b}</dd></div>))}
+    </dl>
+    <p class="more">
+      Desenho de vez em quando e posto no <a href="https://instagram.com/pessoa736">Instagram</a> e no <a href="https://x.com/pessoa736">X</a>.
+    </p>
+  </section>
+
+  <section class="section" aria-labelledby="contato">
+    <h2 id="contato">Contato</h2>
+    <ul class="contact">
+      <li><a href="mailto:pessoa736@users.noreply.github.com">pessoa736@users.noreply.github.com</a></li>
+      <li><a href="https://github.com/pessoa736">github.com/pessoa736</a></li>
+      <li><a href="https://instagram.com/pessoa736">instagram.com/pessoa736</a></li>
+      <li><a href="https://x.com/pessoa736">x.com/pessoa736</a></li>
+    </ul>
+  </section>
+</Base>
+
+<style>
+  .page-head p { margin-top: 1rem; font-size: var(--step-1); line-height: 1.5; }
+  h2 { margin-bottom: 1rem; }
+  .callout { padding: 1.1rem 1.3rem; border-left: 3px solid var(--accent); background: var(--surface); border-radius: 0 var(--radius) var(--radius) 0; }
+  .cv { display: grid; gap: 1rem; }
+  .cv div { display: grid; grid-template-columns: 14rem 1fr; gap: 0.25rem 1.5rem; padding-top: 1rem; border-top: var(--frame) solid var(--line); }
+  .cv dt { color: var(--muted); }
+  .cv dd { margin: 0; }
+  .more { margin-top: 1.25rem; }
+  .contact { list-style: none; padding: 0; display: grid; gap: 0.5rem; }
+  @media (max-width: 640px) { .cv div { grid-template-columns: 1fr; } }
+</style>

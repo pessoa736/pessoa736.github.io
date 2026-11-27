@@ -1,34 +1,23 @@
 {
   "name": "pessoa736.github.io",
-  "version": "0.1.0",
+  "type": "module",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --webpack",
-    "build": "next build --webpack",
-    "start": "next start",
-    "lint": "eslint",
-    "enrich-docs": "tsx scripts/enrich-docs.ts",
-    "enrich-docs:fast": "tsx scripts/enrich-docs.ts 0 999 1500"
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "cache:github": "node scripts/cache-github.mjs"
   },
   "dependencies": {
-    "@tailwindcss/vite": "^4.1.18",
-    "lucide-react": "^1.22.0",
-    "motion": "^12.33.0",
-    "next": "16.1.6",
-    "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "@astrojs/check": "^0.9.12",
+    "@fontsource/jost": "^5.3.0",
+    "@fontsource/space-mono": "^5.3.0",
+    "astro": "^7.4.13",
+    "typescript": "^6.0.3"
   },
   "devDependencies": {
-    "@tailwindcss/cli": "^4.1.18",
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "babel-plugin-react-compiler": "1.0.0",
-    "eslint": "^9",
-    "eslint-config-next": "16.1.6",
-    "tailwindcss": "^4.1.18",
-    "tsx": "^4.22.4",
-    "typescript": "^5"
+    "@types/node": "^26.6.11"
   }
 }

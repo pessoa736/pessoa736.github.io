@@ -1,0 +1,34 @@
+---
+// One project as a row in a list: name, what it is, status, stack, last update.
+import type { Project } from "../data/projects";
+import type { RepoStats } from "../lib/github";
+import StatusBadge from "./StatusBadge.astro";
+
+interface Props { project: Project; stats?: RepoStats }
+const { project, stats } = Astro.props;
+
+const updated = stats
+  ? new Date(stats.pushedAt).toLocaleDateString("pt-BR", { month: "short", year: "numeric" })
+  : null;
+---
+<li class="row" data-area={project.area} data-status={project.status}>
+  <div class="head">
+    <h3><a href={`/projetos/${project.repo}`}>{project.title}</a></h3>
+    <StatusBadge status={project.status} />
+  </div>
+  <p class="summary">{project.summary}</p>
+  <p class="meta">
+    <span>{project.stack.join(", ")}</span>
+    {updated && <span>atualizado em {updated}</span>}
+  </p>
+</li>
+
+<style>
+  .row { padding-block: 1.1rem; border-top: var(--frame) solid var(--line); max-width: none; }
+  .head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; }
+  h3 { font-size: var(--step-1); }
+  h3 a { text-decoration: none; }
+  h3 a:hover { text-decoration: underline; }
+  .summary { margin-top: 0.3rem; }
+  .meta { display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem; margin-top: 0.4rem; color: var(--muted); font-size: var(--step--1); }
+</style>

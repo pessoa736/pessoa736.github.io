@@ -1,0 +1,73 @@
+/* Design tokens: the whole look of the site lives here.
+
+   Direction (from Davi's references): brutalist structure, surrealism,
+   vintage-futurist space posters. Sand paper, warm ink, a deep teal "void"
+   for the space plates, and one signal orange.
+
+     paper   #e3d4b0   page background (sand, like an old printed poster)
+     ink     #221f1a   text and the heavy frames
+     void    #10201f   deep space plates (hero orrery)
+     signal  #e0521c   the sun, the dot after "davi.", focus
+     ash     #6e6553   secondary text
+
+   Dark mode keeps the same world: the page becomes the void, text becomes paper. */
+
+:root {
+  --paper: #e3d4b0;
+  --paper-2: #ecdfbf;          /* raised panels */
+  --ink: #221f1a;
+  --void: #10201f;
+  --signal: #e0521c;
+  --signal-text: #a8350c;      /* orange dark enough for text on paper (>= 4.5:1) */
+  --ash: #6e6553;
+
+  --bg: var(--paper);
+  --surface: var(--paper-2);
+  --text: var(--ink);
+  --muted: var(--ash);
+  --line: var(--ink);
+  --accent: var(--signal);
+  --accent-text: var(--signal-text);
+
+  /* status: dot + word, colour is never the only signal */
+  --st-ativo: #2f6b3f;
+  --st-dev: #24507a;
+  --st-pausado: #8a5a0c;
+  --st-descontinuado: #8a2f22;
+  --st-arquivo: #5e584c;
+  --st-estudo: #5b3f86;
+
+  /* type: one geometric family (Futura-like) + a mono for the HUD only */
+  --font-text: "Jost", "Futura", "Century Gothic", system-ui, sans-serif;
+  --font-mono: "Space Mono", ui-monospace, monospace;
+  --step--1: 0.875rem;
+  --step-0: 1.0625rem;
+  --step-1: 1.3rem;
+  --step-2: 1.75rem;
+  --step-3: clamp(2.2rem, 5.5vw, 3.4rem);
+  --step-4: clamp(3.2rem, 11vw, 8rem);
+
+  /* layout */
+  --frame: 2px;                /* brutalist rule weight */
+  --measure: 66ch;
+  --page: 72rem;
+  --gutter: clamp(1rem, 3.5vw, 2.5rem);
+  --radius: 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: var(--void);
+    --surface: #16302e;
+    --text: #e3d4b0;
+    --muted: #a99d82;
+    --line: #e3d4b0;
+    --accent-text: #f2804f;
+    --st-ativo: #8fcf9c;
+    --st-dev: #8fb6e0;
+    --st-pausado: #e2b25a;
+    --st-descontinuado: #ec9585;
+    --st-arquivo: #b3aa96;
+    --st-estudo: #c2a8ec;
+  }
+}
