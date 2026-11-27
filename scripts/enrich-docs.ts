@@ -10,8 +10,8 @@
 // Quando você sobe pra gh-pages, basta rodar uma vez em dev e commitar
 // o conteúdo de `.cache/repo-docs/` (ou usar o hook do repo pra repopular).
 
-import { fetchRepoDocs } from "../src/lib/github";
-import { writeRepoDocsCache } from "../src/lib/repoDocsCache";
+import { fetchRepoAssets, type GhRepo } from "../src/lib/github";
+import { writeRepoAssetsCache } from "../src/lib/repoDocsCache";
 import { siteConfig } from "../src/config/site";
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -35,10 +35,19 @@ interface GhRepoFull {
   forks_count: number;
   archived: boolean;
   fork: boolean;
+<<<<<<< HEAD
   default_branch: string;
 }
 
 async function listReposOrdered(owner: string): Promise<GhRepoFull[]> {
+=======
+  has_pages: boolean;
+}
+
+async function listReposOrdered(
+  owner: string,
+): Promise<{ name: string; hasPages: boolean }[]> {
+>>>>>>> 0796a56 (refactor(lib): separar RepoDocs em RepoAssets (sources: pages/docs))
   const res = await fetch(
     `https://api.github.com/users/${owner}/repos?per_page=100&sort=updated`,
     {
@@ -55,7 +64,21 @@ async function listReposOrdered(owner: string): Promise<GhRepoFull[]> {
   if (!res.ok) {
     throw new Error(`GitHub ${res.status} ao listar repos`);
   }
+<<<<<<< HEAD
   return (await res.json()) as GhRepoFull[];
+=======
+  const data = (await res.json()) as GhRepoLite[];
+  const blacklist = new Set(siteConfig.blacklist);
+  return data
+    .filter(
+      (r) =>
+        !r.archived &&
+        !r.fork &&
+        r.name !== siteConfig.self.repoName &&
+        !blacklist.has(r.name),
+    )
+    .map((r) => ({ name: r.name, hasPages: r.has_pages }));
+>>>>>>> 0796a56 (refactor(lib): separar RepoDocs em RepoAssets (sources: pages/docs))
 }
 
 function sleep(ms: number): Promise<void> {
@@ -76,6 +99,7 @@ async function main() {
   const owner = siteConfig.owner;
   console.log(`[enrich-docs] owner=${owner} start=${start} count=${count} gapMs=${gapMs}`);
 
+<<<<<<< HEAD
   const all = await listReposOrdered(owner);
   // Cacheia a lista COMPLETA (sem filtro) em `.cache/repos.json` — a build
   // lê daqui e nunca mais faz rede pra listar repos. Também atualiza o
@@ -93,6 +117,12 @@ async function main() {
   const sliced = valid.slice(start, start + count);
   if (!sliced.length) {
     console.log(`[enrich-docs] nada pra fazer (total=${valid.length})`);
+=======
+  const repos = await listReposOrdered(owner);
+  const sliced = repos.slice(start, start + count);
+  if (!sliced.length) {
+    console.log(`[enrich-docs] nada pra fazer (total=${repos.length})`);
+>>>>>>> 0796a56 (refactor(lib): separar RepoDocs em RepoAssets (sources: pages/docs))
     return;
   }
 
@@ -101,14 +131,20 @@ async function main() {
   let fail = 0;
 
   for (let i = 0; i < sliced.length; i++) {
+<<<<<<< HEAD
     const repo = sliced[i].name;
     process.stdout.write(`[enrich-docs] ${i + 1}/${sliced.length} ${repo} ... `);
+=======
+    const r = sliced[i];
+    const source = r.hasPages ? "public/" : "docs/";
+    process.stdout.write(`[enrich-docs] ${i + 1}/${sliced.length} ${r.name} [${source}] ... `);
+>>>>>>> 0796a56 (refactor(lib): separar RepoDocs em RepoAssets (sources: pages/docs))
     try {
-      const docs = await fetchRepoDocs(owner, repo);
-      writeRepoDocsCache(owner, repo, docs);
-      if (docs === null) empty += 1;
+      const assets = await fetchRepoAssets(owner, r.name, r.hasPages);
+      writeRepoAssetsCache(owner, r.name, assets);
+      if (assets === null) empty += 1;
       else ok += 1;
-      console.log("ok" + (docs === null ? " (sem docs/)" : ""));
+      console.log("ok" + (assets === null ? " (sem pasta)" : ""));
     } catch (e) {
       fail += 1;
       console.log("ERROR " + String(e).slice(0, 80));

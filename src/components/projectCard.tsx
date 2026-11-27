@@ -67,9 +67,9 @@ export default function ProjectCard({ repo, size = "md" }: Props) {
         </div>
       </div>
 
-      {size === "lg" && (repo.docs?.description ?? repo.description) && (
+      {size === "lg" && (repo.assets?.description ?? repo.description) && (
         <p className="mt-3 text-sm opacity-70 line-clamp-2">
-          {repo.docs?.description ?? repo.description}
+          {repo.assets?.description ?? repo.description}
         </p>
       )}
     </Link>

@@ -1,4 +1,5 @@
 import { getAllRepos } from "mySite/lib/github";
+import { withCachedAssets } from "mySite/lib/repoDocsCache";
 import { siteConfig } from "mySite/config/site";
 import Hero from "mySite/plates/hero";
 import Now from "mySite/plates/now";
@@ -17,7 +18,10 @@ const now = [
 export default async function Home() {
   let repos: Awaited<ReturnType<typeof getAllRepos>> = [];
   try {
-    repos = await getAllRepos();
+    // Pega a lista do GitHub + (sem rede) enriquece com assets do cache local
+    // populado por `npm run enrich-docs`. Cards caem no fallback do
+    // `ghPagesThumb` quando não há cache.
+    repos = await withCachedAssets(await getAllRepos());
   } catch {
     /* sem rede — site ainda renderiza */
   }

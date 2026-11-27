@@ -9,7 +9,7 @@ import {
   renderMarkdown,
   projectSlug,
 } from "mySite/lib/github";
-import { getRepoDocsCached } from "mySite/lib/repoDocsCache";
+import { getRepoAssetsCached } from "mySite/lib/repoDocsCache";
 import { siteConfig } from "mySite/config/site";
 import Reveal from "mySite/components/reveal";
 import Highlight from "mySite/components/highlight";
@@ -43,10 +43,14 @@ export default async function ProjectPage({ params }: PageProps) {
   const repo = repos.find((r) => projectSlug(r.name) === slug);
   if (!repo) notFound();
 
-  // docs/ enriquecido SEM rede — só lê de `.cache/repo-docs/`.
-  // Cache é populado pelo endpoint /api/enrich-docs.
-  const docs = await getRepoDocsCached(repo.name);
+  // assets enriquecido SEM rede — só lê de `.cache/repo-docs/`.
+  // Cache é populado por `npm run enrich-docs`.
+  const assets = await getRepoAssetsCached(repo.name);
 
+<<<<<<< HEAD
+=======
+  const thumb = assets?.thumb ?? ghPagesThumb(repo);
+>>>>>>> 0796a56 (refactor(lib): separar RepoDocs em RepoAssets (sources: pages/docs))
   const live =
     repo.homepage || (repo.has_pages ? `https://${siteConfig.owner}.github.io/${repo.name}/` : null);
 
@@ -61,7 +65,9 @@ export default async function ProjectPage({ params }: PageProps) {
     readmeHtml = "<p>README indisponível.</p>";
   }
 
-  const description = docs?.description ?? repo.description;
+  const description = assets?.description ?? repo.description;
+  const gallery = assets?.gallery ?? [];
+  const settingFeatured = assets?.settings?.featured === true;
 
   return (
     <main className="pt-24 pb-16 px-4 sm:px-8 max-w-3xl mx-auto">
