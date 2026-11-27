@@ -1,14 +1,17 @@
 ---
-// Davi's cut-out portrait on a piece of deep space, seen through an old tube TV:
-// the tube-TV texture itself is applied to the whole screen in global.css.
-// The image file is clean (background removed by `npm run foto`); every effect is CSS,
-// so changing the photo never means redoing the filter.
+// Davi's cut-out portrait on a piece of deep space. The tube-TV texture is applied
+// to the whole screen in global.css; the sepia tone is baked into the file by
+// `npm run foto`, which also removes the background.
+//
+// The photo is drawn as a background image (not an <img>) and shakes by moving
+// its background-position. Moving it as a layer (translate) made Chromium sometimes
+// skip painting the picture.
 interface Props { src?: string; alt?: string }
 const { src = "/images/eu-recorte.webp", alt = "Foto do Davi" } = Astro.props;
 ---
 <figure class="tv">
   <div class="sun jitter slow" aria-hidden="true"></div>
-  <div class="screen jitter alt"><img src={src} alt={alt} width="900" height="1000" loading="eager" decoding="async" /></div>
+  <div class="screen" role="img" aria-label={alt} style={`--photo: url("${src}")`}></div>
 </figure>
 
 <style>
@@ -17,20 +20,28 @@ const { src = "/images/eu-recorte.webp", alt = "Foto do Davi" } = Astro.props;
     background: radial-gradient(120% 90% at 50% 40%, #183533 0%, var(--void) 70%);
   }
 
-  /* surreal touch: the sun from the orrery rises behind the head */
+  /* surreal touch: the sun from the orrery rises behind the head.
+     Placed with left/top only: `translate` belongs to the jitter animation. */
   .sun {
     position: absolute; z-index: 0;
-    height: 58%; aspect-ratio: 1; left: 50%; top: 9%; translate: -20% 0;
+    height: 58%; aspect-ratio: 1; left: 30%; top: 9%;
     border-radius: 50%; background: var(--signal); opacity: 0.9;
   }
 
-  .screen { position: relative; z-index: 1; height: 100%; }
-  .tv img {
-    display: block; width: 100%; height: 100%;
-    object-fit: contain; object-position: 50% 100%;
-    padding-top: 6%;
-    /* the sepia tone is baked into the file by `npm run foto`: a CSS filter on an
-       image that shakes makes Chromium stop painting it */
+  .screen {
+    position: absolute; inset: 6% 0 0; z-index: 1;
+    background: var(--photo) 50% 100% / contain no-repeat;
   }
 
+  /* weak-signal shake for the photo, on background-position (see note above) */
+  @media (prefers-reduced-motion: no-preference) {
+    .screen { animation: photo-jitter 0.57s steps(1, end) infinite; }
+  }
+  @keyframes photo-jitter {
+    0%   { background-position: 50% 100%; }
+    20%  { background-position: calc(50% - 0.6px) calc(100% + 0.2px); }
+    40%  { background-position: calc(50% + 0.5px) calc(100% - 0.5px); }
+    60%  { background-position: calc(50% - 0.3px) calc(100% + 0.5px); }
+    80%  { background-position: calc(50% + 0.7px) calc(100% + 0.1px); }
+  }
 </style>
