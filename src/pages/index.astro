@@ -29,7 +29,7 @@ const built = new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "2
 <Base>
   <section class="plate" aria-labelledby="titulo">
     <svg class="orrery" viewBox="0 0 1200 720" role="img" aria-label="Um sol laranja no canto, com órbitas; cada planeta é um projeto em destaque.">
-      <circle cx={SUN.x} cy={SUN.y} r={SUN.r} class="sun" />
+      <circle cx={SUN.x} cy={SUN.y} r={SUN.r} class="sun jitter slow" />
       {ORBITS.map((r, i) => <circle cx={SUN.x} cy={SUN.y} r={r} class={i === 3 ? "orbit dotted" : "orbit"} />)}
       {planets.map((p) => (
         <a href={`/projetos/${p.project.repo}`} class="planet">
@@ -42,15 +42,15 @@ const built = new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "2
     </svg>
 
     <div class="title">
-      <h1 id="titulo">davi<span class="dot">.</span></h1>
+      <h1 id="titulo" class="jitter">davi<span class="dot">.</span></h1>
       <p class="tagline">garoto de programa</p>
     </div>
 
     <!-- HUD corners: real information only -->
-    <p class="hud tl">{built}</p>
-    <p class="hud tr">procurando bolsa ou estágio</p>
-    <p class="hud bl">natal, rn</p>
-    <p class="hud br">{projects.length} projetos</p>
+    <p class="hud tl jitter alt">{built}</p>
+    <p class="hud tr jitter slow">procurando bolsa ou estágio</p>
+    <p class="hud bl jitter slow">natal, rn</p>
+    <p class="hud br jitter alt">{projects.length} projetos</p>
   </section>
 
   <section class="intro-grid">

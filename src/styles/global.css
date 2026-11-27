@@ -103,4 +103,30 @@ body::after {
   from { background-position: 0 -40%, 0 0, 0 0; }
   to   { background-position: 0 140%, 0 0, 0 0; }
 }
+/* ── tube jitter ─────────────────────────────────────────────
+   Add class="jitter" to an element to make it shake like a weak signal:
+   a jump of at most 1px, several times per second. Only on display pieces
+   (title, HUD, picture), never on text people read. Off with reduced motion. */
+@media (prefers-reduced-motion: no-preference) {
+  .jitter { animation: jitter 0.42s steps(1, end) infinite; }
+  .jitter.slow { animation-duration: 0.9s; }
+  .jitter.alt { animation-name: jitter-alt; animation-duration: 0.57s; }
+}
+@keyframes jitter {
+  0%   { translate: 0 0; }
+  14%  { translate: 0.6px -0.4px; }
+  29%  { translate: -0.5px 0.3px; }
+  43%  { translate: 0.3px 0.6px; }
+  57%  { translate: -0.7px -0.2px; }
+  71%  { translate: 0.4px 0.2px; }
+  86%  { translate: -0.2px -0.6px; }
+}
+@keyframes jitter-alt {
+  0%   { translate: 0 0; }
+  20%  { translate: -0.6px 0.2px; }
+  40%  { translate: 0.5px -0.5px; }
+  60%  { translate: -0.3px 0.5px; }
+  80%  { translate: 0.7px 0.1px; }
+}
+
 @media print { body::before, body::after { display: none; } }

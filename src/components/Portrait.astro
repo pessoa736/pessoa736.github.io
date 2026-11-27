@@ -7,8 +7,9 @@ interface Props { src?: string; alt?: string }
 const { src = "/images/eu-recorte.webp", alt = "Foto do Davi" } = Astro.props;
 ---
 <figure class="tv">
-  <div class="sun" aria-hidden="true"></div>
-  <img src={src} alt={alt} width="900" height="1000" loading="eager" decoding="async" />
+  <div class="sun jitter slow" aria-hidden="true"></div>
+  <!-- jitter goes on a wrapper: animating the filtered <img> itself makes Chromium drop it -->
+  <div class="screen jitter alt"><img src={src} alt={alt} width="900" height="1000" loading="eager" decoding="async" /></div>
 </figure>
 
 <style>
@@ -24,8 +25,8 @@ const { src = "/images/eu-recorte.webp", alt = "Foto do Davi" } = Astro.props;
     border-radius: 50%; background: var(--signal); opacity: 0.9;
   }
 
+  .screen { position: relative; z-index: 1; height: 100%; }
   .tv img {
-    position: relative; z-index: 1;
     display: block; width: 100%; height: 100%;
     object-fit: contain; object-position: 50% 100%;
     padding-top: 6%;
