@@ -8,7 +8,6 @@ const { src = "/images/eu-recorte.webp", alt = "Foto do Davi" } = Astro.props;
 ---
 <figure class="tv">
   <div class="sun jitter slow" aria-hidden="true"></div>
-  <!-- jitter goes on a wrapper: animating the filtered <img> itself makes Chromium drop it -->
   <div class="screen jitter alt"><img src={src} alt={alt} width="900" height="1000" loading="eager" decoding="async" /></div>
 </figure>
 
@@ -30,9 +29,8 @@ const { src = "/images/eu-recorte.webp", alt = "Foto do Davi" } = Astro.props;
     display: block; width: 100%; height: 100%;
     object-fit: contain; object-position: 50% 100%;
     padding-top: 6%;
-    /* old print / tube look: monochrome, warm, a bit of contrast.
-       (No drop-shadow here: on a large image it makes Chromium skip painting it.) */
-    filter: grayscale(1) sepia(0.45) contrast(1.15) brightness(1.02);
+    /* the sepia tone is baked into the file by `npm run foto`: a CSS filter on an
+       image that shakes makes Chromium stop painting it */
   }
 
 </style>
