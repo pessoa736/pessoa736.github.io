@@ -37,7 +37,7 @@ const sorted = [...projects].sort((a, b) =>
   </div>
   <p class="count muted" aria-live="polite"><span id="count">{sorted.length}</span> projetos</p>
 
-  <ul class="list" id="lista">
+  <ul class="grid" id="lista">
     {sorted.map((p) => <ProjectRow project={p} stats={stats[p.repo]} />)}
   </ul>
 </Base>
@@ -88,6 +88,21 @@ const sorted = [...projects].sort((a, b) =>
   .filters button:hover { border-color: var(--muted); }
   .filters button[aria-pressed="true"] { background: var(--text); color: var(--bg); border-color: var(--text); }
   .count { margin-top: 1.25rem; font-size: var(--step--1); }
-  .list { list-style: none; padding: 0; margin-top: 0.5rem; border-bottom: var(--frame) solid var(--line); }
+  /* ruled grid: the cells share their borders, like a poster's panels */
+  .grid {
+    list-style: none; padding: 0; margin-top: 0.75rem;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
+    border-top: var(--frame) solid var(--line); border-left: var(--frame) solid var(--line);
+  }
+  .grid :global(.row) {
+    display: flex; flex-direction: column; gap: 0.6rem;
+    padding: 1.1rem 1.2rem 1.2rem;
+    border-top: 0; border-right: var(--frame) solid var(--line); border-bottom: var(--frame) solid var(--line);
+  }
+  .grid :global(.row[hidden]) { display: none; }   /* the flex rule above would beat [hidden] */
+  .grid :global(.row:hover) { background: var(--surface); }
+  .grid :global(.head) { flex-direction: column; align-items: flex-start; gap: 0.35rem; }
+  .grid :global(.summary) { margin-top: 0; }
+  .grid :global(.meta) { margin-top: auto; padding-top: 0.6rem; flex-direction: column; gap: 0.1rem; }
   @media (max-width: 520px) { .legend div { grid-template-columns: 1fr; gap: 0; } }
 </style>

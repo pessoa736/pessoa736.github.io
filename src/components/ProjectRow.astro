@@ -1,5 +1,6 @@
 ---
-// One project as a row in a list: name, what it is, status, stack, last update.
+// One project: name, what it is, status, stack, last update. A row on the home page,
+// a cell of the grid on /projetos. The whole box is clickable (the title link is stretched).
 import type { Project } from "../data/projects";
 import type { RepoStats } from "../lib/github";
 import StatusBadge from "./StatusBadge.astro";
@@ -24,11 +25,12 @@ const updated = stats
 </li>
 
 <style>
-  .row { padding-block: 1.1rem; border-top: var(--frame) solid var(--line); max-width: none; }
+  .row { position: relative; padding-block: 1.1rem; border-top: var(--frame) solid var(--line); max-width: none; }
   .head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; }
   h3 { font-size: var(--step-1); }
   h3 a { text-decoration: none; }
-  h3 a:hover { text-decoration: underline; }
+  h3 a::after { content: ""; position: absolute; inset: 0; }   /* stretched link */
+  .row:hover h3 a { text-decoration: underline; text-decoration-color: var(--accent); }
   .summary { margin-top: 0.3rem; }
   .meta { display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem; margin-top: 0.4rem; color: var(--muted); font-size: var(--step--1); }
 </style>

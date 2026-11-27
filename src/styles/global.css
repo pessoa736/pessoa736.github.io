@@ -130,20 +130,20 @@ body::after {
 }
 
 /* ── "you can press this" ───────────────────────────────────
-   Only the main clickable pieces that have no underline (nav cells, planets,
-   project and post names, area filters) drift slower and a bit wider than the
+   Only the main clickable pieces that have no underline (planets, project and
+   post names, area filters; never anything in the header or footer) drift slower and a bit wider than the
    decorative jitter. Underlined links already say "click me" and stay still.
    When the pointer or keyboard focus reaches a piece, it locks still. */
-nav a, .planet, .row h3 a, .list h2 a, .filters button { display: inline-block; }
+.planet, .row h3 a, .list h2 a, .filters button { display: inline-block; }
 @media (prefers-reduced-motion: no-preference) {
-  nav a, .planet, .row h3 a, .list h2 a, .filters button {
+  .planet, .row h3 a, .list h2 a, .filters button {
     animation: drift 1.6s steps(1, end) infinite;
   }
-  nav li:nth-child(even) a, .row:nth-child(even) h3 a, .list li:nth-child(even) h2 a,
+  .row:nth-child(even) h3 a, .list li:nth-child(even) h2 a,
   .filters button:nth-child(even), .planet:nth-of-type(even) {
     animation-name: drift-alt; animation-duration: 1.9s;
   }
-  :is(nav a, .planet, .row h3 a, .list h2 a, .filters button):is(:hover, :focus-visible) {
+  :is(.planet, .row h3 a, .list h2 a, .filters button):is(:hover, :focus-visible) {
     animation: none;
   }
 }
