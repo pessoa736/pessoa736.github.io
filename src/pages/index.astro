@@ -6,6 +6,13 @@ import { projects } from "../data/projects";
 import { getRepoStats } from "../lib/github";
 import { getCollection } from "astro:content";
 
+
+const agora = Date.now();                         // ms
+const nasc  = new Date(2005, 10, 21).getTime();   // ms (10 = novembro)
+const age   = Math.floor((agora - nasc) / (1000 * 60 * 60 * 24 * 365.25));
+
+
+
 const stats = await getRepoStats();
 const featured = projects.filter((p) => p.featured);
 const posts = (await getCollection("escritos", ({ data }) => !(import.meta.env.PROD && data.draft)))
@@ -29,7 +36,7 @@ const built = new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "2
 <Base>
   <section class="plate" aria-labelledby="titulo">
     <svg class="orrery" viewBox="0 0 1200 720" role="img" aria-label="Um sol laranja no canto, com órbitas; cada planeta é um projeto em destaque.">
-      <circle cx={SUN.x} cy={SUN.y} r={SUN.r} class="sun jitter slow" />
+      <circle cx={SUN.x} cy={SUN.y} r={SUN.r} class="sun" />
       {ORBITS.map((r, i) => <circle cx={SUN.x} cy={SUN.y} r={r} class={i === 3 ? "orbit dotted" : "orbit"} />)}
       {planets.map((p) => (
         <a href={`/projetos/${p.project.repo}`} class="planet">
@@ -42,26 +49,28 @@ const built = new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "2
     </svg>
 
     <div class="title">
-      <h1 id="titulo" class="jitter">davi<span class="dot">.</span></h1>
+      <h1 id="titulo">davi<span class="dot">.</span></h1>
       <p class="tagline">garoto de programa</p>
     </div>
 
     <!-- HUD corners: real information only -->
-    <p class="hud tl jitter alt">{built}</p>
-    <p class="hud tr jitter slow">procurando bolsa ou estágio</p>
-    <p class="hud bl jitter slow">natal, rn</p>
-    <p class="hud br jitter alt">{projects.length} projetos</p>
+    <p class="hud tl">{built}</p>
+    <p class="hud tr">ect, ufrn</p>
+    <p class="hud bl">natal, rn</p>
+    <p class="hud br">{projects.length} projetos</p>
   </section>
 
   <section class="intro-grid">
     <div class="photo"><Portrait /></div>
     <div class="intro">
       <p>
-        Estudo Ciência e Tecnologia na UFRN e gosto de entender como as coisas funcionam por dentro:
-        kernels, linguagens, redes. Programo principalmente em Lua e Rust.
+        Sou Davi, tenho {age} anos de idade, sou entusiasta da tecnologia,  
+        atualmente cursando o Bacharelado Interdisciplinar em Ciência e Tecnologia 
+        (BCT) na Escola de Ciência e Tecnologia (ECT) da Universidade Federal 
+        do Rio Grande do Norte (UFRN) 
       </p>
       <p>
-        Estou procurando <strong>bolsa ou estágio</strong>. <a href="/sobre">Veja o que eu sei fazer</a>.
+        <a href="/sobre">Mais sobre mim e meus planos para dominar o mundo</a>.
       </p>
     </div>
   </section>

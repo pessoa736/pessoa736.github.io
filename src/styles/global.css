@@ -8,7 +8,7 @@
 *, *::before, *::after { box-sizing: border-box; }
 * { margin: 0; }
 
-html { color-scheme: light dark; -webkit-text-size-adjust: 100%; }
+html { color-scheme: light dark; -webkit-text-size-adjust: 100%; scroll-padding-top: 7rem; }
 body {
   background: var(--bg);
   color: var(--text);
@@ -103,67 +103,4 @@ body::after {
   from { background-position: 0 -40%, 0 0, 0 0; }
   to   { background-position: 0 140%, 0 0, 0 0; }
 }
-/* ── tube jitter ─────────────────────────────────────────────
-   Add class="jitter" to an element to make it shake like a weak signal:
-   a jump of at most 1px, several times per second. Only on display pieces
-   (title, HUD, picture), never on text people read. Off with reduced motion. */
-@media (prefers-reduced-motion: no-preference) {
-  .jitter { animation: jitter 0.42s steps(1, end) infinite; }
-  .jitter.slow { animation-duration: 0.6s; }
-  .jitter.alt { animation-name: jitter-alt; animation-duration: 0.3s; }
-}
-@keyframes jitter {
-  0%   { translate: 0 0; }
-  14%  { translate: 0.3px -0.2px; }
-  29%  { translate: -0.25px 0.15px; }
-  43%  { translate: 0.15px 0.3px; }
-  57%  { translate: -0.35px -0.1px; }
-  71%  { translate: 0.2px 0.1px; }
-  86%  { translate: -0.1px -0.3px; }
-}
-@keyframes jitter-alt {
-  0%   { translate: 0 0; }
-  20%  { translate: -0.3px 0.1px; }
-  40%  { translate: 0.25px -0.25px; }
-  60%  { translate: -0.15px 0.25px; }
-  80%  { translate: 0.35px 0.05px; }
-}
-
-/* ── "you can press this" ───────────────────────────────────
-   Only the main clickable pieces that have no underline (planets, project and
-   post names, area filters; never anything in the header or footer) drift slower and a bit wider than the
-   decorative jitter. Underlined links already say "click me" and stay still.
-   When the pointer or keyboard focus reaches a piece, it locks still. */
-.planet, .row h3 a, .list h2 a, .filters button { display: inline-block; }
-@media (prefers-reduced-motion: no-preference) {
-  .planet, .row h3 a, .list h2 a, .filters button {
-    animation: drift 1.6s steps(1, end) infinite;
-  }
-  .row:nth-child(even) h3 a, .list li:nth-child(even) h2 a,
-  .filters button:nth-child(even), .planet:nth-of-type(even) {
-    animation-name: drift-alt; animation-duration: 1.9s;
-  }
-  :is(.planet, .row h3 a, .list h2 a, .filters button):is(:hover, :focus-visible) {
-    animation: none;
-  }
-}
-@keyframes drift {
-  0%   { translate: 0 0; }
-  12%  { translate: 1.2px -0.8px; }
-  25%  { translate: -1px 0.6px; }
-  37%  { translate: 0.5px 1.3px; }
-  50%  { translate: -1.4px -0.4px; }
-  62%  { translate: 0.9px 0.3px; }
-  75%  { translate: -0.4px -1.2px; }
-  87%  { translate: 1.3px 0.9px; }
-}
-@keyframes drift-alt {
-  0%   { translate: 0 0; }
-  16%  { translate: -1.3px 0.4px; }
-  33%  { translate: 1px -1px; }
-  50%  { translate: -0.6px 1.2px; }
-  66%  { translate: 1.4px 0.2px; }
-  83%  { translate: -0.9px -0.9px; }
-}
-
 @media print { body::before, body::after { display: none; } }
