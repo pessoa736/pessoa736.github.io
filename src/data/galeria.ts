@@ -1,7 +1,9 @@
 // Gallery: drawings and photos.
 //
-// To add a picture: drop it in galeria-entrada/ and run `npm run galeria:add`.
-// It lands here as <id>.webp, already light. Duplicates are refused by content.
+// To add pictures: drop them in galeria-entrada/ (a sub-folder = an album) and run
+// `npm run galeria:add`. They land in src/assets/galeria/[<album>/]<id>.webp, already
+// light. Duplicates are refused by content.
+// Keys below: "<id>.webp" for loose pictures, "<album>/<id>.webp" inside an album.
 // To give it a title, a description, a type or a date (all optional), add an entry
 // below with the same file name.
 // Newest first: entries with a date go by date, the rest keep file-name order.

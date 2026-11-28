@@ -1,0 +1,116 @@
+---
+// A wall of pictures (columns keep each picture's proportions), a type filter when
+// there are both drawings and photos, and a full-size viewer. Used by /galeria and
+// /galeria/<album>. Without JavaScript the links simply open the image.
+import type { Picture } from "../lib/galeria";
+interface Props { pictures: Picture[] }
+const { pictures } = Astro.props;
+const kinds = (["desenho", "foto"] as const).filter((k) => pictures.some((p) => p.kind === k));
+---
+{kinds.length > 1 && (
+  <div class="filters" role="group" aria-label="Filtrar por tipo" hidden>
+    <button type="button" data-kind="" aria-pressed="true">tudo</button>
+    {kinds.map((k) => <button type="button" data-kind={k} aria-pressed="false">{k === "desenho" ? "desenhos" : "fotos"}</button>)}
+  </div>
+)}
+<ul class="wall">
+  {pictures.map((p) => (
+    <li data-kind={p.kind}>
+      <a href={p.full} class="frame" data-title={p.title} data-description={p.description}>
+        <img src={p.thumb.src} width={p.thumb.width} height={p.thumb.height} alt={p.alt} loading="lazy" decoding="async" />
+      </a>
+      {(p.title || p.date) && (
+        <p class="caption">
+          {p.title && <span class="title">{p.title}</span>}
+          {p.date && <time class="muted" datetime={p.date.toISOString()}>{p.date.toLocaleDateString("pt-BR", { month: "short", year: "numeric" })}</time>}
+        </p>
+      )}
+      {p.description && <p class="description">{p.description}</p>}
+    </li>
+  ))}
+</ul>
+
+<dialog class="visor" aria-label="Imagem ampliada">
+  <img alt="" />
+  <div class="info">
+    <p class="v-title"></p>
+    <p class="v-description"></p>
+  </div>
+  <form method="dialog"><button type="submit">Fechar</button></form>
+</dialog>
+
+<script>
+  for (const wall of document.querySelectorAll<HTMLElement>(".wall")) {
+    const dialog = wall.parentElement!.querySelector<HTMLDialogElement>("dialog.visor")!;
+
+    // open a picture in the viewer instead of leaving the page
+    wall.addEventListener("click", (e) => {
+      const link = (e.target as HTMLElement).closest<HTMLAnchorElement>("a.frame");
+      if (!link) return;
+      e.preventDefault();
+      const big = dialog.querySelector("img")!;
+      big.src = link.href;
+      big.alt = link.querySelector("img")!.alt;
+      const title = link.dataset.title ?? "", description = link.dataset.description ?? "";
+      dialog.querySelector(".v-title")!.textContent = title;
+      dialog.querySelector(".v-description")!.textContent = description;
+      dialog.querySelector<HTMLElement>(".info")!.hidden = !title && !description;
+      dialog.showModal();
+    });
+    dialog.addEventListener("click", (e) => { if (e.target === dialog) dialog.close(); });
+
+    // type filter (?tipo=desenho), same behaviour as on /projetos
+    const group = wall.parentElement!.querySelector<HTMLElement>(".filters");
+    if (!group) continue;
+    group.hidden = false;
+    const cells = [...wall.querySelectorAll<HTMLElement>(":scope > li")];
+    const apply = (kind: string) => {
+      for (const c of cells) c.hidden = !!kind && c.dataset.kind !== kind;
+      for (const b of group.querySelectorAll("button")) b.setAttribute("aria-pressed", String(b.dataset.kind === kind));
+      const url = new URL(location.href);
+      kind ? url.searchParams.set("tipo", kind) : url.searchParams.delete("tipo");
+      history.replaceState(null, "", url);
+    };
+    group.addEventListener("click", (e) => {
+      const b = (e.target as HTMLElement).closest("button");
+      if (b) apply(b.dataset.kind ?? "");
+    });
+    apply(new URL(location.href).searchParams.get("tipo") ?? "");
+  }
+</script>
+
+<style>
+  .filters { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.5rem; }
+  .filters button {
+    font: inherit; font-size: var(--step--1); min-height: 2.5rem; padding: 0.35rem 0.9rem;
+    color: var(--text); background: transparent; border: var(--frame) solid var(--line); cursor: pointer;
+  }
+  .filters button[aria-pressed="true"] { background: var(--text); color: var(--bg); }
+
+  .wall { list-style: none; padding: 0; margin-top: 1.5rem; columns: 3 16rem; column-gap: 1.25rem; }
+  .wall li { break-inside: avoid; margin-bottom: 1.25rem; max-width: none; }
+  .wall li[hidden] { display: none; }
+  .frame { display: block; border: var(--frame) solid var(--line); background: var(--void); }
+  .frame img { width: 100%; height: auto; }
+  .frame:hover { border-color: var(--accent); }
+  .caption { display: flex; justify-content: space-between; gap: 1rem; margin-top: 0.4rem; font-size: var(--step--1); }
+  .caption .title { font-weight: 500; }
+  .description { margin-top: 0.25rem; font-size: var(--step--1); color: var(--muted); }
+
+  dialog {
+    margin: auto;   /* the global `* { margin: 0 }` would pin it to the top-left corner */
+    max-width: min(96vw, 1400px); max-height: 94vh; padding: 0;
+    border: var(--frame) solid var(--paper); background: var(--void); color: var(--paper);
+  }
+  dialog::backdrop { background: rgb(16 32 31 / 0.88); }
+  dialog img { display: block; max-width: 100%; max-height: calc(94vh - 9rem); margin-inline: auto; }
+  dialog .info { padding: 0.8rem 1.1rem; border-top: var(--frame) solid var(--paper); }
+  dialog .info[hidden] { display: none; }
+  dialog .info p { max-width: 70ch; }
+  .v-title { font-weight: 500; }
+  .v-title:empty, .v-description:empty { display: none; }
+  .v-description { margin-top: 0.25rem; color: #cbbd99; }
+  dialog form { display: flex; justify-content: flex-end; border-top: var(--frame) solid var(--paper); }
+  dialog button { font: inherit; min-height: 2.75rem; padding: 0.4rem 1.2rem; color: var(--paper); background: transparent; border: 0; border-left: var(--frame) solid var(--paper); cursor: pointer; }
+  dialog button:hover { background: var(--paper); color: var(--void); }
+</style>

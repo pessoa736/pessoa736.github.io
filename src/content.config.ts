@@ -15,4 +15,17 @@ const escritos = defineCollection({
   }),
 });
 
-export const collections = { escritos };
+// "albuns" = optional text for a gallery album: src/content/albuns/<album-slug>.md,
+// same name as the folder in src/assets/galeria/. Everything is optional.
+const albuns = defineCollection({
+  loader: glob({ pattern: "**/[^_]*.md", base: "./src/content/albuns" }),
+  schema: z.object({
+    title: z.string().optional(),
+    description: z.string().optional(),
+    date: z.coerce.date().optional(),
+    cover: z.string().optional(),       // picture id inside the album, e.g. "20210303-200924"
+    draft: z.boolean().default(false),  // true = album not published yet
+  }),
+});
+
+export const collections = { escritos, albuns };
