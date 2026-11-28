@@ -1,0 +1,27 @@
+---
+// Frame of every /admin page: the site layout, a tab per section and the status line.
+// Dev server only (pages injected by integrations/admin.mjs).
+import Base from "../layouts/Base.astro";
+import "./admin.css";
+
+interface Props { title: string; section: "inicio" | "galeria" | "projetos" | "escritos" }
+const { title, section } = Astro.props;
+const tabs = [
+  { id: "galeria", href: "/admin/galeria", label: "galeria" },
+  { id: "projetos", href: "/admin/projetos", label: "projetos" },
+  { id: "escritos", href: "/admin/escritos", label: "escritos" },
+];
+---
+<Base title={`admin: ${title}`} description="Admin local do site.">
+<div class="admin">
+  <header class="page-head">
+    <p class="tag">só no npm run dev · nada é commitado sozinho</p>
+    <h1><a href="/admin" class="home">Admin</a>{section !== "inicio" && <> / {title}</>}</h1>
+    <nav class="tabs" aria-label="Seções do admin">
+      {tabs.map((t) => <a href={t.href} aria-current={t.id === section ? "page" : undefined}>{t.label}</a>)}
+    </nav>
+  </header>
+  <p id="status" role="status" aria-live="polite"></p>
+  <slot />
+</div>
+</Base>

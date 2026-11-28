@@ -1,0 +1,40 @@
+---
+// /admin: entry point of the local admin. Dev server only (integrations/admin.mjs).
+import AdminShell from "./AdminShell.astro";
+import { getCollection } from "astro:content";
+import { projects } from "../data/projects";
+
+const posts = await getCollection("escritos");
+const drafts = posts.filter((p) => p.data.draft).length;
+const pictures = Object.keys(import.meta.glob("../assets/galeria/**/*.webp")).length;
+---
+<AdminShell title="início" section="inicio">
+  <p class="muted">As mudanças viram arquivos no repositório. Confira com <code>git status</code> e faça o commit quando quiser.</p>
+  <ul class="hub">
+    <li><a href="/admin/galeria">
+      <strong>Galeria</strong>
+      <span>{pictures} {pictures === 1 ? "imagem" : "imagens"} publicadas</span>
+      <span>álbuns e sub-álbuns, mover e tirar imagens, adicionar imagens do computador</span>
+    </a></li>
+    <li><a href="/admin/galeria/imagens">
+      <strong>Imagens</strong>
+      <span>dados de cada imagem publicada</span>
+      <span>nome do arquivo, título, descrição, tipo, data (pode ser só o ano), em lote ou uma a uma</span>
+    </a></li>
+    <li><a href="/admin/galeria/entrada">
+      <strong>Entrada da galeria</strong>
+      <span>galeria-entrada/: ainda não enviados</span>
+      <span>organizar pastas e imagens antes de publicar, texto do álbum, publicar tudo ou só algumas</span>
+    </a></li>
+    <li><a href="/admin/projetos">
+      <strong>Projetos</strong>
+      <span>{projects.length} na lista · {projects.filter((p) => p.featured).length} em destaque</span>
+      <span>criar, editar, reordenar e tirar projetos</span>
+    </a></li>
+    <li><a href="/admin/escritos">
+      <strong>Escritos</strong>
+      <span>{posts.length} {posts.length === 1 ? "texto" : "textos"}{drafts > 0 && ` · ${drafts} rascunho(s)`}</span>
+      <span>escrever, editar, renomear e apagar textos</span>
+    </a></li>
+  </ul>
+</AdminShell>

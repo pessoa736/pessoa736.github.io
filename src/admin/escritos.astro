@@ -1,0 +1,103 @@
+---
+// /admin/escritos: the posts in src/content/escritos/*.md. Dev server only (integrations/admin.mjs).
+import AdminShell from "./AdminShell.astro";
+---
+<AdminShell title="escritos" section="escritos">
+  <p class="muted">Rascunhos aparecem no <code>npm run dev</code> (para conferir) e nunca no site publicado.</p>
+  <div class="cols">
+    <div class="side">
+      <button type="button" id="new">+ novo escrito</button>
+      <ul id="list" class="pick-list"></ul>
+    </div>
+    <div id="editor"><p class="muted">Escolha um escrito.</p></div>
+  </div>
+</AdminShell>
+
+<script>
+  // Safe innerHTML: every value interpolated below goes through esc(), see src/admin/client.ts.
+  import { $, esc, fields, get, hashValue, post, restoreStatus, say, setHash, slugify, today } from "./client";
+
+  type Post = { slug: string; data: { title?: string; description?: string; date?: string; tags?: string[]; draft?: boolean }; body: string };
+  let posts: Post[] = [];
+  let current = hashValue();   // slug being edited, or "novo"
+  const select = (v: string) => { current = v; setHash(v); };
+
+  async function load() {
+    ({ posts } = await get("escritos/state"));
+    renderList();
+    renderEditor();
+  }
+
+  function renderList() {
+    $("#list").innerHTML = posts.map((p) => `
+      <li><button type="button" data-pick="${esc(p.slug)}" aria-current="${p.slug === current}">
+        <span>${esc(p.data.title || p.slug)}</span>
+        <span class="muted">${esc(p.data.date ?? "sem data")}${p.data.draft ? " · rascunho" : ""}</span>
+      </button></li>`).join("") || '<li class="muted-note">Nenhum escrito ainda.</li>';
+  }
+  $("#list").addEventListener("click", (e) => {
+    const b = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-pick]");
+    if (b) { select(b.dataset.pick!); renderList(); renderEditor(); }
+  });
+  $("#new").addEventListener("click", () => { select("novo"); renderList(); renderEditor(); });
+
+  function renderEditor() {
+    const isNew = current === "novo";
+    const p: Post | undefined = isNew ? { slug: "", data: { date: today(), draft: true, tags: [] }, body: "" } : posts.find((x) => x.slug === current);
+    if (!p) { $("#editor").innerHTML = '<p class="muted">Escolha um escrito.</p>'; return; }
+    const d = p.data;
+    $("#editor").innerHTML = `
+      <form class="card" id="form">
+        <h3>${isNew ? "Novo escrito" : esc(d.title || p.slug)}${!isNew ? ` <a href="/escritos/${esc(p.slug)}" target="_blank">ver ↗</a>` : ""}</h3>
+        <label>título<input name="title" value="${esc(d.title)}" required></label>
+        <label>endereço (/escritos/…)<input name="slug" value="${esc(p.slug)}" required pattern="[a-z0-9]+(-[a-z0-9]+)*" ${isNew ? 'data-auto="1"' : ""}></label>
+        <label>descrição (uma frase: aparece na lista e nos buscadores)<input name="description" value="${esc(d.description)}" required></label>
+        <div class="row">
+          <label>data<input type="date" name="date" value="${esc(d.date)}" required></label>
+          <label>tags (separe por vírgula)<input name="tags" value="${esc((d.tags ?? []).join(", "))}" placeholder="lua, kernel"></label>
+          <label class="check"><input type="checkbox" name="draft" ${d.draft ? "checked" : ""}> rascunho</label>
+        </div>
+        <label>texto (Markdown)<textarea name="body" class="code" rows="20">${esc(p.body)}</textarea></label>
+        <div class="row">
+          <button type="submit" class="primary">${isNew ? "criar" : "salvar"}</button>
+          ${!isNew ? '<button type="button" class="danger push" id="delete">apagar</button>' : ""}
+        </div>
+      </form>`;
+  }
+
+  // while creating, the address follows the title until it is edited by hand
+  $("#editor").addEventListener("input", (e) => {
+    const t = e.target as HTMLInputElement;
+    const slug = document.querySelector<HTMLInputElement>('#form [name="slug"]');
+    if (!slug) return;
+    if (t === slug) delete slug.dataset.auto;
+    else if (t.name === "title" && slug.dataset.auto) slug.value = slugify(t.value);
+  });
+
+  $("#editor").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const f = fields(e.target as HTMLFormElement);
+    const original = current === "novo" ? null : current;
+    if (original && f.slug !== original && !confirm(`Mudar o endereço de /escritos/${original} para /escritos/${f.slug}? Links antigos para ele param de funcionar.`)) return;
+    try {
+      const out = await post("escritos/save", {
+        original, slug: f.slug, title: f.title, description: f.description, date: f.date,
+        tags: (f.tags ?? "").split(","), draft: f.draft === "on", body: f.body,
+      });
+      select(out.slug);
+      say(original ? "salvo" : "escrito criado"); await load();
+    } catch (err: any) { say(err.message, true); }
+  });
+
+  $("#editor").addEventListener("click", async (e) => {
+    if ((e.target as HTMLElement).id !== "delete") return;
+    if (!confirm(`Apagar "${current}"? O arquivo src/content/escritos/${current}.md é apagado (o git ainda guarda a última versão commitada).`)) return;
+    try {
+      await post("escritos/delete", { slug: current });
+      select(""); say("apagado"); await load();
+    } catch (err: any) { say(err.message, true); }
+  });
+
+  restoreStatus();
+  load().catch((err) => say(err.message, true));
+</script>

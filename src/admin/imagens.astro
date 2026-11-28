@@ -1,0 +1,366 @@
+---
+// /admin/galeria/imagens: every published picture in one list, to edit its data (file
+// name, title, description, type, date, alt text) without going album by album.
+// Search, filters ("what is missing"), and changes to many pictures at once.
+// Dev server only (integrations/admin.mjs); nothing is committed for you.
+import AdminShell from "./AdminShell.astro";
+---
+<AdminShell title="imagens" section="galeria">
+  <nav class="subtabs" aria-label="Galeria">
+    <a href="/admin/galeria">publicados</a>
+    <a href="/admin/galeria/imagens" aria-current="page">imagens (editar dados)</a>
+    <a href="/admin/galeria/entrada">entrada (ainda não enviados)</a>
+    <span class="note">ordem padrão = a do site: fixadas primeiro; depois mais recentes; no mesmo ano, as com mais informação; rascunhos por último</span>
+  </nav>
+
+  <form class="filters-bar" id="filters" role="search">
+    <label>buscar<input type="search" name="q" placeholder="nome, título, descrição, arquivo original"></label>
+    <label>álbum<select name="album"></select></label>
+    <label>mostrar<select name="falta">
+      <option value="">todas</option>
+      <option value="fixadas">fixadas</option>
+      <option value="rascunhos">rascunhos</option>
+      <option value="semrascunho">sem os rascunhos</option>
+      <option value="titulo">sem título</option>
+      <option value="descricao">sem descrição</option>
+      <option value="data">sem data escrita</option>
+      <option value="semdata">sem data nenhuma (nem no nome do arquivo)</option>
+      <option value="alt">sem texto alternativo</option>
+      <option value="nada">sem nenhuma informação</option>
+    </select></label>
+    <label>ordem<select name="ordem">
+      <option value="">como no site</option>
+      <option value="nome">nome do arquivo</option>
+      <option value="album">álbum</option>
+    </select></label>
+  </form>
+
+  <div class="selbar" role="toolbar" aria-label="Mudar várias imagens">
+    <span class="count" id="count"></span>
+    <button type="button" data-sel="all">selecionar as visíveis</button>
+    <button type="button" data-sel="none">nenhuma</button>
+    <span class="bulk">
+      <select id="bulk-kind" aria-label="tipo para as selecionadas">
+        <option value="">tipo: manter</option>
+        <option value="foto">foto</option>
+        <option value="desenho">desenho</option>
+      </select>
+      <span id="bulk-date"></span>
+      <select id="bulk-draft" aria-label="rascunho para as selecionadas">
+        <option value="">rascunho: manter</option>
+        <option value="1">marcar rascunho</option>
+        <option value="0">tirar de rascunho</option>
+      </select>
+      <button type="button" data-sel="apply">aplicar às selecionadas</button>
+      <button type="button" data-sel="pin">fixar</button>
+      <button type="button" data-sel="unpin">desafixar</button>
+      <button type="button" class="danger" data-sel="delete">apagar selecionadas</button>
+    </span>
+  </div>
+
+  <!-- confirmation for deleting, with the option of sending the originals to the trash -->
+  <dialog id="ask-delete" class="ask" aria-labelledby="ask-title">
+    <form method="dialog">
+      <h3 id="ask-title"></h3>
+      <p class="muted-note">Sai do site: o arquivo publicado e o texto dela (título, descrição...).</p>
+      <label class="check"><input type="checkbox" name="original"> <span id="ask-original"></span></label>
+      <p class="muted-note">A lixeira é a do sistema: dá para recuperar de lá. Sem marcar, o original continua em galeria-entrada/ (e pode ser publicado de novo).</p>
+      <div class="row">
+        <button type="button" data-answer="cancel">cancelar</button>
+        <button type="button" data-answer="ok" class="danger push">apagar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- crop / turn editor (src/admin/crop.ts) -->
+  <dialog id="crop" class="ask crop" aria-label="Recortar imagem">
+    <div class="chead"><h3>Recortar: <span class="ctitle"></span></h3></div>
+    <div class="stage"><canvas></canvas>
+      <div class="cbox" data-h="move">
+        <i data-h="nw"></i><i data-h="n"></i><i data-h="ne"></i><i data-h="e"></i>
+        <i data-h="se"></i><i data-h="s"></i><i data-h="sw"></i><i data-h="w"></i>
+      </div>
+    </div>
+    <div class="row ctools">
+      <label>proporção<select name="aspect">
+        <option value="">livre</option><option value="orig">a da imagem</option>
+        <option value="1:1">1:1 quadrado</option><option value="4:3">4:3</option><option value="3:2">3:2</option><option value="16:9">16:9</option>
+        <option value="3:4">3:4 em pé</option><option value="2:3">2:3 em pé</option><option value="9:16">9:16 em pé</option>
+      </select></label>
+      <button type="button" data-c="left" title="girar 90° para a esquerda">↺ girar</button>
+      <button type="button" data-c="right" title="girar 90° para a direita">girar ↻</button>
+      <button type="button" data-c="reset">desfazer ajustes</button>
+      <span class="cinfo muted-note"></span>
+    </div>
+    <fieldset class="cmode">
+      <label class="check"><input type="radio" name="cmode" value="replace" checked> trocar a imagem (a versão anterior fica em galeria-entrada/.versoes/)</label>
+      <label class="check"><input type="radio" name="cmode" value="copy"> salvar como imagem nova, ao lado da atual</label>
+    </fieldset>
+    <p class="csource muted-note"></p>
+    <div class="row">
+      <button type="button" data-c="cancel">cancelar</button>
+      <button type="button" data-c="save" class="push">salvar recorte</button>
+    </div>
+  </dialog>
+
+  <ul class="rows" id="rows"></ul>
+</AdminShell>
+
+<script>
+  // Safe innerHTML: every value interpolated below goes through esc() (or
+  // encodeURIComponent inside thumb()), see src/admin/client.ts.
+  import { openCrop } from "./crop";
+  import { $, dateField, dateLabel, draftBox, esc, get, hashValue, post, restoreStatus, say, setHash, slugify } from "./client";
+
+  type Meta = { title?: string; description?: string; kind?: string; date?: string; alt?: string; pinned?: string; draft?: boolean };
+  type Pic = { key: string; file: string; meta: Meta; original: string; taken: string; album: string };
+  type Album = { slug: string | null; pictures: Omit<Pic, "album">[]; data: Record<string, any> };
+
+  let pics: Pic[] = [];
+  let albums: Album[] = [];
+  const selected = new Set<string>();
+  const thumb = (path: string) => `/__admin/galeria/thumb?path=${encodeURIComponent(path)}`;
+  const idOf = (key: string) => key.split("/").pop()!.replace(/\.webp$/, "");
+
+  // filters live in the address (#q=...&album=...), so they survive the reload that
+  // the dev server does when a file changes
+  const filters = $<HTMLFormElement>("#filters");
+  const readFilters = () => Object.fromEntries(new FormData(filters)) as Record<string, string>;
+  function saveFilters() {
+    const p = new URLSearchParams(Object.entries(readFilters()).filter(([, v]) => v));
+    setHash(p.toString());
+  }
+
+  // same order as the site (src/lib/galeria.ts): year, then information, then exact date
+  const when = (p: Pic) => p.meta.date || p.taken || "";
+  const info = (p: Pic) => [p.meta.title, p.meta.description, p.meta.alt, p.meta.date].filter(Boolean).length;
+  const pinOrder = (a: Pic, b: Pic) =>
+    a.meta.pinned || b.meta.pinned ? (!a.meta.pinned ? 1 : !b.meta.pinned ? -1 : b.meta.pinned.localeCompare(a.meta.pinned)) : 0;
+  const draftOrder = (a: Pic, b: Pic) => Number(a.meta.draft === true) - Number(b.meta.draft === true);
+  const siteOrder = (a: Pic, b: Pic) => pinOrder(a, b) || draftOrder(a, b) ||
+    (Number(when(b).slice(0, 4)) || -1) - (Number(when(a).slice(0, 4)) || -1) ||
+    info(b) - info(a) || when(b).localeCompare(when(a)) || a.key.localeCompare(b.key, "pt-BR", { numeric: true });
+
+  async function load() {
+    const data = await get<{ albums: Album[] }>("galeria/state");
+    albums = data.albums;
+    pics = albums.flatMap((a) => a.pictures.map((p) => ({ ...p, album: a.slug ?? "" })));
+    for (const k of [...selected]) if (!pics.some((p) => p.key === k)) selected.delete(k);
+    // album filter options, keeping the current choice
+    const current = readFilters().album ?? "";
+    $<HTMLSelectElement>('select[name="album"]').innerHTML =
+      `<option value="">todos</option><option value="-">(avulsas)</option>` +
+      albums.filter((a) => a.slug).map((a) => `<option value="${esc(a.slug)}">${esc(a.slug!.split("/").join(" / "))}</option>`).join("");
+    $<HTMLSelectElement>('select[name="album"]').value = current;
+    render();
+  }
+
+  function visible(): Pic[] {
+    const f = readFilters();
+    const q = (f.q ?? "").trim().toLowerCase();
+    const out = pics.filter((p) => {
+      if (f.album === "-" && p.album) return false;
+      if (f.album && f.album !== "-" && !(p.album === f.album || p.album.startsWith(f.album + "/"))) return false;
+      if (q && ![p.key, p.original, p.meta.title, p.meta.description, p.meta.alt].some((x) => (x ?? "").toLowerCase().includes(q))) return false;
+      switch (f.falta) {
+        case "fixadas": return !!p.meta.pinned;
+        case "rascunhos": return p.meta.draft === true;
+        case "semrascunho": return p.meta.draft !== true;
+        case "titulo": return !p.meta.title;
+        case "descricao": return !p.meta.description;
+        case "data": return !p.meta.date;
+        case "semdata": return !p.meta.date && !p.taken;
+        case "alt": return !p.meta.alt;
+        case "nada": return info(p) === 0;
+      }
+      return true;
+    });
+    if (f.ordem === "nome") out.sort((a, b) => idOf(a.key).localeCompare(idOf(b.key), "pt-BR", { numeric: true }));
+    else if (f.ordem === "album") out.sort((a, b) => a.album.localeCompare(b.album) || siteOrder(a, b));
+    else out.sort(siteOrder);
+    return out;
+  }
+
+  function render() {
+    const list = visible();
+    $("#count").textContent = `${list.length} de ${pics.length} · ${selected.size} selecionada(s)`;
+    $("#rows").innerHTML = list.map((p) => `
+      <li class="item ${selected.has(p.key) ? "selected" : ""} ${p.meta.pinned ? "pinned" : ""} ${p.meta.draft === true ? "is-draft" : ""}" data-key="${esc(p.key)}">
+        ${p.meta.pinned ? '<span class="pin-mark">fixada</span>' : p.meta.draft === true ? '<span class="pin-mark draft-mark">rascunho</span>' : ""}
+        <label class="sel" title="selecionar"><input type="checkbox" data-tick ${selected.has(p.key) ? "checked" : ""} aria-label="selecionar ${esc(idOf(p.key))}"></label>
+        <a class="shot" href="/admin/galeria#${encodeURIComponent(p.album || "avulsas")}" title="abrir o álbum no editor"><img loading="lazy" alt="" src="${thumb(p.key)}"></a>
+        <form data-key="${esc(p.key)}">
+          <div class="row">
+            <label>nome do arquivo<input name="rename" value="${esc(idOf(p.key))}" pattern="[a-z0-9]+(-[a-z0-9]+)*" title="letras minúsculas, números e hífens"></label>
+            <label>título<input name="title" value="${esc(p.meta.title)}"></label>
+            <label class="kind">tipo<select name="kind">
+              <option value="foto" ${p.meta.kind !== "desenho" ? "selected" : ""}>foto</option>
+              <option value="desenho" ${p.meta.kind === "desenho" ? "selected" : ""}>desenho</option>
+            </select></label>
+            ${draftBox(p.meta)}
+          </div>
+          <div class="row">
+            <label>descrição<textarea name="description" rows="1">${esc(p.meta.description)}</textarea></label>
+            ${dateField("date", p.meta.date, !p.meta.date && p.taken ? `vazio: o site usa ${dateLabel(p.taken)}, do nome do arquivo` : !p.meta.date && !p.meta.pinned ? "sem data: vai para o fim" : "")}
+          </div>
+          <div class="row">
+            <label>texto alternativo<input name="alt" value="${esc(p.meta.alt)}" placeholder="o que aparece na imagem (para leitores de tela)"></label>
+            <button type="submit">salvar</button>
+            <button type="button" data-crop>recortar</button>
+            <button type="button" data-pin="${p.meta.pinned ? "0" : "1"}" aria-pressed="${!!p.meta.pinned}">${p.meta.pinned ? "desafixar" : "fixar no topo"}</button>
+            <button type="button" class="danger" data-delete>apagar</button>
+          </div>
+          <p class="where muted-note">${esc(p.album ? p.album.split("/").join(" / ") : "(avulsa)")}${p.original ? ` · original: ${esc(p.original)}` : ""}</p>
+        </form>
+      </li>`).join("") || '<li class="muted">Nenhuma imagem com esses filtros.</li>';
+    restoreScroll();
+  }
+
+  // keep the place in the list across saves (the page may reload)
+  const rememberScroll = () => sessionStorage.setItem("imagens-scroll", JSON.stringify([scrollY, Date.now()]));
+  function restoreScroll() {
+    const s = JSON.parse(sessionStorage.getItem("imagens-scroll") ?? "null");
+    if (s && Date.now() - s[1] < 8000) { scrollTo(0, s[0]); sessionStorage.removeItem("imagens-scroll"); }
+  }
+
+  filters.addEventListener("input", () => { saveFilters(); render(); });
+  filters.addEventListener("submit", (e) => e.preventDefault());
+
+  // a row was edited but not saved yet: mark it, so nothing is lost by accident
+  $("#rows").addEventListener("input", (e) => (e.target as HTMLElement).closest(".item")?.classList.add("dirty"));
+  $("#rows").addEventListener("change", (e) => (e.target as HTMLElement).closest(".item")?.classList.add("dirty"));
+  addEventListener("beforeunload", (e) => { if (document.querySelector(".item.dirty")) e.preventDefault(); });
+
+  $("#rows").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const form = e.target as HTMLFormElement;
+    const key = form.dataset.key!;
+    const f = Object.fromEntries(new FormData(form)) as Record<string, string>;
+    try {
+      rememberScroll();
+      await post("galeria/picture/save", { key, title: f.title, description: f.description, kind: f.kind, date: f.date, alt: f.alt, draft: f.draft === "on" });
+      const name = slugify(f.rename ?? "");
+      let msg = "salvo";
+      if (name && name !== idOf(key)) {
+        const out = await post("galeria/picture/rename", { key, name });
+        if (selected.delete(key)) selected.add(out.key);
+        msg = `salvo · arquivo renomeado para ${out.key.split("/").pop()}`;
+      }
+      form.closest(".item")?.classList.remove("dirty");
+      say(msg); await load();
+    } catch (err: any) { say(err.message, true); }
+  });
+
+  // ── delete: ask (with the originals option), then remove ──
+  function askDelete(keys: string[]): Promise<{ original: boolean } | null> {
+    const dialog = $<HTMLDialogElement>("#ask-delete");
+    const withOriginal = keys.filter((k) => pics.find((p) => p.key === k)?.original).length;
+    $("#ask-title").textContent = keys.length === 1 ? `Apagar ${idOf(keys[0])}?` : `Apagar ${keys.length} imagens?`;
+    const box = dialog.querySelector<HTMLInputElement>('input[name="original"]')!;
+    box.checked = false;
+    box.disabled = withOriginal === 0;
+    $("#ask-original").textContent = withOriginal === 0
+      ? "não há original registrado em galeria-entrada/"
+      : keys.length === 1 ? `também mandar o original (${pics.find((p) => p.key === keys[0])!.original}) para a lixeira`
+      : `também mandar os originais para a lixeira (${withOriginal} de ${keys.length} têm original registrado)`;
+    dialog.showModal();
+    // answered by the buttons themselves (not the dialog's "close" event, which some
+    // browsers hold back in background tabs); Esc counts as cancel
+    return new Promise((resolve) => {
+      const done = (answer: { original: boolean } | null) => {
+        dialog.removeEventListener("click", onClick);
+        dialog.removeEventListener("cancel", onCancel);
+        dialog.close();
+        resolve(answer);
+      };
+      const onClick = (e: Event) => {
+        const b = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-answer]");
+        if (b) done(b.dataset.answer === "ok" ? { original: box.checked } : null);
+      };
+      const onCancel = (e: Event) => { e.preventDefault(); done(null); };
+      dialog.addEventListener("click", onClick);
+      dialog.addEventListener("cancel", onCancel);
+    });
+  }
+  async function crop(key: string) {
+    try {
+      const done = await openCrop(key);
+      if (!done) return;
+      rememberScroll();
+      say(done.copy ? `imagem nova salva: ${done.key} (${done.width} × ${done.height})` : `recortada: ${done.width} × ${done.height} px`);
+      await load();
+    } catch (err: any) { say(err.message, true); }
+  }
+  async function pin(keys: string[], on: boolean) {
+    try {
+      rememberScroll();
+      const out = await post("galeria/pictures/pin", { keys, pinned: on });
+      say(`${out.changed} imagem(ns) ${on ? "fixada(s) no topo" : "desafixada(s)"}`); await load();
+    } catch (err: any) { say(err.message, true); }
+  }
+  async function remove(keys: string[]) {
+    const answer = await askDelete(keys);
+    if (!answer) return;
+    try {
+      rememberScroll();
+      const out = await post("galeria/pictures/delete", { keys, original: answer.original });
+      keys.forEach((k) => selected.delete(k));
+      say(`${out.removed} apagada(s) do site${answer.original ? ` · ${out.trashed} original(is) na lixeira${out.missing ? `, ${out.missing} sem original encontrado` : ""}` : ""}`);
+      await load();
+    } catch (err: any) { say(err.message, true); }
+  }
+
+  $("#rows").addEventListener("click", (e) => {
+    const t = e.target as HTMLElement;
+    if (t.matches("[data-delete]")) { remove([t.closest<HTMLElement>(".item")!.dataset.key!]); return; }
+    if (t.matches("[data-crop]")) { crop(t.closest<HTMLElement>(".item")!.dataset.key!); return; }
+    if (t.matches("[data-pin]")) { pin([t.closest<HTMLElement>(".item")!.dataset.key!], t.dataset.pin === "1"); return; }
+    if (!t.matches("[data-tick]")) return;
+    const key = t.closest<HTMLElement>(".item")!.dataset.key!;
+    (t as HTMLInputElement).checked ? selected.add(key) : selected.delete(key);
+    t.closest(".item")!.classList.toggle("selected", selected.has(key));
+    $("#count").textContent = `${visible().length} de ${pics.length} · ${selected.size} selecionada(s)`;
+  });
+
+  // bulk: type and/or date on every selected picture
+  $("#bulk-date").innerHTML = dateField("bulkdate", "", "", "data");
+  document.querySelector(".selbar")!.addEventListener("click", async (e) => {
+    const b = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-sel]");
+    if (!b) return;
+    if (b.dataset.sel === "all") { visible().forEach((p) => selected.add(p.key)); render(); return; }
+    if (b.dataset.sel === "none") { selected.clear(); render(); return; }
+    if (b.dataset.sel === "pin" || b.dataset.sel === "unpin") {
+      if (!selected.size) return say("nenhuma imagem selecionada", true);
+      return pin([...selected], b.dataset.sel === "pin");
+    }
+    if (b.dataset.sel === "delete") { if (!selected.size) return say("nenhuma imagem selecionada", true); return remove([...selected]); }
+    const patch: Record<string, string> = {};
+    const kind = $<HTMLSelectElement>("#bulk-kind").value;
+    const date = $<HTMLInputElement>('#bulk-date input[name="bulkdate"]').value;
+    const draft = $<HTMLSelectElement>("#bulk-draft").value;
+    if (kind) patch.kind = kind;
+    if (date) patch.date = date;
+    if (draft) (patch as any).draft = draft === "1";
+    if (!selected.size) return say("nenhuma imagem selecionada", true);
+    if (!Object.keys(patch).length) return say("escolha tipo, data ou rascunho para aplicar", true);
+    const what = [kind && `tipo ${kind}${kind === "desenho" && !draft ? " (desenhos novos entram como rascunho)" : ""}`, date && `data ${dateLabel(date)}`,
+      draft && (draft === "1" ? "rascunho" : "sem rascunho")].filter(Boolean).join(", ");
+    if (!confirm(`Aplicar ${what} a ${selected.size} imagem(ns)? Substitui o que já estiver escrito nesses campos.`)) return;
+    try {
+      rememberScroll();
+      const out = await post("galeria/pictures/save", { keys: [...selected], patch });
+      say(`${out.changed} imagem(ns) atualizada(s)`); await load();
+    } catch (err: any) { say(err.message, true); }
+  });
+
+  // filters from the address
+  for (const [k, v] of new URLSearchParams(hashValue())) {
+    const el = filters.elements.namedItem(k) as HTMLInputElement | HTMLSelectElement | null;
+    if (el) el.value = v;
+  }
+  restoreStatus();
+  load().then(() => {
+    const album = new URLSearchParams(hashValue()).get("album");
+    if (album) { $<HTMLSelectElement>('select[name="album"]').value = album; render(); }
+  }).catch((err) => say(err.message, true));
+</script>

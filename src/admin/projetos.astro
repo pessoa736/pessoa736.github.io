@@ -1,0 +1,147 @@
+---
+// /admin/projetos: the list in src/data/projects.json. Dev server only (integrations/admin.mjs).
+// The status/area words come from src/data/projects.ts, so the form offers only valid ones.
+import AdminShell from "./AdminShell.astro";
+import { AREAS, STATUS_INFO } from "../data/projects";
+const vocab = JSON.stringify({ status: STATUS_INFO, areas: AREAS });
+---
+<AdminShell title="projetos" section="projetos">
+  <p class="muted">A ordem desta lista vale para a home: os 4 primeiros projetos marcados como destaque viram os planetas. Em /projetos a ordem é por estado e último envio.</p>
+  <div class="cols">
+    <div class="side">
+      <button type="button" id="new">+ novo projeto</button>
+      <ul id="list" class="pick-list"></ul>
+      <div id="missing"></div>
+    </div>
+    <div id="editor"><p class="muted">Escolha um projeto.</p></div>
+  </div>
+  <script type="application/json" id="vocab" set:html={vocab} />
+</AdminShell>
+
+<script>
+  // Safe innerHTML: every value interpolated below goes through esc(), see src/admin/client.ts.
+  import { $, esc, fields, get, hashValue, lines, post, restoreStatus, say, setHash } from "./client";
+
+  type Link = { label: string; href: string };
+  type Project = { repo: string; title: string; summary: string; status: string; area: string; stack: string[]; featured?: boolean; notes?: string[]; links?: Link[] };
+  type Missing = { repo: string; pushedAt: string; homepage: string | null };
+
+  const vocab = JSON.parse($("#vocab").textContent!) as { status: Record<string, string>; areas: string[] };
+  const HOME_SLOTS = 4;   // planets on the home page (ANGLES in src/pages/index.astro)
+  let data: { projects: Project[]; missing: Missing[]; cacheDate: string | null } = { projects: [], missing: [], cacheDate: null };
+  // "#<repo>" = editing that project, "#novo" or "#novo:<repo>" = new one
+  let current = hashValue();
+  const select = (v: string) => { current = v; setHash(v); };
+
+  async function load() {
+    data = await get("projetos/state");
+    renderList();
+    renderEditor();
+  }
+
+  function renderList() {
+    const featured = data.projects.filter((p) => p.featured).map((p) => p.repo);
+    $("#list").innerHTML = data.projects.map((p) => {
+      const star = featured.indexOf(p.repo);
+      return `
+      <li><button type="button" data-pick="${esc(p.repo)}" aria-current="${p.repo === current}">
+        <span>${esc(p.title)}</span>
+        <span class="muted">${esc(p.status)} · ${esc(p.area)}${star >= 0 ? ` · ★${star < HOME_SLOTS ? ` home ${star + 1}` : " (fora da home)"}` : ""}</span>
+      </button></li>`;
+    }).join("");
+    $("#missing").innerHTML = data.missing.length ? `
+      <p class="muted-note">No GitHub, fora da lista${data.cacheDate ? ` (dados de ${esc(data.cacheDate.slice(0, 10))}, npm run cache:github atualiza)` : ""}:</p>
+      <div class="suggest">${data.missing.map((m) => `<button type="button" data-add="${esc(m.repo)}" title="último envio ${esc(m.pushedAt.slice(0, 10))}">${esc(m.repo)}</button>`).join("")}</div>` : "";
+  }
+  $("#list").addEventListener("click", (e) => {
+    const b = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-pick]");
+    if (b) { select(b.dataset.pick!); renderList(); renderEditor(); }
+  });
+  $("#missing").addEventListener("click", (e) => {
+    const b = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-add]");
+    if (b) { select("novo:" + b.dataset.add); renderList(); renderEditor(); }
+  });
+  $("#new").addEventListener("click", () => { select("novo"); renderList(); renderEditor(); });
+
+  const linkRow = (l: Partial<Link> = {}) => `
+    <div class="row link-row">
+      <label>nome<input name="link-label" value="${esc(l.label)}" placeholder="LuaRocks, no ar, documentação"></label>
+      <label>endereço<input name="link-href" value="${esc(l.href)}" placeholder="https://…" type="url"></label>
+      <button type="button" data-unlink aria-label="tirar este link">×</button>
+    </div>`;
+
+  function renderEditor() {
+    const isNew = current.startsWith("novo");
+    const at = data.projects.findIndex((p) => p.repo === current);
+    if (!isNew && at < 0) { $("#editor").innerHTML = '<p class="muted">Escolha um projeto.</p>'; return; }
+    const p: Partial<Project> = isNew ? { repo: current.split(":")[1] ?? "", title: current.split(":")[1] ?? "", stack: [] } : data.projects[at];
+
+    $("#editor").innerHTML = `
+      <form class="card" id="form">
+        <h3>${isNew ? "Novo projeto" : esc(p.title)}${!isNew ? ` <a href="/projetos/${encodeURIComponent(p.repo!)}" target="_blank">ver ↗</a>` : ""}</h3>
+        <div class="row">
+          <label>repositório no GitHub (vira /projetos/…)<input name="repo" value="${esc(p.repo)}" required pattern="[A-Za-z0-9._\\-]+"></label>
+          <label>nome mostrado<input name="title" value="${esc(p.title)}" required></label>
+        </div>
+        <label>o que é (uma frase)<textarea name="summary" rows="2" required>${esc(p.summary)}</textarea></label>
+        <div class="row">
+          <label>estado<select name="status">${Object.entries(vocab.status).map(([s, info]) =>
+            `<option value="${esc(s)}" ${s === p.status ? "selected" : ""} title="${esc(info)}">${esc(s)}</option>`).join("")}</select></label>
+          <label>área<select name="area">${vocab.areas.map((a) =>
+            `<option value="${esc(a)}" ${a === p.area ? "selected" : ""}>${esc(a)}</option>`).join("")}</select></label>
+          <label class="check"><input type="checkbox" name="featured" ${p.featured ? "checked" : ""}> destaque (home)</label>
+        </div>
+        <label>feito com (separe por vírgula)<input name="stack" value="${esc((p.stack ?? []).join(", "))}" placeholder="Rust, no_std, Limine"></label>
+        <label>bom saber (um por linha: o que funciona, o que não)<textarea name="notes" rows="3">${esc((p.notes ?? []).join("\n"))}</textarea></label>
+        <div class="links-edit">
+          <span class="muted-note">links (o GitHub entra sozinho)</span>
+          <div id="links">${(p.links ?? []).map(linkRow).join("")}</div>
+          <div><button type="button" id="add-link">+ link</button></div>
+        </div>
+        <div class="row">
+          <button type="submit" class="primary">${isNew ? "criar projeto" : "salvar"}</button>
+          ${!isNew ? `
+          <button type="button" data-move="-1" ${at === 0 ? "disabled" : ""}>↑ subir</button>
+          <button type="button" data-move="1" ${at === data.projects.length - 1 ? "disabled" : ""}>↓ descer</button>
+          <button type="button" class="danger push" id="delete">tirar da lista</button>` : ""}
+        </div>
+      </form>`;
+  }
+
+  $("#editor").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const form = e.target as HTMLFormElement;
+    const f = fields(form);
+    const links = [...form.querySelectorAll(".link-row")].map((row) => ({
+      label: row.querySelector<HTMLInputElement>('[name="link-label"]')!.value,
+      href: row.querySelector<HTMLInputElement>('[name="link-href"]')!.value,
+    }));
+    const project = {
+      repo: f.repo, title: f.title, summary: f.summary, status: f.status, area: f.area,
+      stack: (f.stack ?? "").split(","), featured: f.featured === "on", notes: lines(f.notes), links,
+    };
+    try {
+      const original = current.startsWith("novo") ? null : current;
+      const out = await post("projetos/save", { original, project });
+      select(out.repo);
+      say(original ? "salvo" : "projeto criado"); await load();
+    } catch (err: any) { say(err.message, true); }
+  });
+
+  $("#editor").addEventListener("click", async (e) => {
+    const t = e.target as HTMLElement;
+    try {
+      if (t.id === "add-link") { $("#links").insertAdjacentHTML("beforeend", linkRow()); return; }
+      if (t.dataset.unlink !== undefined) { t.closest(".link-row")!.remove(); return; }
+      if (t.dataset.move) { await post("projetos/move", { repo: current, by: Number(t.dataset.move) }); say("ordem trocada"); await load(); return; }
+      if (t.id === "delete") {
+        if (!confirm(`Tirar "${current}" da lista do site? O repositório no GitHub não é tocado.`)) return;
+        await post("projetos/delete", { repo: current });
+        select(""); say("tirado da lista"); await load();
+      }
+    } catch (err: any) { say(err.message, true); }
+  });
+
+  restoreStatus();
+  load().catch((err) => say(err.message, true));
+</script>

@@ -1,0 +1,318 @@
+---
+// /admin/galeria/entrada: organise galeria-entrada/ before publishing. Dev server only
+// (integrations/admin.mjs + integrations/admin/entrada.mjs). Folders are future albums,
+// sub-folders sub-albums; the originals never leave the computer and "apagar" sends them
+// to the system trash.
+import AdminShell from "./AdminShell.astro";
+---
+<AdminShell title="galeria" section="galeria">
+  <nav class="subtabs" aria-label="Galeria">
+    <a href="/admin/galeria">publicados</a>
+    <a href="/admin/galeria/imagens">imagens (editar dados)</a>
+    <a href="/admin/galeria/entrada" aria-current="page">entrada (ainda não enviados)</a>
+    <span class="note">originais em galeria-entrada/, fora do git · "apagar" manda para a lixeira do sistema</span>
+  </nav>
+  <div class="cols">
+    <div class="side">
+      <ul id="folders" class="pick-list"></ul>
+      <button type="button" id="new-folder">+ nova pasta</button>
+      <p class="muted-note">Cada pasta vira um álbum quando publicada; pasta dentro de pasta vira sub-álbum. Arraste imagens para uma pasta da lista para movê-las (ou arquivos do computador para enviá-los a ela).</p>
+    </div>
+    <div id="editor"><p class="muted">Escolha uma pasta.</p></div>
+  </div>
+  <pre id="log" hidden></pre>
+</AdminShell>
+
+<script>
+  // Safe innerHTML: every value interpolated below goes through esc() (or
+  // encodeURIComponent inside thumb()), see src/admin/client.ts.
+  import { $, dateField, esc, fileDrop, get, hashValue, post, restoreStatus, say, setHash, uploadFiles } from "./client";
+
+  type File_ = { name: string; path: string; size: number; published: boolean };
+  type Folder = { path: string | null; slug: string | null; files: File_[]; onSite: boolean; data: Record<string, any>; body: string };
+
+  let folders: Folder[] = [];
+  // open folder: "" = inbox root, undefined = none. Kept in the address (#path).
+  let current: string | undefined = hashValue() === "raiz" ? "" : hashValue() || undefined;
+  const selected = new Set<string>();
+  let lastTicked: string | undefined;
+
+  const select = (p: string) => {
+    if (p !== current) { selected.clear(); lastTicked = undefined; }
+    current = p;
+    setHash(p || "raiz");
+  };
+  const thumb = (p: string) => `/__admin/galeria/thumb?from=entrada&path=${encodeURIComponent(p)}`;
+  const nameOf = (p: string) => p.split("/").at(-1)!;
+  const parentOf = (p: string) => (p.includes("/") ? p.slice(0, p.lastIndexOf("/")) : "");
+  const within = (p: string, root: string) => p === root || p.startsWith(root + "/");
+  const paths = () => folders.filter((f) => f.path).map((f) => f.path!);
+  const find = (p: string | undefined) => folders.find((f) => (f.path ?? "") === p);
+  const fresh = (f: Folder) => f.files.filter((x) => !x.published).length;
+  const mb = (n: number) => `${(n / 1048576).toFixed(1)} MB`;
+  const PICS = "application/x-entrada-files";
+
+  async function load() {
+    ({ folders } = await get("galeria/entrada/state"));
+    // the open folder may be gone (moved or trashed): go up to the nearest one
+    while (current && !find(current)) select(parentOf(current));
+    for (const k of [...selected]) if (!folders.some((f) => f.files.some((x) => x.path === k))) selected.delete(k);
+    renderTree();
+    if (current !== undefined && find(current)) renderEditor();
+    else $("#editor").innerHTML = '<p class="muted">Escolha uma pasta.</p>';
+  }
+
+  // ── folder tree ──
+  function renderTree() {
+    $("#folders").innerHTML = folders.map((f) => {
+      const p = f.path ?? "", depth = p ? p.split("/").length - 1 : 0, n = fresh(f);
+      return `
+      <li><button type="button" data-folder="${esc(p)}" aria-current="${p === current}" ${p ? 'draggable="true"' : ""} style="--depth:${depth}">
+        <span>${depth ? '<span class="depth-mark">└</span>' : ""}${esc(p ? nameOf(p) : "(raiz)")}</span>
+        <span class="muted">${f.files.length}${n ? ` · ${n} nova(s)` : f.files.length ? " · tudo no site" : ""}${f.slug ? ` → /galeria/${esc(f.slug)}` : " → avulsas"}</span>
+      </button></li>`;
+    }).join("");
+  }
+  $("#folders").addEventListener("click", (e) => {
+    const b = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-folder]");
+    if (b) { select(b.dataset.folder!); renderTree(); renderEditor(); }
+  });
+
+  // drag & drop on the tree: pictures (move), a folder (nest it), files from the computer (upload)
+  const FOLDER = "application/x-entrada-folder";
+  $("#folders").addEventListener("dragstart", (e) => {
+    const b = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-folder]");
+    if (!b?.dataset.folder) return;
+    e.dataTransfer!.setData(FOLDER, b.dataset.folder);
+  });
+  $("#folders").addEventListener("dragover", (e) => {
+    const b = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-folder]");
+    const t = e.dataTransfer?.types ?? [];
+    if (!b || !(t.includes(PICS) || t.includes(FOLDER) || t.includes("Files"))) return;
+    e.preventDefault();
+    for (const x of document.querySelectorAll("#folders .drop-target")) if (x !== b) x.classList.remove("drop-target");
+    b.classList.add("drop-target");
+  });
+  $("#folders").addEventListener("dragleave", (e) => {
+    (e.target as HTMLElement).closest("[data-folder]")?.classList.remove("drop-target");
+  });
+  $("#folders").addEventListener("drop", async (e) => {
+    const b = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-folder]");
+    if (!b) return;
+    e.preventDefault();
+    b.classList.remove("drop-target");
+    const to = b.dataset.folder ?? "";
+    const dt = e.dataTransfer!;
+    try {
+      if (dt.getData(PICS)) return await moveFiles(JSON.parse(dt.getData(PICS)), to);
+      if (dt.getData(FOLDER)) { const from = dt.getData(FOLDER); return await moveFolder(from, to ? `${to}/${nameOf(from)}` : nameOf(from)); }
+      if (dt.files.length) { select(to); await send([...dt.files], to, false); }
+    } catch (err: any) { say(err.message, true); }
+  });
+
+  async function moveFiles(list: string[], to: string) {
+    const out = await post("galeria/entrada/files/move", { paths: list, to });
+    list.forEach((k) => selected.delete(k));
+    say(`${out.moved} imagem(ns) movida(s) para ${to || "(raiz)"}`);
+    await load();
+  }
+  async function moveFolder(from: string, to: string) {
+    if (from === to) return;
+    if (within(to, from)) throw new Error("uma pasta não pode ir para dentro dela mesma");
+    await post("galeria/entrada/folder/move", { from, to });
+    if (current && within(current, from)) select(to + current.slice(from.length));
+    say(`pasta agora em ${to}`); await load();
+  }
+  async function createFolder(parent: string) {
+    const name = prompt(parent ? `Nome da subpasta dentro de "${parent}":` : "Nome da pasta (vira o álbum):");
+    if (!name) return;
+    const out = await post("galeria/entrada/folder/create", { parent, name });
+    select(out.path); say(`pasta ${out.path} criada`); await load();
+  }
+  $("#new-folder").addEventListener("click", () => createFolder("").catch((err) => say(err.message, true)));
+
+  // upload files from the computer into a folder; optionally publish them right away
+  async function send(files: File[], dir: string, publish: boolean) {
+    const out = await uploadFiles(files, { dir });
+    let msg = `${out.paths.length - out.existed} enviada(s)${out.existed ? `, ${out.existed} já estava(m) aqui` : ""}${out.skipped.length ? `, ignorado(s) por formato: ${out.skipped.join(", ")}` : ""}`;
+    if (publish && out.paths.length) {
+      say(`${msg} · publicando…`);
+      const r = await post("galeria/entrada/publish", { paths: out.paths });
+      const log = $("#log"); log.hidden = false; log.textContent = r.log;
+      msg += " · publicadas (veja o registro abaixo)";
+    }
+    say(msg); await load();
+  }
+
+  // ── editor of the open folder ──
+  function renderEditor() {
+    const f = find(current);
+    if (!f) return;
+    const p = f.path ?? "", d = f.data, n = fresh(f);
+    const parents = paths().filter((x) => !p || !within(x, p));
+    const others = paths().filter((x) => x !== p);
+    const subs = paths().filter((x) => parentOf(x) === p && x !== p);
+    const below = p ? folders.filter((x) => x.path && within(x.path, p)).reduce((s, x) => s + fresh(x), 0) : n;
+
+    $("#editor").innerHTML = `
+      ${p ? `
+      <form class="card" id="folder-form">
+        <h3>Pasta <span class="muted">galeria-entrada/${esc(p)}</span></h3>
+        <p class="muted-note">Vira <strong>/galeria/${esc(f.slug)}</strong>${f.onSite ? ` — esse álbum já existe no site: o que for publicado entra nele. <a href="/galeria/${esc(f.slug)}" target="_blank">ver ↗</a>` : "."}</p>
+        <div class="row">
+          <label>nome<input name="name" value="${esc(nameOf(p))}"></label>
+          <label>dentro de<select name="parent">
+            <option value="">(raiz da entrada)</option>
+            ${parents.map((x) => `<option value="${esc(x)}" ${x === parentOf(p) ? "selected" : ""}>${esc(x.split("/").join(" / "))}</option>`).join("")}
+          </select></label>
+          <button type="button" id="move-folder">renomear / mover</button>
+        </div>
+        <h4>Texto do álbum <small class="muted">(já fica pronto para quando publicar)</small></h4>
+        <label>título<input name="title" value="${esc(d.title)}" placeholder="${esc(nameOf(p))}"></label>
+        <label>descrição<input name="description" value="${esc(d.description)}"></label>
+        ${dateField("date", d.date)}
+        <label>texto (Markdown)<textarea name="body" rows="3">${esc(f.body)}</textarea></label>
+        <div class="row">
+          <button type="submit">salvar texto</button>
+          <button type="button" id="new-sub">+ subpasta</button>
+          <button type="button" class="primary" id="publish-folder" ${below ? "" : "disabled"}>publicar pasta${below ? ` (${below} nova(s)${subs.length ? ", com subpastas" : ""})` : ""}</button>
+          <button type="button" class="danger push" id="delete-folder">apagar pasta</button>
+        </div>
+      </form>` : `
+      <div class="card">
+        <p class="muted">Raiz da entrada: imagens soltas aqui viram <strong>avulsas</strong> (sem álbum) quando publicadas.</p>
+        <div class="row"><button type="button" class="primary" id="publish-folder" ${n ? "" : "disabled"}>publicar avulsas${n ? ` (${n} nova(s))` : ""}</button></div>
+      </div>`}
+
+      <div class="dropzone" id="drop">
+        <span>Solte imagens do computador aqui, ou</span>
+        <label class="pickfile">escolher arquivos<input type="file" id="pick" multiple accept=".jpg,.jpeg,.png,.webp,.avif,.tif,.tiff"></label>
+        <label class="check"><input type="checkbox" id="publish-now"> publicar logo depois de enviar</label>
+      </div>
+
+      ${f.files.length ? `
+      <div class="selbar" role="toolbar" aria-label="Imagens selecionadas">
+        <span class="count" id="sel-count"></span>
+        <button type="button" data-sel="all">todas</button>
+        <button type="button" data-sel="fresh">só as novas</button>
+        <button type="button" data-sel="none">nenhuma</button>
+        <select id="dest" aria-label="mover para">
+          ${p ? '<option value="">(raiz)</option>' : ""}
+          ${others.map((x) => `<option value="${esc(x)}">${esc(x.split("/").join(" / "))}</option>`).join("")}
+        </select>
+        <button type="button" data-sel="move">mover</button>
+        <button type="button" data-sel="publish">publicar</button>
+        <button type="button" class="danger" data-sel="delete">lixeira</button>
+      </div>` : `<p class="muted-note" style="margin-top:1rem">Nenhuma imagem nesta pasta${subs.length ? " (só subpastas)" : ""}.</p>`}
+
+      <ul class="pics">${f.files.map((x) => `
+        <li class="pic" data-path="${esc(x.path)}" draggable="true">
+          <label class="sel" title="selecionar"><input type="checkbox" data-tick aria-label="selecionar ${esc(x.name)}"></label>
+          ${x.published ? '<span class="badge on-site">no site</span>' : ""}
+          <img loading="lazy" alt="" src="${thumb(x.path)}" draggable="false">
+          <p class="name" title="${esc(x.name)} · ${mb(x.size)}">${esc(x.name)}</p>
+        </li>`).join("")}</ul>`;
+
+    fileDrop($("#drop"), (files) => send(files, p, $<HTMLInputElement>("#publish-now").checked).catch((err) => say(err.message, true)));
+    $<HTMLInputElement>("#pick").addEventListener("change", (e) => {
+      const input = e.target as HTMLInputElement;
+      send([...(input.files ?? [])], p, $<HTMLInputElement>("#publish-now").checked).catch((err) => say(err.message, true));
+    });
+    updateSelection();
+  }
+
+  function updateSelection() {
+    const count = document.getElementById("sel-count");
+    if (!count) return;
+    count.textContent = `${selected.size} selecionada(s)`;
+    for (const b of document.querySelectorAll<HTMLButtonElement>('[data-sel="move"], [data-sel="publish"], [data-sel="delete"]')) b.disabled = selected.size === 0;
+    for (const li of document.querySelectorAll<HTMLElement>(".pic")) {
+      const on = selected.has(li.dataset.path!);
+      li.classList.toggle("selected", on);
+      li.querySelector<HTMLInputElement>("[data-tick]")!.checked = on;
+    }
+  }
+  const currentFiles = () => find(current)?.files ?? [];
+  function tick(key: string, on: boolean, range: boolean) {
+    const keys = currentFiles().map((x) => x.path);
+    if (range && lastTicked && keys.includes(lastTicked)) {
+      const [i, j] = [keys.indexOf(lastTicked), keys.indexOf(key)].sort((x, y) => x - y);
+      for (const k of keys.slice(i, j + 1)) on ? selected.add(k) : selected.delete(k);
+    } else on ? selected.add(key) : selected.delete(key);
+    lastTicked = key;
+    updateSelection();
+  }
+
+  $("#editor").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const f = Object.fromEntries(new FormData(e.target as HTMLFormElement)) as Record<string, string>;
+    try {
+      await post("galeria/entrada/album/save", { path: current, title: f.title, description: f.description, date: f.date, body: f.body });
+      say("texto salvo"); await load();
+    } catch (err: any) { say(err.message, true); }
+  });
+
+  $("#editor").addEventListener("click", async (e) => {
+    const t = e.target as HTMLElement;
+    const pic = t.closest<HTMLElement>(".pic");
+    try {
+      if (pic && (t.matches("[data-tick]") || t.tagName === "IMG")) {
+        const key = pic.dataset.path!;
+        tick(key, t.matches("[data-tick]") ? (t as HTMLInputElement).checked : !selected.has(key), (e as MouseEvent).shiftKey);
+        return;
+      }
+      if (t.id === "new-sub") return await createFolder(current!);
+      if (t.id === "move-folder") {
+        const form = $<HTMLFormElement>("#folder-form");
+        const name = (form.elements.namedItem("name") as HTMLInputElement).value.trim();
+        const parent = (form.elements.namedItem("parent") as HTMLSelectElement).value;
+        return await moveFolder(current!, parent ? `${parent}/${name}` : name);
+      }
+      if (t.id === "publish-folder") {
+        if (!confirm(current ? `Publicar "${current}" e as subpastas? As novas viram WebP leves em src/assets/galeria/ (o commit continua com você).` : "Publicar as imagens soltas da raiz como avulsas?")) return;
+        (t as HTMLButtonElement).disabled = true;
+        say("publicando… pode levar um minuto");
+        const out = await post("galeria/publish", { album: current || null });
+        const log = $("#log"); log.hidden = false; log.textContent = out.log;
+        say("publicado (veja o registro abaixo)"); await load();
+        return;
+      }
+      if (t.id === "delete-folder") {
+        const all = folders.filter((x) => x.path && within(x.path, current!)).reduce((s, x) => s + x.files.length, 0);
+        if (!confirm(`Mandar a pasta "${current}" para a lixeira do sistema, com ${all} imagem(ns) e as subpastas? Dá para recuperar pela lixeira. O que já foi publicado continua no site.`)) return;
+        await post("galeria/entrada/folder/delete", { path: current });
+        select(parentOf(current!)); say("pasta na lixeira do sistema"); await load();
+        return;
+      }
+      switch (t.dataset.sel) {
+        case "all": currentFiles().forEach((x) => selected.add(x.path)); updateSelection(); break;
+        case "fresh": selected.clear(); currentFiles().filter((x) => !x.published).forEach((x) => selected.add(x.path)); updateSelection(); break;
+        case "none": selected.clear(); updateSelection(); break;
+        case "move": await moveFiles([...selected], $<HTMLSelectElement>("#dest").value); break;
+        case "publish": {
+          say(`publicando ${selected.size} imagem(ns)…`);
+          const out = await post("galeria/entrada/publish", { paths: [...selected] });
+          const log = $("#log"); log.hidden = false; log.textContent = out.log;
+          selected.clear(); say("publicado (veja o registro abaixo)"); await load();
+          break;
+        }
+        case "delete": {
+          if (!confirm(`Mandar ${selected.size} original(is) para a lixeira do sistema? Dá para recuperar pela lixeira. O que já foi publicado continua no site.`)) return;
+          const out = await post("galeria/entrada/files/delete", { paths: [...selected] });
+          selected.clear(); say(`${out.removed} na lixeira do sistema`); await load();
+          break;
+        }
+      }
+    } catch (err: any) { say(err.message, true); }
+  });
+
+  $("#editor").addEventListener("dragstart", (e) => {
+    const li = (e.target as HTMLElement).closest<HTMLElement>(".pic");
+    if (!li) return;
+    const key = li.dataset.path!;
+    e.dataTransfer!.setData(PICS, JSON.stringify(selected.has(key) ? [...selected] : [key]));
+  });
+
+  restoreStatus();
+  load().catch((err) => say(err.message, true));
+</script>
