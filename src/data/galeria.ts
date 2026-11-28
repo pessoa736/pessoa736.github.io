@@ -15,6 +15,10 @@ export interface GalleryInfo {
   kind?: Kind;            // default: "foto"
   date?: string;          // "2026-11-27"
   alt?: string;           // description for screen readers; defaults to the title
+  draft?: boolean;        // rascunho: still shown, but after everything else. New drawings
+                          // start as drafts; `false` is kept to remember "not a draft"
+  pinned?: string;        // set = pinned to the top of the gallery and of its album; holds
+                          // when it was pinned (the latest pin comes first)
 }
 
 // The entries live in galeria.json so the dev-only admin page (/admin) can edit them.

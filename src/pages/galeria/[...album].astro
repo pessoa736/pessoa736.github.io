@@ -1,0 +1,61 @@
+---
+// /galeria/<album>[/<sub-album>...]: one album, its sub-albums and its own pictures.
+// The path is the folder path in src/assets/galeria/.
+import Base from "../../layouts/Base.astro";
+import Wall from "../../components/Wall.astro";
+import AlbumGrid from "../../components/AlbumGrid.astro";
+import { getCollection, render } from "astro:content";
+import { albumSlugs, loadGallery } from "../../lib/galeria";
+
+export async function getStaticPaths() {
+  return (await albumSlugs()).map((album) => ({ params: { album } }));
+}
+const { all } = await loadGallery();
+const album = all.get(Astro.params.album!)!;
+// the text is optional: look it up in the collection (getEntry warns for every album without one)
+const note = (await getCollection("albuns")).find((e) => e.id === album.slug);
+const { Content } = note ? await render(note) : { Content: undefined };
+
+// breadcrumb: Galeria / viagens / 2024 (each ancestor by its title)
+const trail: { href: string; label: string }[] = [{ href: "/galeria", label: "Galeria" }];
+for (let s = album.parent; s; s = all.get(s)?.parent) trail.splice(1, 0, { href: `/galeria/${s}`, label: all.get(s)?.title ?? s });
+---
+<Base title={`${album.title}: galeria`} description={album.description ?? `Álbum ${album.title}, ${album.total} imagens.`}>
+  <nav class="back" aria-label="Caminho">
+    {trail.map((t, i) => <>{i > 0 && <span class="sep" aria-hidden="true">/</span>}<a href={t.href}>{t.label}</a></>)}
+  </nav>
+  <header class="page-head">
+    <h1>{album.title}</h1>
+    {album.description && <p class="lede">{album.description}</p>}
+    <p class="muted meta">
+      {album.total} {album.total === 1 ? "imagem" : "imagens"}
+      {album.date && <> · <time datetime={album.date.text}>{album.date.longLabel}</time></>}
+    </p>
+  </header>
+
+  {Content && <div class="prose"><Content /></div>}
+
+  {album.children.length > 0 && (
+    <section class="section" aria-labelledby="sub">
+      <h2 id="sub">Sub-álbuns</h2>
+      <AlbumGrid albums={album.children} />
+    </section>
+  )}
+
+  {album.pictures.length > 0 && (
+    <section class="section" aria-label="Imagens">
+      {album.children.length > 0 && <h2>Neste álbum</h2>}
+      <Wall pictures={album.pictures} filterBar />
+    </section>
+  )}
+</Base>
+
+<style>
+  .back { margin-top: 1.5rem; font-size: var(--step--1); display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .back a:first-child::before { content: "← "; }
+  .sep { color: var(--muted); }
+  .page-head { margin-top: 1rem; }
+  .lede { margin-top: 0.75rem; font-size: var(--step-1); }
+  .meta { margin-top: 0.5rem; font-size: var(--step--1); }
+  .prose { margin-top: 1.5rem; max-width: 70ch; }
+</style>

@@ -2,33 +2,121 @@
 // A wall of pictures (columns keep each picture's proportions), a type filter when
 // there are both drawings and photos, and a full-size viewer. Used by /galeria and
 // /galeria/<album>. Without JavaScript the links simply open the image.
-import type { Picture } from "../lib/galeria";
-interface Props { pictures: Picture[] }
-const { pictures } = Astro.props;
+// `showAlbum`: under each picture, a link to the album it belongs to (for the mixed feed).
+// `rows`: justified rows read left to right (for a feed where order is time); the default
+// columns fill top to bottom, so the 2nd picture would sit under the 1st.
+// `filterBar`: a full filter area (search, type, year, album, pinned, hide drafts) instead of the
+// simple type buttons. Its state lives in the address (?q=&tipo=&ano=&album=&fixadas=1),
+// so a filtered view can be shared. Without JavaScript it stays hidden and all is shown.
+import { whenOf, type Picture } from "../lib/galeria";
+interface Props { pictures: Picture[]; showAlbum?: boolean; rows?: boolean; filterBar?: boolean }
+const { pictures, showAlbum = false, rows = false, filterBar = false } = Astro.props;
 const kinds = (["desenho", "foto"] as const).filter((k) => pictures.some((p) => p.kind === k));
+
+// options of the filter area, only those that would change something
+const years = [...new Set(pictures.map((p) => whenOf(p)?.year).filter((y): y is number => !!y))].sort((a, b) => b - a);
+const undated = pictures.some((p) => !whenOf(p));
+// every album path and its parents ("desenhos", "desenhos/2022"): picking a parent includes its sub-albums
+const albumTitle = new Map<string, string>();
+for (const p of pictures) {
+  if (!p.album) continue;
+  const parts = p.album.split("/");
+  for (let i = 1; i <= parts.length; i++) {
+    const path = parts.slice(0, i).join("/");
+    if (!albumTitle.has(path) || path === p.album) albumTitle.set(path, path === p.album && p.albumTitle ? p.albumTitle : parts[i - 1]);
+  }
+}
+const albumOptions = [...albumTitle].sort(([a], [b]) => a.localeCompare(b, "pt-BR", { numeric: true }));
+const hasLoose = pictures.some((p) => !p.album);
+const pinned = pictures.filter((p) => p.pinned).length;
+const drafts = pictures.filter((p) => p.draft).length;
+const showBar = filterBar && pictures.length > 1;
+const yearOf = (p: Picture) => String(whenOf(p)?.year ?? "sem-data");
 ---
-{kinds.length > 1 && (
+{showBar && (
+  <details class="gfold" hidden>
+  <summary><span class="s-label">filtros e ordem</span> <span class="s-state"></span></summary>
+  <form class="gfilters" role="search" aria-label="Filtrar e ordenar imagens">
+    <label class="search">buscar<input type="search" name="q" placeholder="título, descrição, álbum" autocomplete="off"></label>
+    <div class="opts">
+      <label>ordenar<select name="ordem">
+        <option value="">padrão (fixadas, recentes, rascunhos no fim)</option>
+        <option value="recentes">mais recentes primeiro</option>
+        <option value="antigas">mais antigas primeiro</option>
+        <option value="az">alfabética (A → Z)</option>
+        <option value="za">alfabética (Z → A)</option>
+      </select></label>
+      {kinds.length > 1 && (
+        <fieldset class="chips">
+          <legend>tipo</legend>
+          <label><input type="radio" name="tipo" value="" checked><span>tudo</span></label>
+          {kinds.map((k) => <label><input type="radio" name="tipo" value={k}><span>{k === "desenho" ? "desenhos" : "fotos"}</span></label>)}
+        </fieldset>
+      )}
+      {(years.length > 1 || (years.length > 0 && undated)) && (
+        <label>ano<select name="ano">
+          <option value="">todos</option>
+          {years.map((y) => <option value={y}>{y}</option>)}
+          {undated && <option value="sem-data">sem data</option>}
+        </select></label>
+      )}
+      {showAlbum && albumOptions.length + (hasLoose ? 1 : 0) > 1 && (
+        <label>álbum<select name="album">
+          <option value="">todos</option>
+          {albumOptions.map(([path, title]) => <option value={path}>{"— ".repeat(path.split("/").length - 1)}{title}</option>)}
+          {hasLoose && <option value="-">sem álbum</option>}
+        </select></label>
+      )}
+      {pinned > 0 && pinned < pictures.length && (
+        <label class="check"><input type="checkbox" name="fixadas" value="1"> só fixadas</label>
+      )}
+      {drafts > 0 && drafts < pictures.length && (
+        <label class="check"><input type="checkbox" name="semrascunho" value="1"> esconder rascunhos</label>
+      )}
+    </div>
+    <p class="result"><span class="count" aria-live="polite"></span> <button type="reset" class="clear">limpar filtros</button></p>
+  </form>
+  </details>
+)}
+{!showBar && kinds.length > 1 && (
   <div class="filters" role="group" aria-label="Filtrar por tipo" hidden>
     <button type="button" data-kind="" aria-pressed="true">tudo</button>
     {kinds.map((k) => <button type="button" data-kind={k} aria-pressed="false">{k === "desenho" ? "desenhos" : "fotos"}</button>)}
   </div>
 )}
-<ul class="wall">
+<ul class:list={["wall", { rows }]}>
   {pictures.map((p) => (
-    <li data-kind={p.kind}>
-      <a href={p.full} class="frame" data-title={p.title} data-description={p.description}>
+    <li data-kind={p.kind} data-year={yearOf(p)} data-album={p.album ?? "-"} data-pinned={p.pinned ? "1" : undefined} data-draft={p.draft ? "1" : undefined}
+        data-when={whenOf(p)?.sortValue} data-name={(p.title?.trim() || p.key.split("/").pop()!.replace(/\.webp$/, "").replace(/-/g, " ")).replace(/^[^\p{L}\p{N}]+/u, "")}
+        data-text={[p.title, p.description, p.alt, p.albumTitle, p.album].filter(Boolean).join(" ").toLowerCase()}
+        style={rows ? `--r: ${(p.thumb.width / p.thumb.height).toFixed(4)}` : undefined}>
+      <a href={p.full} class:list={["frame", { pinned: p.pinned }]} data-title={p.title} data-description={p.description}>
+        {p.pinned && <span class="pin">fixada</span>}
+        {p.draft && (
+          <span class="draft" title="rascunho">
+            {/* small pencil: marks a draft without competing with the picture */}
+            <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true">
+              <path d="M11.5 2.5l2 2L6 12l-2.75.75L4 10z M10 4l2 2" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" />
+            </svg>
+            <span class="sr-only">rascunho</span>
+          </span>
+        )}
         <img src={p.thumb.src} width={p.thumb.width} height={p.thumb.height} alt={p.alt} loading="lazy" decoding="async" />
       </a>
-      {(p.title || p.date) && (
+      {(p.title || whenOf(p)) && (
         <p class="caption">
           {p.title && <span class="title">{p.title}</span>}
-          {p.date && <time class="muted" datetime={p.date.toISOString()}>{p.date.toLocaleDateString("pt-BR", { month: "short", year: "numeric" })}</time>}
+          {whenOf(p) && <time class="muted" datetime={whenOf(p)!.text}>{whenOf(p)!.label}</time>}
         </p>
       )}
       {p.description && <p class="description">{p.description}</p>}
+      {showAlbum && p.album && p.albumTitle && (
+        <p class="from muted">em <a href={`/galeria/${p.album}`}>{p.albumTitle}</a></p>
+      )}
     </li>
   ))}
 </ul>
+{showBar && <p class="none" hidden>Nenhuma imagem com esses filtros.</p>}
 
 <dialog class="visor" aria-label="Imagem ampliada">
   <img alt="" />
@@ -59,6 +147,91 @@ const kinds = (["desenho", "foto"] as const).filter((k) => pictures.some((p) => 
     });
     dialog.addEventListener("click", (e) => { if (e.target === dialog) dialog.close(); });
 
+    // full filter area: every field narrows the list; the state goes to the address
+    const form = wall.parentElement!.querySelector<HTMLFormElement>("form.gfilters");
+    if (form) {
+      const fold_ = form.closest<HTMLDetailsElement>("details.gfold")!;
+      fold_.hidden = false;
+      const cells = [...wall.querySelectorAll<HTMLElement>(":scope > li")];
+      cells.forEach((c, i) => (c.dataset.i = String(i)));   // the site's order, to go back to it
+      const state = fold_.querySelector<HTMLElement>(".s-state")!;
+      const none = wall.parentElement!.querySelector<HTMLElement>(".none");
+      const count = form.querySelector<HTMLElement>(".count")!;
+      const keys = ["q", "ordem", "tipo", "ano", "album", "fixadas", "semrascunho"];
+      // ordering: dated pictures by date (undated always last); names A-Z with numbers in
+      // order (2 before 10); drafts stay last in every order, as on the rest of the site
+      const collator = new Intl.Collator("pt-BR", { numeric: true, sensitivity: "base" });
+      const num = (v?: string) => (v ? Number(v) : NaN);
+      const orders: Record<string, (a: HTMLElement, b: HTMLElement) => number> = {
+        recentes: (a, b) => (num(b.dataset.when) || -Infinity) - (num(a.dataset.when) || -Infinity),
+        antigas: (a, b) => (num(a.dataset.when) || Infinity) - (num(b.dataset.when) || Infinity),
+        az: (a, b) => collator.compare(a.dataset.name ?? "", b.dataset.name ?? ""),
+        za: (a, b) => collator.compare(b.dataset.name ?? "", a.dataset.name ?? ""),
+      };
+      let lastOrder: string | undefined;
+      const sortCells = (order: string) => {
+        if (order === lastOrder) return;
+        lastOrder = order;
+        const cmp = orders[order];
+        const sorted = [...cells].sort((a, b) =>
+          !cmp ? Number(a.dataset.i) - Number(b.dataset.i)
+          : Number(a.dataset.draft === "1") - Number(b.dataset.draft === "1") || cmp(a, b) || Number(a.dataset.i) - Number(b.dataset.i));
+        wall.append(...sorted);
+      };
+      // words without accents, so "ceu" finds "céu"
+      const fold = (t: string) => t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+      const run = () => {
+        const f = Object.fromEntries(new FormData(form)) as Record<string, string>;
+        const words = fold(f.q ?? "").split(/\s+/).filter(Boolean);
+        sortCells(f.ordem ?? "");
+        let shown = 0;
+        for (const c of cells) {
+          const d = c.dataset;
+          const ok =
+            (!f.tipo || d.kind === f.tipo) &&
+            (!f.ano || d.year === f.ano) &&
+            (!f.album || (f.album === "-" ? d.album === "-" : d.album === f.album || d.album!.startsWith(f.album + "/"))) &&
+            (!f.fixadas || d.pinned === "1") &&
+            (!f.semrascunho || d.draft !== "1") &&
+            words.every((w) => fold(d.text ?? "").includes(w));
+          c.hidden = !ok;
+          if (ok) shown++;
+        }
+        const filtering = keys.filter((k) => k !== "ordem" && f[k]).length;
+        const active = filtering > 0 || !!f.ordem;
+        count.textContent = filtering ? `${shown} de ${cells.length} imagens` : `${cells.length} imagens`;
+        // closed area still tells what is on: "3 filtros · A → Z"
+        const orderName = form.querySelector<HTMLSelectElement>('select[name="ordem"]')!.selectedOptions[0];
+        state.textContent = [filtering && `${filtering} filtro${filtering > 1 ? "s" : ""} · ${shown} de ${cells.length}`,
+          f.ordem && orderName.textContent!.replace(/ primeiro$/, "")].filter(Boolean).join(" · ");
+        form.querySelector<HTMLElement>(".clear")!.hidden = !active;
+        if (none) none.hidden = shown > 0;
+        const url = new URL(location.href);
+        for (const k of keys) f[k] ? url.searchParams.set(k, f[k]) : url.searchParams.delete(k);
+        history.replaceState(null, "", url);
+      };
+      // start from the address
+      const params = new URL(location.href).searchParams;
+      for (const k of keys) {
+        const v = params.get(k);
+        if (!v) continue;
+        const fields = form.querySelectorAll<HTMLInputElement>(`[name="${k}"]`);
+        for (const el of fields) {
+          if (el.type === "radio") el.checked = el.value === v;
+          else if (el.type === "checkbox") el.checked = true;
+          else el.value = v;
+        }
+      }
+      form.addEventListener("input", run);
+      form.addEventListener("change", run);
+      form.addEventListener("submit", (e) => e.preventDefault());
+      form.addEventListener("reset", () => setTimeout(run));   // after the fields are cleared
+      // closed by default; opens by itself when the address already brings filters
+      fold_.open = keys.some((k) => params.get(k));
+      run();
+      continue;
+    }
+
     // type filter (?tipo=desenho), same behaviour as on /projetos
     const group = wall.parentElement!.querySelector<HTMLElement>(".filters");
     if (!group) continue;
@@ -87,15 +260,81 @@ const kinds = (["desenho", "foto"] as const).filter((k) => pictures.some((p) => 
   }
   .filters button[aria-pressed="true"] { background: var(--text); color: var(--bg); }
 
+  /* filter area: a ruled box, same language as the rest of the site */
+  /* retractable: a ruled bar that opens into the filter box */
+  .gfold { margin-top: 1.5rem; border: var(--frame) solid var(--line); }
+  .gfold[hidden] { display: none; }
+  .gfold summary {
+    display: flex; align-items: center; gap: 0.8rem; min-height: 2.75rem; padding: 0.4rem 1rem;
+    cursor: pointer; list-style: none; font-size: var(--step--1);
+  }
+  .gfold summary::-webkit-details-marker { display: none; }
+  .gfold summary::before { content: "+"; font-family: var(--font-mono); width: 1ch; color: var(--accent); }
+  .gfold[open] summary::before { content: "−"; }
+  .gfold summary:hover { background: var(--surface); }
+  .gfold .s-label { font-weight: 600; }
+  .gfold .s-state { font-family: var(--font-mono); color: var(--muted); }
+  .gfold[open] summary { border-bottom: var(--frame) solid var(--line); }
+  .gfilters { display: grid; gap: 0.8rem; padding: 1rem; }
+  .gfilters label, .gfilters legend { display: grid; gap: 0.25rem; font-size: var(--step--1); color: var(--muted); }
+  .gfilters input[type="search"], .gfilters select {
+    font: inherit; font-size: var(--step-0, 1rem); width: 100%; min-height: 2.5rem; padding: 0.35rem 0.6rem;
+    color: var(--text); background: var(--bg); border: var(--frame) solid var(--line);
+  }
+  .gfilters .opts { display: flex; flex-wrap: wrap; align-items: end; gap: 0.8rem 1.2rem; }
+  .gfilters .opts > label { flex: 0 1 12rem; }
+  .gfilters .opts > label:first-child { flex-basis: 17rem; }
+  @media (max-width: 520px) { .gfilters .opts > label { flex: 1 1 100%; } }
+  .gfilters fieldset { border: 0; padding: 0; margin: 0; }
+  .gfilters .chips { display: flex; flex-wrap: wrap; align-items: end; gap: 0; }
+  .gfilters .chips legend { margin-bottom: 0.25rem; }
+  .gfilters .chips label { display: block; }
+  .gfilters .chips input { position: absolute; opacity: 0; pointer-events: none; }
+  .gfilters .chips span {
+    display: inline-flex; align-items: center; min-height: 2.5rem; padding: 0.35rem 0.9rem; cursor: pointer;
+    font-size: var(--step--1); color: var(--text); border: var(--frame) solid var(--line);
+  }
+  .gfilters .chips label + label span { border-left: 0; }
+  .gfilters .chips input:checked + span { background: var(--text); color: var(--bg); }
+  .gfilters .chips input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .gfilters label.check { display: flex; align-items: center; gap: 0.5rem; min-height: 2.5rem; color: var(--text); }
+  .gfilters .result { display: flex; align-items: center; gap: 1rem; font-family: var(--font-mono); font-size: var(--step--1); color: var(--muted); }
+  .gfilters .clear { font: inherit; padding: 0; color: var(--text); background: none; border: 0; cursor: pointer; text-decoration: underline; text-decoration-color: var(--accent); }
+  .gfilters .clear[hidden] { display: none; }
+  .none { margin-top: 1.5rem; padding: 1.2rem; border: var(--frame) dashed var(--line); }
+  .none[hidden] { display: none; }
+
   .wall { list-style: none; padding: 0; margin-top: 1.5rem; columns: 3 16rem; column-gap: 1.25rem; }
   .wall li { break-inside: avoid; margin-bottom: 1.25rem; max-width: none; }
   .wall li[hidden] { display: none; }
-  .frame { display: block; border: var(--frame) solid var(--line); background: var(--void); }
+  /* justified rows: width and growth both proportional to the picture's ratio (--r), so
+     every picture in a row ends up the same height; the spacer keeps the last row from
+     stretching a lone picture across the page */
+  .wall.rows { columns: auto; display: flex; flex-wrap: wrap; align-items: flex-start; gap: 1.25rem; }
+  .wall.rows li { flex: var(--r) 1 calc(var(--r) * 14rem); min-width: 0; margin-bottom: 0; }
+  .wall.rows::after { content: ""; flex: 9999 1 0; }
+  @media (max-width: 520px) { .wall.rows li { flex-basis: 100%; } }
+  .frame { position: relative; display: block; border: var(--frame) solid var(--line); background: var(--void); }
+  .frame.pinned { border-color: var(--accent); }
+  .pin {
+    position: absolute; top: 0; left: 0; z-index: 1; padding: 0.1rem 0.45rem;
+    font-family: var(--font-mono); font-size: 0.7rem; background: var(--accent); color: var(--paper);
+  }
+  /* draft mark: a small, faded pencil in the corner; a bit clearer on hover */
+  .draft {
+    position: absolute; right: 0.3rem; bottom: 0.3rem; z-index: 1;
+    display: grid; place-items: center; width: 1.3rem; height: 1.3rem;
+    color: var(--muted); background: color-mix(in srgb, var(--bg) 80%, transparent);
+    border-radius: 50%; opacity: 0.7; transition: opacity 0.15s;
+  }
+  .frame:hover .draft, .frame:focus-visible .draft { opacity: 1; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   .frame img { width: 100%; height: auto; }
   .frame:hover { border-color: var(--accent); }
   .caption { display: flex; justify-content: space-between; gap: 1rem; margin-top: 0.4rem; font-size: var(--step--1); }
   .caption .title { font-weight: 500; }
   .description { margin-top: 0.25rem; font-size: var(--step--1); color: var(--muted); }
+  .from { margin-top: 0.2rem; font-size: var(--step--1); }
 
   dialog {
     margin: auto;   /* the global `* { margin: 0 }` would pin it to the top-left corner */

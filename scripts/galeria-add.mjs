@@ -2,16 +2,19 @@
 //
 //   1. drop images into galeria-entrada/          (that folder is NOT committed)
 //      a sub-folder is an album: galeria-entrada/viagem-2024/*.jpg -> /galeria/viagem-2024
+//      a folder inside it is a sub-album: galeria-entrada/viagens/2024/ -> /galeria/viagens/2024
 //   2. npm run galeria:add                        lists what is waiting, publishes nothing
-//      npm run galeria:add -- viagem-2024         publishes that album (several names allowed)
+//      npm run galeria:add -- viagem-2024         publishes that album and its sub-albums (several allowed)
+//      npm run galeria:add -- viagens/2024        publishes only that sub-album
+//      npm run galeria:add -- viagens/2024/a.jpg  publishes only that file (several allowed)
 //      npm run galeria:add -- --avulsas           publishes the loose files at the top level
 //      npm run galeria:add -- --tudo              publishes everything waiting
 //
 // Each new picture is resized (max 1800px on the long side), converted to WebP and
-// written to src/assets/galeria/[<album>/]<id>.webp, where <id> comes from the file name.
+// written to src/assets/galeria/[<album path>/]<id>.webp, where <id> comes from the file name.
 // Duplicates never enter twice: we compare the exact bytes (sha256) AND a perceptual
 // hash (dHash), so the same photo with another name, format or size is recognised.
-// Titles/descriptions stay in src/data/galeria.ts, keyed by "<id>.webp".
+// Titles/descriptions stay in src/data/galeria.json (editable at /admin), keyed by "<id>.webp".
 import { createHash } from "node:crypto";
 import { existsSync } from "node:fs";
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
@@ -27,11 +30,14 @@ const MAX_SIDE = 1800;
 const QUALITY = 78;
 const HAMMING_LIMIT = 8; // of 256 bits: near-identical images, not just similar ones
 
-const slug = (name) =>
-  path.parse(name).name
-    .normalize("NFD").replace(/[̀-ͯ]/g, "")
+const slugText = (s) =>
+  s.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
     .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "")
-    .slice(0, 60) || "imagem";
+    .slice(0, 60);
+const slug = (name) => slugText(path.parse(name).name) || "imagem";
+// an album path, one slug per folder: "Viagens/Natal 2024" -> "viagens/natal-2024"
+// (same rule in integrations/admin/galeria.mjs; a folder name keeps its dots: "v1.0" -> "v1-0")
+const slugPath = (rel) => rel.split("/").map((seg) => slugText(seg) || "album").join("/");
 
 // 16x16 difference hash: 256 bits that survive resizing, recompression and format changes
 async function dhash(buffer) {
@@ -64,29 +70,48 @@ const images = async (dir) =>
     .map((f) => f.name)
     .sort((a, b) => a.localeCompare(b, "pt-BR", { numeric: true }));
 
-// what is waiting in the inbox: loose files + one entry per sub-folder (album)
-const entries = await readdir(INBOX, { withFileTypes: true });
+// what is waiting in the inbox: loose files + one entry per folder, at any depth
+// (album = the folder's path relative to the inbox, e.g. "viagens/2024")
 const waiting = [{ album: null, label: "(avulsas)", files: await images(INBOX) }];
-for (const d of entries.filter((e) => e.isDirectory()).sort((a, b) => a.name.localeCompare(b.name)))
-  waiting.push({ album: d.name, label: d.name, files: await images(path.join(INBOX, d.name)) });
+async function walk(rel) {
+  const dirs = (await readdir(path.join(INBOX, rel), { withFileTypes: true }))
+    .filter((e) => e.isDirectory() && !e.name.startsWith(".")).map((e) => e.name).sort((a, b) => a.localeCompare(b));
+  for (const name of dirs) {
+    const sub = rel ? `${rel}/${name}` : name;
+    waiting.push({ album: sub, label: sub, files: await images(path.join(INBOX, sub)) });
+    await walk(sub);
+  }
+}
+await walk("");
 
 const args = process.argv.slice(2);
 if (args.length === 0) {
   console.log("Na entrada (nada foi publicado):");
-  for (const w of waiting) if (w.files.length) console.log(`  ${w.label.padEnd(24)} ${w.files.length} imagem(ns)  →  /galeria${w.album ? "/" + slug(w.album) : ""}`);
+  for (const w of waiting) if (w.files.length) console.log(`  ${w.label.padEnd(24)} ${w.files.length} imagem(ns)  →  /galeria${w.album ? "/" + slugPath(w.album) : ""}`);
   console.log(`\nNa galeria: ${manifest.length} imagem(ns).`);
   console.log("Para publicar: npm run galeria:add -- <álbum>   |   -- --avulsas   |   -- --tudo");
   process.exit(0);
 }
+// an argument names a folder (by its real name or its slug; its sub-folders come along)
+// or a single file inside the inbox ("2022/foto.jpg")
+const names = args.filter((a) => !a.startsWith("--")).map((a) => a.replace(/^\/+|\/+$/g, ""));
+const isFile = (a) => EXT.has(path.extname(a).toLowerCase()) && existsSync(path.join(INBOX, a));
+const fileArgs = new Set(names.filter(isFile));
+const folderArgs = names.filter((a) => !fileArgs.has(a));
+const under = (w, a) => w.album !== null && [w.album, slugPath(w.album)].some((p) => p === a || p.startsWith(a + "/"));
 const pick = args.includes("--tudo")
   ? waiting
-  : waiting.filter((w) => (w.album === null ? args.includes("--avulsas") : args.includes(w.album) || args.includes(slug(w.album))));
-const unknown = args.filter((a) => !a.startsWith("--") && !waiting.some((w) => w.album && (w.album === a || slug(w.album) === a)));
+  : waiting.map((w) => {
+      if (w.album === null ? args.includes("--avulsas") : folderArgs.some((a) => under(w, a))) return w;
+      const files = w.files.filter((f) => fileArgs.has(w.album ? `${w.album}/${f}` : f));
+      return files.length ? { ...w, files } : null;
+    }).filter(Boolean);
+const unknown = folderArgs.filter((a) => !waiting.some((w) => under(w, a)));
 if (unknown.length) { console.log(`Não achei em galeria-entrada/: ${unknown.join(", ")}`); process.exit(1); }
 
 let added = 0, dupes = 0;
 for (const w of pick) {
-  const albumSlug = w.album ? slug(w.album) : null;
+  const albumSlug = w.album ? slugPath(w.album) : null;
   const outDir = albumSlug ? path.join(OUT, albumSlug) : OUT;
   await mkdir(outDir, { recursive: true });
   if (w.files.length) console.log(`\n[${w.label}]`);
