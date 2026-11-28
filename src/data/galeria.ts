@@ -4,8 +4,7 @@
 // `npm run galeria:add`. They land in src/assets/galeria/[<album>/]<id>.webp, already
 // light. Duplicates are refused by content.
 // Keys below: "<id>.webp" for loose pictures, "<album>/<id>.webp" inside an album.
-// To give it a title, a description, a type or a date (all optional), add an entry
-// below with the same file name.
+// Title, description, type and date per picture are all optional (see below).
 // Newest first: entries with a date go by date, the rest keep file-name order.
 
 export type Kind = "desenho" | "foto";
@@ -18,11 +17,13 @@ export interface GalleryInfo {
   alt?: string;           // description for screen readers; defaults to the title
 }
 
-export const galeria: Record<string, GalleryInfo> = {
-  // "meu-desenho.png": {
-  //   title: "Lua sobre o mar",
-  //   description: "Feito no caderno de Cálculo, numa aula sobre integrais.",
-  //   kind: "desenho",
-  //   date: "2026-11-20",
-  // },
-};
+// The entries live in galeria.json so the dev-only admin page (/admin) can edit them.
+// You can still edit the JSON by hand. Example entry:
+//   "x-2021/2-desenho-terminado.webp": {
+//     "title": "Lua sobre o mar",
+//     "description": "Feito no caderno de Cálculo.",
+//     "kind": "desenho",
+//     "date": "2021-03-05"
+//   }
+import data from "./galeria.json";
+export const galeria = data as Record<string, GalleryInfo>;

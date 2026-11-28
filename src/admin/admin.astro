@@ -1,0 +1,277 @@
+---
+// /admin: edit the gallery's albums. This page exists only in `npm run dev`
+// (injected by integrations/admin.mjs); the build never generates it.
+// Everything happens through the local /__admin API; changes are files in the repo,
+// nothing is committed for you.
+import Base from "../layouts/Base.astro";
+---
+<Base title="admin" description="Admin local da galeria.">
+<div class="admin">
+  <header class="page-head">
+    <p class="tag">só no npm run dev · nada é commitado sozinho</p>
+    <h1>Admin da galeria</h1>
+    <p class="muted">As mudanças viram arquivos no repositório. Confira com <code>git status</code> e faça o commit quando quiser.</p>
+  </header>
+
+  <p id="status" role="status" aria-live="polite"></p>
+
+  <section class="section" aria-labelledby="t-espera">
+    <h2 id="t-espera">Esperando publicação <small class="muted">galeria-entrada/</small></h2>
+    <div id="waiting"></div>
+    <pre id="log" hidden></pre>
+  </section>
+
+  <section class="section" aria-labelledby="t-albuns">
+    <h2 id="t-albuns">Publicados</h2>
+    <div class="cols">
+      <ul id="albums" class="album-list"></ul>
+      <div id="editor"><p class="muted">Escolha um álbum.</p></div>
+    </div>
+  </section>
+</div>
+</Base>
+
+<script>
+  type Meta = { title?: string; description?: string; kind?: string; date?: string; alt?: string };
+  type Pic = { key: string; file: string; meta: Meta };
+  type Pub = { slug: string | null; pictures: Pic[]; data: Record<string, any>; body: string };
+  type Wait = { album: string | null; files: string[]; fresh: number };
+
+  let data: { published: Pub[]; waiting: Wait[] } = { published: [], waiting: [] };
+  // selected album (null = loose pictures). Kept in the address (#slug) because saving
+  // a file makes the dev server reload this page; the last message survives it too.
+  let current: string | null | undefined =
+    location.hash === "#avulsas" ? null : location.hash ? decodeURIComponent(location.hash.slice(1)) : undefined;
+  const select = (slug: string | null) => {
+    current = slug;
+    history.replaceState(null, "", "#" + (slug === null ? "avulsas" : encodeURIComponent(slug)));
+  };
+
+  const $ = <T extends HTMLElement>(sel: string, root: ParentNode = document) => root.querySelector<T>(sel)!;
+  // every value interpolated into innerHTML below goes through esc() (or encodeURIComponent
+  // for thumbnail URLs), so file names and texts can't inject markup
+  const esc = (s: unknown) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
+  const thumb = (path: string, from = "") => `/__admin/thumb?${from ? "from=entrada&" : ""}path=${encodeURIComponent(path)}`;
+  const idOf = (file: string) => file.replace(/\.webp$/, "");
+
+  function say(text: string, bad = false) {
+    const s = $("#status");
+    s.textContent = text;
+    s.className = bad ? "bad" : "ok";
+    sessionStorage.setItem("admin-status", JSON.stringify([text, bad, Date.now()]));
+  }
+  const last = JSON.parse(sessionStorage.getItem("admin-status") ?? "null");
+  if (last && Date.now() - last[2] < 5000) say(last[0], last[1]);
+
+  async function post(action: string, body: object) {
+    const r = await fetch(`/__admin/${action}`, {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-admin": "1" },
+      body: JSON.stringify(body),
+    });
+    const out = await r.json();
+    if (!r.ok) throw new Error(out.error);
+    return out;
+  }
+
+  async function load() {
+    data = await (await fetch("/__admin/state")).json();
+    renderWaiting();
+    renderAlbums();
+    if (current !== undefined && data.published.some((a) => a.slug === current)) renderEditor(current);
+    else $("#editor").innerHTML = '<p class="muted">Escolha um álbum.</p>';
+  }
+
+  // ── waiting in galeria-entrada/ ──
+  function renderWaiting() {
+    const box = $("#waiting");
+    if (!data.waiting.length) { box.innerHTML = '<p class="muted">Nada esperando.</p>'; return; }
+    box.innerHTML = data.waiting.map((w) => `
+      <div class="wait">
+        <div class="wait-head">
+          <strong>${esc(w.album ?? "(avulsas)")}</strong>
+          <span class="muted">${w.fresh} nova(s)${w.files.length > w.fresh ? ` · ${w.files.length - w.fresh} já no site` : ""}</span>
+          ${w.fresh ? `<button type="button" data-publish="${esc(w.album ?? "")}">publicar</button>` : `<span class="done">tudo publicado</span>`}
+        </div>
+        <div class="strip">${w.files.slice(0, 8).map((f) =>
+          `<img loading="lazy" alt="" src="${thumb(w.album ? `${w.album}/${f}` : f, "entrada")}">`).join("")}
+          ${w.files.length > 8 ? `<span class="more muted">+${w.files.length - 8}</span>` : ""}</div>
+      </div>`).join("");
+  }
+
+  $("#waiting").addEventListener("click", async (e) => {
+    const b = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-publish]");
+    if (!b) return;
+    const album = b.dataset.publish || null;
+    if (!confirm(`Publicar ${album ?? "as avulsas"}? As imagens vão para src/assets/galeria/ (o commit continua com você).`)) return;
+    b.disabled = true; say(`publicando ${album ?? "avulsas"}… pode levar um minuto`);
+    try {
+      const out = await post("publish", { album });
+      const log = $("#log"); log.hidden = false; log.textContent = out.log;
+      say("publicado"); select(album ? slugify(album) : null); await load();
+    } catch (err: any) { say(err.message, true); b.disabled = false; }
+  });
+  const slugify = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+
+  // ── published albums ──
+  function renderAlbums() {
+    $("#albums").innerHTML = data.published.map((a) => `
+      <li><button type="button" data-album="${esc(a.slug ?? "")}" aria-current="${a.slug === current}">
+        <span>${esc(a.data.title ?? a.slug ?? "(avulsas)")}</span>
+        <span class="muted">${a.slug ?? ""} · ${a.pictures.length}${a.data.draft ? " · rascunho" : ""}</span>
+      </button></li>`).join("") || '<li class="muted">Nenhum álbum publicado ainda.</li>';
+  }
+  $("#albums").addEventListener("click", (e) => {
+    const b = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-album]");
+    if (!b) return;
+    select(b.dataset.album || null);
+    renderAlbums(); renderEditor(current);
+  });
+
+  function renderEditor(slug: string | null) {
+    const a = data.published.find((x) => x.slug === slug)!;
+    const albums = data.published.filter((x) => x.slug).map((x) => x.slug!);
+    const d = a.data;
+    $("#editor").innerHTML = `
+      ${slug ? `
+      <form class="card" id="album-form">
+        <h3>Álbum <a href="/galeria/${esc(slug)}" target="_blank">ver ↗</a></h3>
+        <div class="row">
+          <label>endereço (/galeria/…)<input name="slug" value="${esc(slug)}" pattern="[a-z0-9]+(-[a-z0-9]+)*"></label>
+          <button type="button" id="rename">renomear</button>
+        </div>
+        <label>título<input name="title" value="${esc(d.title)}" placeholder="${esc(slug)}"></label>
+        <label>descrição<input name="description" value="${esc(d.description)}"></label>
+        <div class="row">
+          <label>data<input type="date" name="date" value="${esc(d.date)}"></label>
+          <label class="check"><input type="checkbox" name="draft" ${d.draft ? "checked" : ""}> rascunho (escondido do site)</label>
+        </div>
+        <label>texto (Markdown)<textarea name="body" rows="4">${esc(a.body)}</textarea></label>
+        <input type="hidden" name="cover" value="${esc(d.cover)}">
+        <button type="submit">salvar álbum</button>
+      </form>` : `<p class="muted">Imagens avulsas (sem álbum).</p>`}
+      <ul class="pics">${a.pictures.map((p) => {
+        const isCover = slug && (d.cover ?? idOf(a.pictures[0].file)) === idOf(p.file);
+        return `
+        <li class="pic ${isCover ? "is-cover" : ""}">
+          <img loading="lazy" alt="" src="${thumb(p.key)}">
+          <details>
+            <summary>${esc(p.meta.title || p.file)}</summary>
+            <form data-key="${esc(p.key)}">
+              <label>título<input name="title" value="${esc(p.meta.title)}"></label>
+              <label>descrição<textarea name="description" rows="2">${esc(p.meta.description)}</textarea></label>
+              <div class="row">
+                <label>tipo<select name="kind">
+                  <option value="foto" ${p.meta.kind !== "desenho" ? "selected" : ""}>foto</option>
+                  <option value="desenho" ${p.meta.kind === "desenho" ? "selected" : ""}>desenho</option>
+                </select></label>
+                <label>data<input type="date" name="date" value="${esc(p.meta.date)}"></label>
+              </div>
+              <label>texto alternativo<input name="alt" value="${esc(p.meta.alt)}" placeholder="o que aparece na imagem"></label>
+              <div class="row">
+                <button type="submit">salvar</button>
+                ${slug ? `<button type="button" data-cover="${esc(idOf(p.file))}">${isCover ? "é a capa" : "usar como capa"}</button>` : ""}
+              </div>
+              <div class="row">
+                <label>mover para<select name="move">
+                  <option value="">(avulsas)</option>
+                  ${albums.map((x) => `<option value="${esc(x)}" ${x === slug ? "selected" : ""}>${esc(x)}</option>`).join("")}
+                </select></label>
+                <button type="button" data-move>mover</button>
+                <button type="button" class="danger" data-delete>tirar do site</button>
+              </div>
+            </form>
+          </details>
+        </li>`;
+      }).join("")}</ul>`;
+  }
+
+  // one listener for everything inside the editor
+  $("#editor").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const form = e.target as HTMLFormElement;
+    const f = Object.fromEntries(new FormData(form)) as Record<string, string>;
+    try {
+      if (form.id === "album-form") {
+        await post("album/save", { slug: current, title: f.title, description: f.description, date: f.date, cover: f.cover, draft: f.draft === "on", body: f.body });
+      } else {
+        await post("picture/save", { key: form.dataset.key, title: f.title, description: f.description, kind: f.kind, date: f.date, alt: f.alt });
+      }
+      say("salvo"); await load();
+    } catch (err: any) { say(err.message, true); }
+  });
+
+  $("#editor").addEventListener("click", async (e) => {
+    const t = e.target as HTMLElement;
+    const form = t.closest<HTMLFormElement>("form");
+    try {
+      if (t.id === "rename") {
+        const to = ($('input[name="slug"]') as HTMLInputElement).value.trim();
+        if (to === current) return;
+        if (!confirm(`Renomear "${current}" para "${to}"? O endereço do álbum muda para /galeria/${to}.`)) return;
+        await post("album/rename", { from: current, to });
+        select(to); say("renomeado"); await load();
+      } else if (t.dataset.cover !== undefined && form) {
+        const a = data.published.find((x) => x.slug === current)!;
+        await post("album/save", { slug: current, ...a.data, cover: t.dataset.cover, body: a.body });
+        say("capa trocada"); await load();
+      } else if (t.dataset.move !== undefined && form) {
+        const to = (form.elements.namedItem("move") as HTMLSelectElement).value;
+        await post("picture/move", { key: form.dataset.key, to });
+        say("movida"); await load();
+      } else if (t.dataset.delete !== undefined && form) {
+        if (!confirm("Tirar esta imagem do site? O original em galeria-entrada/ continua lá.")) return;
+        await post("picture/delete", { key: form.dataset.key });
+        say("removida"); await load();
+      }
+    } catch (err: any) { say(err.message, true); }
+  });
+
+  load().catch((err) => say(err.message, true));
+</script>
+
+<style is:global>
+  /* global because the editor is built with JavaScript (scoped styles would not reach it);
+     every rule is prefixed with .admin so nothing leaks into the rest of the site */
+  .admin .tag { display: inline-block; font-family: var(--font-mono); font-size: var(--step--1); padding: 0.15rem 0.5rem; background: var(--accent); color: var(--bg); }
+  .admin .page-head p.muted { margin-top: 0.5rem; }
+  .admin #status { min-height: 1.5rem; margin-top: 1rem; font-family: var(--font-mono); font-size: var(--step--1); }
+  .admin #status.bad { color: var(--accent); }
+  .admin h2 small { font-family: var(--font-mono); font-size: var(--step--1); font-weight: 400; }
+  .admin pre { margin-top: 1rem; padding: 0.8rem; max-height: 16rem; overflow: auto; border: var(--frame) solid var(--line); font-size: 0.8rem; }
+
+  .admin button { font: inherit; font-size: var(--step--1); min-height: 2.25rem; padding: 0.25rem 0.8rem; color: var(--text); background: transparent; border: var(--frame) solid var(--line); cursor: pointer; }
+  .admin button:hover { background: var(--text); color: var(--bg); }
+  .admin button.danger:hover { background: var(--accent); border-color: var(--accent); }
+  .admin input, .admin textarea, .admin select { font: inherit; font-size: var(--step--1); width: 100%; padding: 0.35rem 0.5rem; color: var(--text); background: var(--bg); border: var(--frame) solid var(--line); }
+  .admin label { display: grid; gap: 0.2rem; font-size: var(--step--1); color: var(--muted); }
+  .admin label.check { display: flex; align-items: center; gap: 0.5rem; }
+  .admin label.check input { width: auto; }
+  .admin .row { display: flex; flex-wrap: wrap; align-items: end; gap: 0.6rem; }
+  .admin .row > label { flex: 1 1 10rem; }
+
+  .admin .wait { margin-top: 1rem; padding: 0.8rem; border: var(--frame) solid var(--line); }
+  .admin .wait-head { display: flex; align-items: center; gap: 1rem; }
+  .admin .wait-head button, .admin .done { margin-left: auto; }
+  .admin .done { font-family: var(--font-mono); font-size: var(--step--1); color: var(--muted); }
+  .admin .strip { display: flex; gap: 0.4rem; margin-top: 0.6rem; align-items: center; overflow: hidden; }
+  .admin .strip img { height: 64px; width: auto; border: 1px solid var(--line); }
+
+  .admin .cols { display: grid; grid-template-columns: minmax(12rem, 16rem) 1fr; gap: 1.5rem; margin-top: 1rem; align-items: start; }
+  @media (max-width: 760px) { .admin .cols { grid-template-columns: 1fr; } }
+  .admin .album-list { list-style: none; padding: 0; border-top: var(--frame) solid var(--line); }
+  .admin .album-list li { max-width: none; }
+  .admin .album-list button { display: grid; width: 100%; text-align: left; border: 0; border-bottom: var(--frame) solid var(--line); padding: 0.6rem 0.4rem; }
+  .admin .album-list button[aria-current="true"] { background: var(--text); color: var(--bg); }
+  .admin .album-list button[aria-current="true"] .muted { color: inherit; }
+
+  .admin .card { display: grid; gap: 0.7rem; padding: 1rem; border: var(--frame) solid var(--line); }
+  .admin .card h3 a { font-size: var(--step--1); margin-left: 0.5rem; }
+  .admin .pics { list-style: none; padding: 0; margin-top: 1rem; display: grid; grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr)); gap: 0.8rem; }
+  .admin .pic { max-width: none; border: var(--frame) solid var(--line); }
+  .admin .pic.is-cover { border-color: var(--accent); }
+  .admin .pic img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; background: var(--void); }
+  .admin .pic summary { padding: 0.35rem 0.5rem; font-size: var(--step--1); cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .admin .pic form { display: grid; gap: 0.5rem; padding: 0.5rem; border-top: var(--frame) solid var(--line); }
+  .admin .pic details[open] { grid-column: span 2; }
+</style>
